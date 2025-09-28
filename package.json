@@ -12,16 +12,14 @@
     "prettier": "pnpm exec prettier --check .",
     "prettier:fix": "pnpm exec prettier --write .",
     "prepare": "husky",
-    "pre-commit": "concurrently \"pnpm run tsc\" \"pnpm run lint\" \"pnpm run prettier\"",
-    "setup:styled-components": "node ./setup-scripts/setup styled-components",
-    "setup:tailwind": "node ./setup-scripts/setup tailwind",
-    "delete-setup": "node ./setup-scripts/delete-setup"
+    "pre-commit": "concurrently \"pnpm run tsc\" \"pnpm run lint\" \"pnpm run prettier\""
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.52.1",
     "next": "^15.5.2",
     "react": "^19.1.1",
-    "react-dom": "^19.1.1"
+    "react-dom": "^19.1.1",
+    "styled-components": "^6.1.19"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",

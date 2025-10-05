@@ -1,6 +1,9 @@
-import type { CanvasCourse } from "../../../types/schema.js";
+"use server";
 
-const CANVAS_API_KEY = process.env.CANVAS_API_KEY!;
+import type { CanvasCourse } from "../../../types/schema.js";
+import { CanvasModule } from "@/types/schema";
+
+const CANVAS_API_KEY = process.env.CANVAS_API_KEY;
 if (!CANVAS_API_KEY) {
   throw new Error("Missing CANVAS_API_KEY.");
 }
@@ -35,4 +38,25 @@ export async function fetchAllCourses(): Promise<CanvasCourse[]> {
     }
     return [];
   }
+}
+
+// Fetch all modules for a specific group from Canvas
+export async function fetchAllModules(
+  groupId: number,
+): Promise<CanvasModule[]> {
+  const url = `https://canvas.instructure.com/api/v1/courses/${groupId}/modules`;
+
+  const response = await fetch(url, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${CANVAS_API_KEY}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch modules");
+  }
+
+  const modules = await response.json();
+  return modules;
 }

@@ -5,6 +5,7 @@ export type RawCanvasCourse = {
   id: number;
   name: string;
   created_at: string;
+  account_id: number;
 };
 
 /**
@@ -13,6 +14,6 @@ export type RawCanvasCourse = {
 export type GroupsInsert = {
   id: number;
   title: string;
-  teacher_id: number | null; // TODO: add category for teacher_id
-  join_code: string | null; // TODO: add category for join_code
+  teacher_id: number;
+  join_code: string | null; // TODO: update type for join_code
 };

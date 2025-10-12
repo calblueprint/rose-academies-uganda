@@ -4,8 +4,8 @@
 export type RawCanvasCourse = {
   id: number;
   name: string;
-  created_at: string;
   account_id: number;
+  course_code: string;
 };
 
 /**
@@ -15,5 +15,5 @@ export type GroupsInsert = {
   id: number;
   title: string;
   teacher_id: number;
-  join_code: string | null; // TODO: update type for join_code
+  join_code: string;
 };

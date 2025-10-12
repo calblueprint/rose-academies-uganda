@@ -13,6 +13,6 @@ export default function transformCourses(
     id: course.id,
     title: course.name,
     teacher_id: course.account_id,
-    join_code: null, // TODO: update join code
+    join_code: course.course_code,
   }));
 }

@@ -10,7 +10,7 @@ function LessonsPage() {
         style={{
           display: "grid",
           gridTemplateColumns: "repeat(auto-fill, minmax(23.438rem, 1fr))",
-          gap: 20,
+          gap: "1.25rem",
         }}
       >
         <LessonCard title="Agriculture" />

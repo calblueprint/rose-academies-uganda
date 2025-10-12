@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { Content } from "next/font/google";
 import { Card, ImageArea, Title, Titleholder } from "./styles";
 
 interface LessonCardProps {

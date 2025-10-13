@@ -1,19 +1,17 @@
 /**
- * Raw course data that gets returned from Canvas API.
+ * Raw course data from Canvas API.
  */
-export type RawCanvasCourse = {
+export type CanvasCourse = {
   id: number;
-  name: string;
-  account_id: number;
   course_code: string;
+  name: string;
 };
 
 /**
- * Canvas courses with fields to match the Groups table.
+ * A Canvas course for the Groupts table.
  */
-export type GroupsInsert = {
+export type Group = {
   id: number;
-  title: string;
-  teacher_id: number;
   join_code: string;
+  name: string;
 };

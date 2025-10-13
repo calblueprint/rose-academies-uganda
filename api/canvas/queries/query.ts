@@ -1,4 +1,4 @@
-import type { RawCanvasCourse } from "../../types/schema.d.ts";
+import type { CanvasCourse } from "../../../types/schema.js";
 
 const CANVAS_API_KEY = process.env.CANVAS_API_KEY!;
 if (!CANVAS_API_KEY) {
@@ -12,7 +12,7 @@ if (!CANVAS_API_KEY) {
  * @param - none
  * @returns {RawCanvasCourse[]} - an array of raw courses from the canvas API (or empty array).
  */
-export default async function fetchCourses(): Promise<RawCanvasCourse[]> {
+export async function fetchAllCourses(): Promise<CanvasCourse[]> {
   const myHeader = new Headers();
   myHeader.append("Authorization", `Bearer ${CANVAS_API_KEY}`);
   myHeader.append("Accept", "application/json");

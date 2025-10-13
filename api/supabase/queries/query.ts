@@ -1,12 +1,19 @@
+import { fetchAllCourses } from "@/api/canvas/queries/query";
 import supabase from "../client";
 
-// Example query to fetch all rows from your_table_name
-export async function fetchAllRows() {
-  const { data, error } = await supabase.from("your_table_name").select("*");
+/**
+ * Updates/inserts Canvas courses into the "Groups" table.
+ */
+export async function updateCourses() {
+  const courses = (await fetchAllCourses()).map(course => ({
+    id: course.id,
+    join_code: course.course_code,
+    name: course.name,
+  }));
+
+  const { error } = await supabase.from("Groups").upsert(courses);
 
   if (error) {
-    throw new Error(`Error fetching data: ${error.message}`);
+    console.error("Upsert error:", error);
   }
-
-  return data;
 }

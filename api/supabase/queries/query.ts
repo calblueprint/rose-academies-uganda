@@ -19,14 +19,16 @@ export async function updateCourses() {
   }
 }
 
-// Fetch modules from Canvas for a specific group and insert them into Supabase
+/**
+ * Fetches modules from Canvas and updates the Lessons table in Supabase.
+ * @param groupId - Canvas course ID
+ */
 export async function updateLessons(groupId: number) {
   const modules = await fetchAllModules(groupId);
 
   const lessons = modules.map((module: CanvasModule) => ({
     id: module.id,
-    title: module.name,
-    created_at: new Date(),
+    name: module.name,
     group_id: groupId,
   })) as Lesson[];
 

@@ -8,7 +8,7 @@ export type CanvasCourse = {
 };
 
 /**
- * A Canvas course for the Groups table.
+ * A Canvas course for the Groupts table.
  */
 export type Group = {
   id: number;
@@ -16,17 +16,11 @@ export type Group = {
   name: string;
 };
 
-/**
- * A Canvas module for the Lessons table.
- */
 export type CanvasModule = {
   id: number;
   name: string;
 };
 
-/**
- * A Lesson for the Lessons table.
- */
 export type Lesson = {
   id: number;
   name: string;

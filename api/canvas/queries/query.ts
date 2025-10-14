@@ -1,7 +1,6 @@
 "use server";
 
-import type { CanvasCourse } from "../../../types/schema.js";
-import { CanvasModule } from "@/types/schema";
+import { CanvasCourse, CanvasModule } from "@/types/schema";
 
 const CANVAS_API_KEY = process.env.CANVAS_API_KEY;
 if (!CANVAS_API_KEY) {

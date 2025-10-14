@@ -3,11 +3,11 @@
 import React from "react";
 import { Card, ImageArea, Title, Titleholder } from "./styles";
 
-interface LessonCardProps {
+type LessonCardProps = {
   title: string;
-}
+};
 
-const LessonCard: React.FC<LessonCardProps> = ({ title }) => {
+export function LessonCard({ title }: LessonCardProps) {
   return (
     <Card>
       <ImageArea />
@@ -16,6 +16,6 @@ const LessonCard: React.FC<LessonCardProps> = ({ title }) => {
       </Titleholder>
     </Card>
   );
-};
+}
 
 export default LessonCard;

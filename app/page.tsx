@@ -1,13 +1,13 @@
 import React, { CSSProperties } from "react";
-import Image from "next/image";
-import BPLogo from "@/assets/images/bp-logo.png";
-import LessonCard from "../components/LessonCard";
 import LessonPage from "../components/LessonPage";
 
-export default function Page() {
-  return <LessonPage />;
+export default function Home() {
+  return (
+    <main style={mainStyles}>
+      <LessonPage />
+    </main>
+  );
 }
-
 // CSS styles
 
 const mainStyles: CSSProperties = {
@@ -17,10 +17,4 @@ const mainStyles: CSSProperties = {
   flexDirection: "column",
   alignItems: "center",
   justifyContent: "center",
-};
-
-const imageStyles: CSSProperties = {
-  width: "80px",
-  height: "80px",
-  marginBottom: "0.5rem",
 };

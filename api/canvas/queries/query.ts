@@ -4,7 +4,11 @@ import { CanvasModule } from "@/types/schema";
 
 const CANVAS_API_KEY = process.env.CANVAS_API_KEY;
 
-// Fetch all modules for a specific group from Canvas
+/**
+ * Fetch all modules for a specific group from Canvas.
+ * @param groupId - Canvas course ID
+ * @returns Array of CanvasModules
+ */
 export async function fetchAllModules(
   groupId: number,
 ): Promise<CanvasModule[]> {

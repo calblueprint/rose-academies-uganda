@@ -1,6 +1,6 @@
 "use server";
 
-import { CanvasCourse, CanvasModule } from "@/types/schema";
+import { CanvasCourse, CanvasModule, CanvasFile } from "@/types/schema";
 
 const CANVAS_API_KEY = process.env.CANVAS_API_KEY;
 if (!CANVAS_API_KEY) {
@@ -62,4 +62,37 @@ export async function fetchAllModules(
 
   const modules = await response.json();
   return modules;
+}
+
+/**
+ * Fetch all files for a specific Canvas course.
+ * @param courseId - Canvas course ID
+ * @returns Array of CanvasFiles
+ */
+export async function fetchAllFiles(courseId: number): Promise<CanvasFile[]> {
+  const url = `https://canvas.instructure.com/api/v1/courses/${courseId}/files`;
+
+  try {
+    const response = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${CANVAS_API_KEY}`,
+        Accept: "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch files: ${response.status}`);
+    }
+
+    const files = await response.json();
+    // console.log(files);
+    return files;
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error("Error fetching files:", error.message);
+    } else {
+      console.error("Unknown error fetching files:", error);
+    }
+    return [];
+  }
 }

@@ -32,3 +32,30 @@ export type Lesson = {
   name: string;
   group_id: number;
 };
+
+/**
+ * A file from Canvas.
+ */
+export type CanvasFile = {
+  id: number;
+  filename: string;
+  content_type: string;
+  size: number;
+  updated_at: string;
+  url: string;
+  course_id: number;
+};
+
+/**
+ * A file for Supabase buckets.
+ */
+export type File = {
+  canvas_file_id: number;
+  course_id: number;
+  storage_path: string;
+  filename: string;
+  content_type: string;
+  size: number;
+  updated_at: string;
+  last_synced_at: string;
+};

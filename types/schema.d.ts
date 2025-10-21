@@ -50,12 +50,9 @@ export type CanvasFile = {
  * A file for Supabase buckets.
  */
 export type File = {
-  canvas_file_id: number;
-  course_id: number;
+  id?: number;
+  name: string;
+  size_bytes: number;
   storage_path: string;
-  filename: string;
-  content_type: string;
-  size: number;
-  updated_at: string;
-  last_synced_at: string;
+  lesson_id?: number | null;
 };

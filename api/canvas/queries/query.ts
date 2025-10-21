@@ -1,6 +1,6 @@
 "use server";
 
-import { CanvasCourse, CanvasModule, CanvasFile } from "@/types/schema";
+import { CanvasCourse, CanvasFile, CanvasModule } from "@/types/schema";
 
 const CANVAS_API_KEY = process.env.CANVAS_API_KEY;
 if (!CANVAS_API_KEY) {
@@ -65,7 +65,7 @@ export async function fetchAllModules(
 }
 
 /**
- * Fetch all files for a specific Canvas course.
+ * Fetch all files (metadata) for a specific Canvas course.
  * @param courseId - Canvas course ID
  * @returns Array of CanvasFiles
  */
@@ -95,4 +95,23 @@ export async function fetchAllFiles(courseId: number): Promise<CanvasFile[]> {
     }
     return [];
   }
+}
+
+/**
+ * Fetches file bytes.
+ */
+export async function downloadFile(file: CanvasFile) {
+  const response = await fetch(file.url, {
+    headers: { Authorization: `Bearer ${CANVAS_API_KEY}` },
+    redirect: "follow",
+  });
+
+  if (!response.ok) {
+    console.error(
+      `Failed to download file ${file.filename}: ${response.status}`,
+    );
+    return null;
+  }
+
+  return await response.arrayBuffer();
 }

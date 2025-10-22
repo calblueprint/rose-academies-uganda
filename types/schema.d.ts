@@ -32,3 +32,25 @@ export type Lesson = {
   name: string;
   group_id: number;
 };
+
+/**
+ * A file from Canvas.
+ */
+export type CanvasFile = {
+  id: number;
+  filename: string;
+  content_type: string;
+  size: number;
+  updated_at: string;
+  url: string;
+};
+
+/**
+ * A file to be inserted into Files table.
+ */
+export type File = {
+  name: string;
+  size_bytes: number;
+  storage_path: string;
+  lesson_id: number | null;
+};

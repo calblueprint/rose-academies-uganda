@@ -65,9 +65,9 @@ export async function fetchAllModules(
 }
 
 /**
- * Fetch all files (metadata) for a specific Canvas course.
- * @param courseId - Canvas course ID
- * @returns Array of CanvasFiles
+ * Fetch a list of all files for a specific Canvas course.
+ * @param {number} courseId - Canvas course ID
+ * @returns {array} - array of CanvasFiles or empty array
  */
 export async function fetchAllFiles(courseId: number): Promise<CanvasFile[]> {
   const url = `https://canvas.instructure.com/api/v1/courses/${courseId}/files`;
@@ -85,7 +85,7 @@ export async function fetchAllFiles(courseId: number): Promise<CanvasFile[]> {
     }
 
     const files = await response.json();
-    // console.log(files);
+    console.log(files);
     return files;
   } catch (error) {
     if (error instanceof Error) {
@@ -98,7 +98,8 @@ export async function fetchAllFiles(courseId: number): Promise<CanvasFile[]> {
 }
 
 /**
- * Fetches file bytes.
+ * Downloads files from Canvas.
+ * @param {CanvasFile} file
  */
 export async function downloadFile(file: CanvasFile) {
   const response = await fetch(file.url, {

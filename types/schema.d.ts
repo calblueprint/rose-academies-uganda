@@ -43,16 +43,14 @@ export type CanvasFile = {
   size: number;
   updated_at: string;
   url: string;
-  course_id: number;
 };
 
 /**
- * A file for Supabase buckets.
+ * A file to be inserted into Files table.
  */
 export type File = {
-  id?: number;
   name: string;
   size_bytes: number;
   storage_path: string;
-  lesson_id?: number | null;
+  lesson_id: number | null;
 };

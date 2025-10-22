@@ -44,7 +44,16 @@ export async function updateLessons(groupId: number) {
   }
 }
 
-export async function uploadToSupabase(
+/**
+ * Uploads a given file to Supabase storage bucket.
+ *
+ * @param {CanvasFile} file - the file metadata
+ * @param {ArrayBuffer} data - the bytes of the file
+ * @param {number} courseId - the course containing the file
+ * @returns {string} - the public URL for the file
+ *
+ */
+export async function uploadToStorage(
   file: CanvasFile,
   data: ArrayBuffer,
   courseId: number,
@@ -60,12 +69,18 @@ export async function uploadToSupabase(
     return null;
   }
 
+  // After uploading to Supabase bucket, return the file URL
+  // so that it can be stored in the Files table.
   const { data: pub } = supabase.storage
     .from("lesson-files")
     .getPublicUrl(objectPath);
   return pub.publicUrl;
 }
 
+/**
+ * Upserts the file's metadata in to the Files table.
+ * @param {File} row - the file to be upserted
+ */
 export async function saveFileMetadata(row: File) {
   const { error } = await supabase.from("Files").upsert(
     {
@@ -82,28 +97,29 @@ export async function saveFileMetadata(row: File) {
   }
 }
 
-export async function syncCourseFilesToSupabase(
-  courseId: number,
-  opts?: { lessonId?: number | null; categories?: string[] | null },
-) {
+/**
+ * Orchestrator for syncing all of a course's files to Supabase.
+ * @param {number} courseId
+ */
+export async function syncCourseFilesToSupabase(courseId: number) {
   const files: CanvasFile[] = await fetchAllFiles(courseId);
 
   for (const f of files) {
     const data = await downloadFile(f);
     if (!data) continue;
 
-    const publicUrl = await uploadToSupabase(f, data, courseId);
+    const publicUrl = await uploadToStorage(f, data, courseId);
     if (!publicUrl) continue;
 
     const row: File = {
       name: f.filename,
       size_bytes: f.size,
       storage_path: publicUrl,
-      lesson_id: opts?.lessonId ?? null,
+      lesson_id: null, // TODO: fix
     };
 
     await saveFileMetadata(row);
   }
 
-  console.log(`Synced ${files.length} files for course ${courseId}`); // REMOVE
+  console.log(`Synced ${files.length} files for course ${courseId}`);
 }

@@ -47,7 +47,7 @@ export async function fetchAllCourses(): Promise<CanvasCourse[]> {
 export async function fetchAllModules(
   groupId: number,
 ): Promise<CanvasModule[]> {
-  const url = `https://canvas.instructure.com/api/v1/courses/${groupId}/modules`;
+  const url = `https://canvas.instructure.com/api/v1/courses/${groupId}/modules?per_page=100&include[]=items`; // TODO
 
   const response = await fetch(url, {
     method: "GET",

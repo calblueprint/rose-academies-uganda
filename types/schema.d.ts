@@ -22,6 +22,18 @@ export type Group = {
 export type CanvasModule = {
   id: number;
   name: string;
+  items?: CanvasModuleItem[];
+};
+
+/**
+ * A single item inside a Canvas module.
+ */
+export type CanvasModuleItem = {
+  id: number;
+  title: string;
+  type: string;
+  module_id: number;
+  content_id?: number;
 };
 
 /**

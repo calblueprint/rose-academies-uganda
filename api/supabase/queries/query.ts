@@ -98,10 +98,22 @@ export async function saveFileMetadata(row: File) {
 }
 
 /**
- * Orchestrator for syncing all of a course's files to Supabase.
+ * For a given course, syncs files to bucket and file metadata to Files table.
  * @param {number} courseId
  */
 export async function syncCourseFilesToSupabase(courseId: number) {
+  const modules = await fetchAllModules(courseId);
+  const fileToModule = new Map<number, number>();
+
+  for (const mod of modules) {
+    if (!mod.items) continue;
+    for (const item of mod.items) {
+      if (item.type === "File" && item.content_id) {
+        fileToModule.set(item.content_id, mod.id);
+      }
+    }
+  }
+
   const files: CanvasFile[] = await fetchAllFiles(courseId);
 
   for (const f of files) {
@@ -111,15 +123,13 @@ export async function syncCourseFilesToSupabase(courseId: number) {
     const publicUrl = await uploadToStorage(f, data, courseId);
     if (!publicUrl) continue;
 
+    const moduleId = fileToModule.get(f.id) ?? null;
     const row: File = {
       name: f.filename,
       size_bytes: f.size,
       storage_path: publicUrl,
-      lesson_id: null, // TODO: fix
+      lesson_id: moduleId,
     };
-
     await saveFileMetadata(row);
   }
-
-  console.log(`Synced ${files.length} files for course ${courseId}`);
 }

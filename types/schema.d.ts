@@ -32,3 +32,22 @@ export type Lesson = {
   name: string;
   group_id: number;
 };
+
+/**
+ * A teacher for the Teachers table.
+ */
+export type Teacher = {
+  id: number;
+  name: string;
+};
+
+/**
+ * A file for the Files table. Named RoseFile to avoid conflict with built-in File type.
+ */
+export type RoseFile = {
+  id: number;
+  name: string;
+  size_bytes: number;
+  storage_path: string;
+  lesson_id: number;
+};

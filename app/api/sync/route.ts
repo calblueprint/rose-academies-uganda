@@ -1,11 +1,8 @@
-import { NextApiRequest, NextApiResponse } from "next";
+import { NextResponse } from "next/server";
 import Database from "better-sqlite3";
 import supabase from "@/api/supabase/client";
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse,
-) {
+export async function GET(): Promise<NextResponse> {
   try {
     const db = new Database("rose-academies-uganda.db");
 
@@ -103,11 +100,23 @@ export default async function handler(
     });
     insertFiles(files);
 
-    console.log("Data synchronized successfully");
     db.close();
-    return res.status(200).json({ message: "Data synchronized successfully" });
+
+    return new NextResponse(
+      JSON.stringify({ message: "Data synchronized successfully" }),
+      {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      },
+    );
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ error: "Error synchronizing data" });
+    return new NextResponse(
+      JSON.stringify({ error: "Error synchronizing data" }),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      },
+    );
   }
 }

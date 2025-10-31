@@ -6,7 +6,7 @@ export const PageContainer = styled.div`
   padding: 1.5rem;
   display: block;
   margin: 0 auto
-  box_sizing:broader-box;
+  box-sizing:broader-box;
   `;
 
 export const Title = styled.h1`

@@ -3,7 +3,8 @@ import styled from "styled-components";
 export const Outer = styled.main`
   display: flex;
   width: 90rem;
-  padding: 12.8125rem 31.125rem 12.8125rem 31.1875rem;
+  min-height: 100vh;
+  padding: 1 rem;
   justify-content: center;
   align-items: center;
   border: 0.0625rem solid var(--primary-40, #a1a1a1);
@@ -96,4 +97,5 @@ export const PrimaryLink = styled.a`
   font-style: normal;
   font-weight: 400;
   line-height: normal;
+  text-decoration: none;
 `;

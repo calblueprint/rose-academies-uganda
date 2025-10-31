@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import Database from "better-sqlite3";
-import { Group, Lesson, RoseFile, Teacher } from "@/types/schema";
+import { Group, Lesson, LocalFile, Teacher } from "@/types/schema";
 
 export async function GET(): Promise<NextResponse> {
   try {
@@ -9,7 +9,7 @@ export async function GET(): Promise<NextResponse> {
     const teachers = db.prepare("SELECT * FROM teachers").all() as Teacher[];
     const groups = db.prepare("SELECT * FROM groups").all() as Group[];
     const lessons = db.prepare("SELECT * FROM lessons").all() as Lesson[];
-    const files = db.prepare("SELECT * FROM files").all() as RoseFile[];
+    const files = db.prepare("SELECT * FROM files").all() as LocalFile[];
 
     db.close();
 

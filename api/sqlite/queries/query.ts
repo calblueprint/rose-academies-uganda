@@ -1,4 +1,4 @@
-import { Group, Lesson, RoseFile, Teacher } from "@/types/schema";
+import { Group, Lesson, LocalFile, Teacher } from "@/types/schema";
 
 /**
  * Fetches the local SQLite database and returns its contents.
@@ -6,13 +6,13 @@ import { Group, Lesson, RoseFile, Teacher } from "@/types/schema";
  *   - teachers: An array of Teacher objects.
  *   - groups: An array of Group objects.
  *   - lessons: An array of Lesson objects.
- *   - files: An array of RoseFile objects.
+ *   - files: An array of LocalFile objects.
  */
 export async function fetchLocalDatabase(): Promise<{
   teachers: Teacher[];
   groups: Group[];
   lessons: Lesson[];
-  files: RoseFile[];
+  files: LocalFile[];
 }> {
   try {
     const response = await fetch("/api/sqlite");

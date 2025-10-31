@@ -4,7 +4,7 @@ import {
   fetchAllFiles,
   fetchAllModules,
 } from "@/api/canvas/queries/query";
-import { CanvasFile, CanvasModule, File, Lesson } from "@/types/schema";
+import { CanvasFile, CanvasModule, Lesson, LocalFile } from "@/types/schema";
 import supabase from "../client";
 
 /**
@@ -17,7 +17,9 @@ export async function updateCourses() {
     name: course.name,
   }));
 
-  const { error } = await supabase.from("Groups").upsert(courses);
+  const { error } = await supabase
+    .from("Groups")
+    .upsert(courses, { onConflict: "id" });
 
   if (error) {
     console.error("Upsert error:", error);
@@ -37,7 +39,9 @@ export async function updateLessons(groupId: number) {
     group_id: groupId,
   })) as Lesson[];
 
-  const { error } = await supabase.from("Lessons").insert(lessons);
+  const { error } = await supabase
+    .from("Lessons")
+    .upsert(lessons, { onConflict: "id" });
 
   if (error) {
     throw new Error(`Error inserting data: ${error.message}`);
@@ -79,17 +83,18 @@ export async function uploadToStorage(
 
 /**
  * Upserts the file's metadata in to the Files table.
- * @param {File} row - the file to be upserted
+ * @param {LocalFile} row - the file to be upserted
  */
-export async function saveFileMetadata(row: File) {
+export async function saveFileMetadata(row: LocalFile) {
   const { error } = await supabase.from("Files").upsert(
     {
+      id: row.id,
       name: row.name,
       size_bytes: row.size_bytes,
       storage_path: row.storage_path,
       lesson_id: row.lesson_id ?? null,
     },
-    { onConflict: "storage_path" },
+    { onConflict: "storage_path" }, // TO DO: why is it storage_path? maybe change this to id
   );
 
   if (error) {
@@ -124,7 +129,8 @@ export async function syncCourseFilesToSupabase(courseId: number) {
     if (!publicUrl) continue;
 
     const moduleId = fileToModule.get(f.id) ?? null;
-    const row: File = {
+    const row: LocalFile = {
+      id: f.id,
       name: f.filename,
       size_bytes: f.size,
       storage_path: publicUrl,

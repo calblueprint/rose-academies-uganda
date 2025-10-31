@@ -46,6 +46,14 @@ export type Lesson = {
 };
 
 /**
+ * A teacher for the Teachers table.
+ */
+export type Teacher = {
+  id: number;
+  name: string;
+};
+
+/**
  * A file from Canvas.
  */
 export type CanvasFile = {
@@ -58,9 +66,10 @@ export type CanvasFile = {
 };
 
 /**
- * A file to be inserted into Files table.
+ * A file to be inserted into Files table. Named LocalFile to avoid conflict with built-in File type.
  */
-export type File = {
+export type LocalFile = {
+  id: number;
   name: string;
   size_bytes: number;
   storage_path: string;

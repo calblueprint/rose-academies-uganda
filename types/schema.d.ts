@@ -22,6 +22,18 @@ export type Group = {
 export type CanvasModule = {
   id: number;
   name: string;
+  items?: CanvasModuleItem[];
+};
+
+/**
+ * A single item inside a Canvas module.
+ */
+export type CanvasModuleItem = {
+  id: number;
+  title: string;
+  type: string;
+  module_id: number;
+  content_id?: number;
 };
 
 /**
@@ -42,12 +54,24 @@ export type Teacher = {
 };
 
 /**
- * A file for the Files table. Named RoseFile to avoid conflict with built-in File type.
+ * A file from Canvas.
  */
-export type RoseFile = {
+export type CanvasFile = {
+  id: number;
+  filename: string;
+  content_type: string;
+  size: number;
+  updated_at: string;
+  url: string;
+};
+
+/**
+ * A file to be inserted into Files table. Named LocalFile to avoid conflict with built-in File type.
+ */
+export type LocalFile = {
   id: number;
   name: string;
   size_bytes: number;
   storage_path: string;
-  lesson_id: number;
+  lesson_id: number | null;
 };

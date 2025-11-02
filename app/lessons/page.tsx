@@ -2,6 +2,7 @@
 
 import React from "react";
 import Image from "next/image";
+import LogoImage from "@/assets/images/rose-academies-logo.png";
 import LessonCard from "@/components/LessonCard";
 import OperationalButton from "@/components/OperationalButton";
 import SyncButton from "@/components/SyncButton";
@@ -11,6 +12,7 @@ import {
   HeaderLeft,
   HeaderRight,
   LessonsGrid,
+  Logo,
   PageContainer,
   Title,
 } from "./style";
@@ -22,7 +24,7 @@ export default function LessonsPage() {
         <HeaderLeft>
           <Logo>
             <Image
-              src="/assets/images/rose-academies-logo.png"
+              src={LogoImage}
               alt="Rose Academies Uganda"
               width={40}
               height={40}
@@ -38,11 +40,11 @@ export default function LessonsPage() {
       <Content>
         <Title>My Lessons</Title>
         <LessonsGrid>
-          <LessonCard title="Agriculture" />
-          <LessonCard title="Gardening & Food Security" />
-          <LessonCard title="Family Wellbeing" />
-          <LessonCard title="Nutrition & Wellness" />
-          <LessonCard title="Maternal & Child Health" />
+          <LessonCard lessonName="Agriculture" />
+          <LessonCard lessonName="Gardening & Food Security" />
+          <LessonCard lessonName="Family Wellbeing" />
+          <LessonCard lessonName="Nutrition & Wellness" />
+          <LessonCard lessonName="Maternal & Child Health" />
         </LessonsGrid>
       </Content>
     </PageContainer>

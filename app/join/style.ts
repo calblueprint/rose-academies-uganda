@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import COLORS from "@/styles/colors";
 
 export const Outer = styled.main`
   display: flex;
@@ -7,8 +8,7 @@ export const Outer = styled.main`
   padding: 1rem;
   justify-content: center;
   align-items: center;
-  border: 0.0625rem solid var(--primary-40, #a1a1a1);
-  background: #f9faf3;
+  background: ${COLORS.veryLightYellow};
 `;
 
 export const Card = styled.section`
@@ -18,7 +18,7 @@ export const Card = styled.section`
   align-items: center;
   gap: 1.75rem;
   border-radius: 0.9375rem;
-  background: #fff;
+  background: ${COLORS.white};
   box-shadow:
     0 15.9375rem 4.4375rem 0 rgba(0, 0, 0, 0),
     0 10.1875rem 4.0625rem 0 rgba(0, 0, 0, 0.01),
@@ -35,7 +35,7 @@ export const Logo = styled.div`
 `;
 
 export const Title = styled.h1`
-  color: var(--Black-100, #25282b);
+  color: ${COLORS.veryDarkBlue};
   text-align: center;
   font-family: Gilroy-Medium;
   font-size: 2rem;
@@ -46,7 +46,7 @@ export const Title = styled.h1`
 `;
 
 export const Helper = styled.p`
-  color: #747474;
+  color: ${COLORS.lightGrey};
   text-align: center;
   font-family: Gilroy-Medium;
   font-size: 1.25rem;
@@ -59,14 +59,14 @@ export const Helper = styled.p`
 export const Input = styled.input`
   width: 23.75rem;
   height: 3.25rem;
-  background: #fafafa;
+  background: ${COLORS.veryLightGrey};
   border-radius: 0.5rem;
   border: none;
   padding: 0 0.75rem;
   outline: none;
 
   &::placeholder {
-    color: #747474;
+    color: ${COLORS.lightGrey};
     text-align: center;
     font-family: Gilroy-Regular;
     font-size: 1rem;
@@ -89,8 +89,8 @@ export const PrimaryLink = styled.a`
   justify-content: center;
   align-items: center;
   border-radius: 0.5rem;
-  background: var(--cyan-12, #1e4240);
-  color: var(--red-1, #fffdfc);
+  background: var(--cyan-12, #1e4240); // TODO: fix stacked components
+  color: ${COLORS.white};
   text-align: center;
   font-family: Gilroy-Medium;
   font-size: 1.5rem;

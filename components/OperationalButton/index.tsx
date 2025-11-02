@@ -15,20 +15,20 @@ export default function OperationalButton() {
 
   const checkStatus = async () => {
     setIsLoading(true);
-    
+
     // Create a minimum loading time promise (1 second)
-    const minLoadingTime = new Promise((resolve) => setTimeout(resolve, 1000));
-    
+    const minLoadingTime = new Promise(resolve => setTimeout(resolve, 1000));
+
     try {
       const response = await fetch("/api/status");
       const data = await response.json();
-      
+
       // Log debug info to help troubleshoot
       console.log("WiFi Status Check:", data);
-      
+
       // Wait for minimum loading time before updating
       await minLoadingTime;
-      
+
       setIsOperational(data.operational);
     } catch (error) {
       console.error("Failed to check operational status:", error);

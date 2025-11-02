@@ -2,6 +2,7 @@
 
 import React from "react";
 import Image from "next/image";
+import LogoImage from "@/assets/images/Logo.png";
 import LessonCard from "@/components/LessonCard";
 import OperationalButton from "@/components/OperationalButton";
 import SyncButton from "@/components/SyncButton";
@@ -11,6 +12,7 @@ import {
   HeaderLeft,
   HeaderRight,
   LessonsGrid,
+  Logo,
   PageContainer,
   Title,
 } from "./style";
@@ -22,7 +24,7 @@ export default function LessonsPage() {
         <HeaderLeft>
           <Logo>
             <Image
-              src="/../../assets/images/Logo.png"
+              src={LogoImage}
               alt="Rose Academies Uganda"
               width={40}
               height={40}

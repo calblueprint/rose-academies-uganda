@@ -1,10 +1,10 @@
 import React, { CSSProperties } from "react";
-import LessonPage from "../components/LessonPage";
+import JoinPage from "./join/page";
 
 export default function Home() {
   return (
     <main style={mainStyles}>
-      <LessonPage />
+      <JoinPage />
     </main>
   );
 }

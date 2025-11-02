@@ -4,7 +4,7 @@ export const Outer = styled.main`
   display: flex;
   width: 90rem;
   min-height: 100vh;
-  padding: 1 rem;
+  padding: 1rem;
   justify-content: center;
   align-items: center;
   border: 0.0625rem solid var(--primary-40, #a1a1a1);

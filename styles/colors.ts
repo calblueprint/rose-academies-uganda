@@ -9,6 +9,10 @@ const COLORS = {
   veryLightYellow: "#f9faf3",
   red: "#AF2028",
   gray60: "#808582",
+  lightGreen: "#F9FAF3",
+  activeGreen: "#1F5A2A",
+  rose10: "#FCEFEF",
+  rose80: "#EA6172",
 };
 
 export default COLORS;

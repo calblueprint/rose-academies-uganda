@@ -1,4 +1,4 @@
-import styled, { keyframes } from "styled-components";
+import styled, { keyframes, css } from "styled-components";
 import COLORS from "@/styles/colors";
 
 const rotate = keyframes`
@@ -54,9 +54,9 @@ export const SyncIcon = styled.div<SyncIconProps>`
 
   ${({ $isSyncing }) =>
     $isSyncing &&
-    `
-    animation: ${rotate} 1s linear infinite;
-  `}
+    css`
+      animation: ${rotate} 1s linear infinite;
+    `}
 `;
 
 export const SyncText = styled.span`

@@ -11,7 +11,6 @@ import {
   HeaderLeft,
   HeaderRight,
   LessonsGrid,
-  Logo,
   PageContainer,
   Title,
 } from "./style";
@@ -23,7 +22,7 @@ export default function LessonsPage() {
         <HeaderLeft>
           <Logo>
             <Image
-              src="/Logo.png"
+              src="/../../assets/images/Logo.png"
               alt="Rose Academies Uganda"
               width={40}
               height={40}

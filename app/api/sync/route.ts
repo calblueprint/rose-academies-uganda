@@ -7,6 +7,15 @@ import supabase from "@/api/supabase/client";
 const BUCKET = "lesson-files";
 const LOCAL_DIR = "/home/nathantam/rose-files";
 
+function storageUrlToKey(url: string, bucket: string): string {
+  const marker = `/storage/v1/object/public/${bucket}/`;
+  const idx = url.indexOf(marker);
+  if (idx === -1) {
+    return url;
+  }
+  return url.slice(idx + marker.length);
+}
+
 export async function GET(): Promise<NextResponse> {
   try {
     fs.mkdirSync(LOCAL_DIR, { recursive: true });
@@ -121,6 +130,8 @@ export async function GET(): Promise<NextResponse> {
       if (!file.storage_path) {
         continue;
       }
+
+      const objectKey = storageUrlToKey(file.storage_path, BUCKET);
 
       const { data: downloaded, error: downloadError } = await supabase.storage
         .from(BUCKET)

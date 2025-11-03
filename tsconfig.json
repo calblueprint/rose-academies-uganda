@@ -27,7 +27,8 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "eslint.config.mjs"
+    "eslint.config.mjs",
+    "components/FilePreview"
   ],
   "exclude": ["node_modules", "setup-scripts"]
 }

@@ -135,7 +135,7 @@ export async function GET(): Promise<NextResponse> {
 
       const { data: downloaded, error: downloadError } = await supabase.storage
         .from(BUCKET)
-        .download(file.storage_path);
+        .download(objectKey);
 
       if (downloadError || !downloaded) {
         console.warn("Could not download", file.storage_path, downloadError);

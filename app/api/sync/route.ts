@@ -1,9 +1,15 @@
 import { NextResponse } from "next/server";
+import fs from "fs";
+import path from "path";
 import Database from "better-sqlite3";
 import supabase from "@/api/supabase/client";
 
+const BUCKET = "lesson-files";
+const LOCAL_DIR = "/home/nathantam/rose-files";
+
 export async function GET(): Promise<NextResponse> {
   try {
+    fs.mkdirSync(LOCAL_DIR, { recursive: true });
     const db = new Database("rose-academies-uganda.db");
 
     // Create tables if they don't exist
@@ -35,6 +41,13 @@ export async function GET(): Promise<NextResponse> {
     for (const sql of tableSchemaSql) {
       db.prepare(sql).run();
     }
+
+    try {
+      db.prepare(`ALTER TABLE files ADD COLUMN mime_type TEXT`).run();
+    } catch {}
+    try {
+      db.prepare(`ALTER TABLE files ADD COLUMN local_path TEXT`).run();
+    } catch {}
 
     // Fetch data from Supabase
     const { data: teachers, error: teacherError } = await supabase
@@ -99,6 +112,40 @@ export async function GET(): Promise<NextResponse> {
       }
     });
     insertFiles(files);
+
+    const updateStmt = db.prepare(
+      "UPDATE files SET mime_type = ?, local_path = ? WHERE id = ?",
+    );
+
+    for (const file of files) {
+      if (!file.storage_path) {
+        continue;
+      }
+
+      const { data: downloaded, error: downloadError } = await supabase.storage
+        .from(BUCKET)
+        .download(file.storage_path);
+
+      if (downloadError || !downloaded) {
+        console.warn("Could not download", file.storage_path, downloadError);
+        continue;
+      }
+
+      const arrayBuffer = await downloaded.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+
+      const localPath = path.join(LOCAL_DIR, file.storage_path);
+      fs.mkdirSync(path.dirname(localPath), { recursive: true });
+      fs.writeFileSync(localPath, buffer);
+
+      let mime = "application/octet-stream";
+      if (file.name?.endsWith(".pdf")) mime = "application/pdf";
+      else if (file.name?.endsWith(".png")) mime = "image/png";
+      else if (file.name?.endsWith(".jpg") || file.name?.endsWith(".jpeg"))
+        mime = "image/jpeg";
+
+      updateStmt.run(mime, localPath, file.id);
+    }
 
     db.close();
 

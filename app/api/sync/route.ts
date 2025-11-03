@@ -145,7 +145,7 @@ export async function GET(): Promise<NextResponse> {
       const arrayBuffer = await downloaded.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
 
-      const localPath = path.join(LOCAL_DIR, file.storage_path);
+      const localPath = path.join(LOCAL_DIR, objectKey);
       fs.mkdirSync(path.dirname(localPath), { recursive: true });
       fs.writeFileSync(localPath, buffer);
 

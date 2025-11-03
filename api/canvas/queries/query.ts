@@ -85,7 +85,6 @@ export async function fetchAllFiles(courseId: number): Promise<CanvasFile[]> {
     }
 
     const files = await response.json();
-    console.log(files);
     return files;
   } catch (error) {
     if (error instanceof Error) {

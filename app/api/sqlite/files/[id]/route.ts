@@ -16,11 +16,14 @@ export async function GET(
   const { id } = await params;
 
   const db = new Database("rose-academies-uganda.db");
+  // Look up the file row by numeric id.
   const row = db.prepare("SELECT * FROM files WHERE id = ?").get(Number(id)) as
     | FileRow
     | undefined;
   db.close();
 
+  // Error handling for if row is not found for that id or if file has not
+  // yet been saved locallly.
   if (!row) {
     return new NextResponse("Not found", { status: 404 });
   }
@@ -28,12 +31,16 @@ export async function GET(
     return new NextResponse("File not downloaded", { status: 404 });
   }
 
+  // Read the file bytes from disc using the local path.
   const buf = fs.readFileSync(row.local_path);
 
+  // Send the raw file to the browser.
   return new NextResponse(buf, {
     status: 200,
     headers: {
+      // Tell browser the type of file (with generic bytes as fallback).
       "Content-Type": row.mime_type ?? "application/octet-stream",
+      // Show as inline.
       "Content-Disposition": `inline; filename="${row.name}"`,
     },
   });

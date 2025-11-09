@@ -5,8 +5,7 @@ import Database from "better-sqlite3";
 import supabase from "@/api/supabase/client";
 
 const BUCKET = "lesson-files";
-// TODO: fix local directories.
-const LOCAL_DIR = "/home/nathantam/rose-files";
+const LOCAL_DIR = process.env.LOCAL_FILES_DIR ?? "/home/pi/rose-files";
 
 // Since our file storage paths are saved as full URLs, we
 // strip off the prefix ("https://tyc...") and keep the file path.

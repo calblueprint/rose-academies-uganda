@@ -2,6 +2,9 @@
 
 import { LocalFile } from "@/types/schema";
 
+/**
+ * Component shows files with iframe.
+ */
 export function FilePreview({ file }: { file: LocalFile }) {
   if (!file) return <p>No file selected.</p>;
   return (

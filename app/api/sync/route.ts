@@ -5,11 +5,15 @@ import Database from "better-sqlite3";
 import supabase from "@/api/supabase/client";
 
 const BUCKET = "lesson-files";
+// TODO: fix local directories.
 const LOCAL_DIR = "/home/nathantam/rose-files";
 
+// Since our file storage paths are saved as full URLs, we
+// strip off the prefix ("https://tyc...") and keep the file path.
 function storageUrlToKey(url: string, bucket: string): string {
   const marker = `/storage/v1/object/public/${bucket}/`;
   const idx = url.indexOf(marker);
+  // If the URL isn't in the expected format, leave it as is.
   if (idx === -1) {
     return url;
   }
@@ -18,6 +22,7 @@ function storageUrlToKey(url: string, bucket: string): string {
 
 export async function GET(): Promise<NextResponse> {
   try {
+    // Make sure that the local directory exists.
     fs.mkdirSync(LOCAL_DIR, { recursive: true });
     const db = new Database("rose-academies-uganda.db");
 
@@ -51,6 +56,7 @@ export async function GET(): Promise<NextResponse> {
       db.prepare(sql).run();
     }
 
+    // Add new columns.
     try {
       db.prepare(`ALTER TABLE files ADD COLUMN mime_type TEXT`).run();
     } catch {}
@@ -122,6 +128,7 @@ export async function GET(): Promise<NextResponse> {
     });
     insertFiles(files);
 
+    // Prepare SQL statement for updating files row with mime and path.
     const updateStmt = db.prepare(
       "UPDATE files SET mime_type = ?, local_path = ? WHERE id = ?",
     );
@@ -133,22 +140,31 @@ export async function GET(): Promise<NextResponse> {
 
       const objectKey = storageUrlToKey(file.storage_path, BUCKET);
 
+      // Download the file bytes from Supabase storage.
       const { data: downloaded, error: downloadError } = await supabase.storage
         .from(BUCKET)
         .download(objectKey);
 
+      // If a download fails, log and continue.
       if (downloadError || !downloaded) {
         console.warn("Could not download", file.storage_path, downloadError);
         continue;
       }
 
+      // Convert Array Buffer to Node Buffer. This is needed in order
+      // to work with Node's file system.
+      // TODO: Consider using stream instead of buffers.
       const arrayBuffer = await downloaded.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
 
+      // Build folder structure and write the files to disk.
       const localPath = path.join(LOCAL_DIR, objectKey);
       fs.mkdirSync(path.dirname(localPath), { recursive: true });
       fs.writeFileSync(localPath, buffer);
 
+      // Uses mime to tell browser what type of file it is in
+      // order to render it properly.
+      // TODO: Consider using mime type detectin library instead.
       let mime = "application/octet-stream";
       if (file.name?.endsWith(".pdf")) mime = "application/pdf";
       else if (file.name?.endsWith(".png")) mime = "image/png";
@@ -160,6 +176,7 @@ export async function GET(): Promise<NextResponse> {
 
     db.close();
 
+    // Return success response or report errors.
     return new NextResponse(
       JSON.stringify({ message: "Data synchronized successfully" }),
       {

@@ -112,8 +112,8 @@ const gilroy = localFont({
 
 // site metadata - what shows up on embeds
 export const metadata: Metadata = {
-  title: "Project Name",
-  description: "Description of project",
+  title: "Rose Academies",
+  description: "Portable Classroom Hub",
 };
 
 export default function RootLayout({

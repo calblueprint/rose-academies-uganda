@@ -13,7 +13,7 @@ export const Outer = styled.main`
 
 export const Card = styled.section`
   display: flex;
-  padding: 3.5rem 2rem 3.5rem 1.9375rem;
+  padding: 3.5rem 2rem 3.5rem 2rem;
   flex-direction: column;
   align-items: center;
   gap: 1.75rem;
@@ -25,6 +25,13 @@ export const Card = styled.section`
     0 5.75rem 3.4375rem 0 rgba(0, 0, 0, 0.03),
     0 2.5625rem 2.5625rem 0 rgba(0, 0, 0, 0.04),
     0 0.625rem 1.375rem 0 rgba(0, 0, 0, 0.05);
+`;
+
+export const HeaderSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
 `;
 
 export const Logo = styled.div`
@@ -56,7 +63,21 @@ export const Helper = styled.p`
   width: 19.9375rem;
 `;
 
-export const Input = styled.input`
+export const CodeSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+`;
+
+export const CodeInputSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+`;
+
+export const CodeInput = styled.input<{ $error?: boolean }>`
   width: 23.75rem;
   height: 3.25rem;
   background: ${COLORS.veryLightGrey};
@@ -77,11 +98,13 @@ export const Input = styled.input`
   }
 
   &:focus {
-    box-shadow: 0 0 0 0.1875rem rgba(30, 66, 64, 0.18);
+    border-radius: 8px;
+    border: 1.5px solid
+      ${props => (props.$error ? COLORS.red : COLORS.evergreen)};
   }
 `;
 
-export const PrimaryLink = styled.a`
+export const JoinButton = styled.button`
   display: flex;
   width: 23.75rem;
   height: 3.25rem;
@@ -98,4 +121,11 @@ export const PrimaryLink = styled.a`
   font-weight: 400;
   line-height: normal;
   text-decoration: none;
+`;
+
+export const ErrorMessage = styled.p`
+  width: 100%;
+  color: ${COLORS.red};
+  font-family: Gilroy-Medium;
+  font-size: 1rem;
 `;

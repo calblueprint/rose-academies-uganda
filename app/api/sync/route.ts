@@ -5,6 +5,7 @@ import path from "path";
 import { Readable } from "stream";
 import { pipeline } from "stream/promises";
 import Database from "better-sqlite3";
+import mime from "mime-types";
 import supabase from "@/api/supabase/client";
 
 const BUCKET = "lesson-files";
@@ -199,15 +200,12 @@ async function downloadFiles(db: DB, files: FileRow[]) {
       continue;
     }
 
-    // Uses mime to tell browser what type of file it is in order to render it properly.
-    // TODO: Consider using mime type detectin library instead.
-    let mime = "application/octet-stream";
-    if (file.name?.endsWith(".pdf")) mime = "application/pdf";
-    else if (file.name?.endsWith(".png")) mime = "image/png";
-    else if (file.name?.endsWith(".jpg") || file.name?.endsWith(".jpeg"))
-      mime = "image/jpeg";
+    // Use mime-types to infer the MIME type from the file name or path.
+    // Falls back to application/octet-stream if unknown.
+    const inferredMime =
+      mime.lookup(file.name || localPath) || "application/octet-stream";
 
-    updateStmt.run(mime, localPath, file.id);
+    updateStmt.run(inferredMime, localPath, file.id);
   }
 }
 

@@ -1,6 +1,9 @@
+import type { ReadableStream as NodeReadableStream } from "stream/web";
 import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
+import { Readable } from "stream";
+import { pipeline } from "stream/promises";
 import Database from "better-sqlite3";
 import supabase from "@/api/supabase/client";
 
@@ -169,26 +172,32 @@ async function downloadFiles(db: DB, files: FileRow[]) {
 
     const objectKey = storageUrlToKey(file.storage_path, BUCKET);
 
-    // Download the file bytes from Supabase storage.
-    const { data: downloaded, error: downloadError } = await supabase.storage
-      .from(BUCKET)
-      .download(objectKey);
-
-    // If a download fails, log and continue.
-    if (downloadError || !downloaded) {
-      console.warn("Could not download", file.storage_path, downloadError);
+    // Stream file directly from Supabase public URL
+    const response = await fetch(file.storage_path);
+    if (!response.ok || !response.body) {
+      console.warn(
+        "Could not stream download",
+        file.storage_path,
+        response.status,
+      );
       continue;
     }
 
-    // Convert Array Buffer to Node Buffer. This is needed in order to work with Node's file system.
-    // TODO: Consider using stream instead of buffers.
-    const arrayBuffer = await downloaded.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-
-    // Build folder structure and write the files to disk.
     const localPath = path.join(LOCAL_DIR, objectKey);
     fs.mkdirSync(path.dirname(localPath), { recursive: true });
-    fs.writeFileSync(localPath, buffer);
+
+    try {
+      // Convert Web ReadableStream to Node Readable stream.
+      const webStream =
+        response.body as unknown as NodeReadableStream<Uint8Array>;
+      const nodeReadable = Readable.fromWeb(webStream);
+
+      // Runs pipeline with readable and writable stream in order to stream to disk.
+      await pipeline(nodeReadable, fs.createWriteStream(localPath));
+    } catch (err) {
+      console.warn("Error streaming file to disk", file.storage_path, err);
+      continue;
+    }
 
     // Uses mime to tell browser what type of file it is in order to render it properly.
     // TODO: Consider using mime type detectin library instead.

@@ -52,3 +52,12 @@ export const Content = styled.div`
   padding: 1.5rem 2rem;
   box-sizing: border-box;
 `;
+
+export const Title = styled.h1`
+  text-align: center;
+  font-family: var(--font-gilroy);
+  color: ${COLORS.black};
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 400;
+`;

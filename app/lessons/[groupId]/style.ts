@@ -3,7 +3,7 @@ import styled from "styled-components";
 export const PageContainer = styled.div`
   align-self: stretch;
   width: 100%;
-  padding: 7rem;
+  padding: 1.5rem;
   display: block;
   box_sizing: broader-box;
 `;

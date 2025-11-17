@@ -2,7 +2,6 @@
 
 import React, { useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import SyncButton from "@/components/SyncButton";
 import { DataContext } from "@/context/DataContext";
 import { Group } from "@/types/schema";
 import {

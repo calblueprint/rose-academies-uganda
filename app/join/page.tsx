@@ -35,27 +35,21 @@ export default function JoinPage() {
     fetchGroups();
   }, [data]);
 
+  const joinCodes = groups.map(group => group.join_code);
+
   function handleJoin(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
     e.preventDefault();
 
-    const group = groups.find(
-      g => g.join_code.toLowerCase() === joinCode.toLowerCase(),
-    );
-    const groupId = group ? group.id : null;
-
-    if (!joinCode || !groupId) {
+    if (!joinCode || !joinCodes.includes(joinCode)) {
       setError("Invalid code");
       return;
     }
+    const groupId = groups.filter(group => group.join_code === joinCode)[0].id;
 
     // If the join code is valid, navigate to the main app page
     router.push("/lessons/" + groupId);
     setError("");
     setJoinCode("");
-  }
-
-  if (!data) {
-    return <div>Loading...</div>;
   }
 
   return (

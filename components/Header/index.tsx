@@ -1,16 +1,25 @@
 "use client";
 
 import React from "react";
-import { HeaderBar, Left, Logo, Right, TeamName } from "./styles";
+import {
+  Header as HeaderBar,
+  HeaderRight,
+  Logo,
+  LogoAndTitle,
+  PageShell,
+} from "./styles";
 
-export default function Header() {
+export default function SiteHeader() {
   return (
     <HeaderBar>
-      <Left>
-        <Logo />
-        <TeamName>Rose Academies Uganda</TeamName>
-      </Left>
-      <Right></Right>
+      <LogoAndTitle>
+        <PageShell />
+        <Logo>
+          <img src="/Logo.png" alt="Logo" />
+          <span>Rose Academies-Uganda</span>
+        </Logo>
+      </LogoAndTitle>
+      <HeaderRight />
     </HeaderBar>
   );
 }

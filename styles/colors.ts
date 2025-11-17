@@ -7,7 +7,7 @@ const COLORS = {
   evergreen: "#1E4240",
   lightGrey: "#747474",
   veryLightYellow: "#f9faf3",
-  Grey: "#808582",
+  grey: "#808582",
 };
 
 export default COLORS;

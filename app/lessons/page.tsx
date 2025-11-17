@@ -4,26 +4,25 @@ import React, { useState } from "react";
 import Header from "@/components/Header";
 import LessonCard from "@/components/LessonCard";
 import SearchBar from "@/components/SearchBar";
-import { LessonsGrid, PageContainer, Title } from "./style";
+import {
+  LessonsGrid,
+  PageContainer,
+  PageMain,
+  SearchBarRow,
+  Title,
+} from "./style";
 
 export default function LessonsPage() {
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [view, setView] = useState<"grid" | "list">("grid");
 
   return (
-    <main style={{ padding: "2rem 1.5rem" }}>
+    <PageMain>
       <Header />
-
       <PageContainer>
         <Title>My Lessons</Title>
-        <div style={{ marginTop: "1.25rem", marginBottom: "1.5rem" }}>
-          <SearchBar
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            view={view}
-            onChangeView={setView}
-          />
-        </div>
+        <SearchBarRow>
+          <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+        </SearchBarRow>
         <LessonsGrid>
           <LessonCard title="Agriculture" />
           <LessonCard title="Gardening & Food Security" />
@@ -32,6 +31,6 @@ export default function LessonsPage() {
           <LessonCard title="Maternal & Child Health" />
         </LessonsGrid>
       </PageContainer>
-    </main>
+    </PageMain>
   );
 }

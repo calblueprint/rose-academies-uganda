@@ -19,3 +19,12 @@ export const LessonsGrid = styled.section`
   gap: 1.25rem;
   justify-items: start;
 `;
+
+export const PageMain = styled.main`
+  padding: 0 1.5rem;
+`;
+
+export const SearchBarRow = styled.div`
+  margin-top: 1.25rem;
+  margin-bottom: 1.5rem;
+`;

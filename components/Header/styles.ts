@@ -1,43 +1,55 @@
-"use client";
-
 import styled from "styled-components";
+import COLORS from "@/styles/colors";
 
-export const HeaderBar = styled.header`
+export const Header = styled.header`
+  width: 110%;
   display: flex;
-  width: 90rem;
-  height: 5.25rem;
-  padding: 0.8125rem 7.25rem;
-  justify-content: space-between;
   align-items: center;
-  flex-shrink: 0;
-  background: var(--Surface-Light, #fff);
-  box-shadow: 0 0.125rem 0.5rem 0 rgba(0, 0, 0, 0.06);
+  justify-content: space-between;
+  padding: 1.5rem 2rem;
+  background-color: ${COLORS.white};
+  border-bottom: 1px solid ${COLORS.veryLightGrey};
+  box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.06);
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+  font-family: Gilroy-Medium;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 23.343px;
 `;
-
-export const Left = styled.div`
+export const PageShell = styled.div`
+  --gutter: 7.25rem;
+`;
+export const LogoAndTitle = styled.div`
   display: flex;
   align-items: center;
   gap: 0.4375rem;
 `;
 
-export const Logo = styled.img`
-  width: 2.8125rem;
-  height: 2.8125rem;
-  aspect-ratio: 1/1;
-  background: url(<path-to-image>) lightgray 50% / cover no-repeat;
-`;
 
-export const TeamName = styled.h1`
-  color: #000;
-  font-family: Gilroy-Medium;
-  font-size: 1.25rem;
-  font-style: normal;
-  font-weight: 400;
-  line-height: 1.459rem;
-`;
-
-export const Right = styled.div`
+export const Logo = styled.div`
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.75rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${COLORS.veryDarkBlue};
+  img {
+    height: 2.5rem;
+    width: auto;
+  }
+`;
+
+export const HeaderRight = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+`;
+
+export const Content = styled.div`
+  flex: 1;
+  width: 100%;
+  padding: 1.5rem 2rem;
+  box-sizing: border-box;
 `;

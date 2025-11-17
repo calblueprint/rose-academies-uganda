@@ -24,6 +24,10 @@ export default function LessonsPage() {
     fetchLessons();
   }, [data, groupId]);
 
+  if (!data) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <PageContainer>
       <Title>My Lessons</Title>

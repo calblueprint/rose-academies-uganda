@@ -3,7 +3,7 @@ import COLORS from "@/styles/colors";
 
 export const Outer = styled.main`
   display: flex;
-  width: 90rem;
+  width: 100%;
   min-height: 100vh;
   padding: 1rem;
   justify-content: center;
@@ -44,7 +44,7 @@ export const Logo = styled.div`
 export const Title = styled.h1`
   color: ${COLORS.veryDarkBlue};
   text-align: center;
-  font-family: Gilroy-Medium;
+  font-family: var(--font-gilroy);
   font-size: 2rem;
   font-style: normal;
   font-weight: 400;
@@ -55,7 +55,7 @@ export const Title = styled.h1`
 export const Helper = styled.p`
   color: ${COLORS.lightGrey};
   text-align: center;
-  font-family: Gilroy-Medium;
+  font-family: var(--font-gilroy);
   font-size: 1.25rem;
   font-style: normal;
   font-weight: 400;
@@ -89,7 +89,7 @@ export const CodeInput = styled.input<{ $error?: boolean }>`
   &::placeholder {
     color: ${COLORS.lightGrey};
     text-align: center;
-    font-family: Gilroy-Regular;
+    font-family: var(--font-gilroy);
     font-size: 1rem;
     font-style: normal;
     font-weight: 400;
@@ -115,7 +115,7 @@ export const JoinButton = styled.button`
   background: var(--cyan-12, #1e4240); // TODO: fix stacked components
   color: ${COLORS.white};
   text-align: center;
-  font-family: Gilroy-Medium;
+  font-family: var(--font-gilroy);
   font-size: 1.5rem;
   font-style: normal;
   font-weight: 400;
@@ -126,6 +126,6 @@ export const JoinButton = styled.button`
 export const ErrorMessage = styled.p`
   width: 100%;
   color: ${COLORS.red};
-  font-family: Gilroy-Medium;
+  font-family: var(--font-gilroy);
   font-size: 1rem;
 `;

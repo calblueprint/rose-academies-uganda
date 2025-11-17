@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import StyledComponentsRegistry from "@/lib/registry";
 import "@/styles/global.css";
 import localFont from "next/font/local";
+import { DataContextProvider } from "@/context/DataContext";
 
 // font definitions
 const gilroy = localFont({
@@ -124,7 +125,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={gilroy.variable}>
-        <StyledComponentsRegistry>{children}</StyledComponentsRegistry>
+        <StyledComponentsRegistry>
+          <DataContextProvider>{children}</DataContextProvider>
+        </StyledComponentsRegistry>
       </body>
     </html>
   );

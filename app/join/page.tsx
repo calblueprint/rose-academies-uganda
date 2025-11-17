@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { fetchLocalDatabase } from "@/api/sqlite/queries/query";
 import SyncButton from "@/components/SyncButton";
+import { DataContext } from "@/context/DataContext";
 import { Group } from "@/types/schema";
 import {
   Card,
@@ -24,14 +24,16 @@ export default function JoinPage() {
   const [joinCode, setJoinCode] = useState("");
   const [groups, setGroups] = useState<Group[]>([]);
   const [error, setError] = useState("");
+  const data = useContext(DataContext);
 
   useEffect(() => {
-    async function fetchGroups() {
-      const localData = await fetchLocalDatabase();
-      setGroups(localData.groups);
+    function fetchGroups() {
+      if (data) {
+        setGroups(data.groups);
+      }
     }
     fetchGroups();
-  }, []);
+  }, [data]);
 
   const joinCodes = groups.map(group => group.join_code);
 

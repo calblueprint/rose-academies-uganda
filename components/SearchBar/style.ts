@@ -39,7 +39,7 @@ export const SearchInput = styled.input`
   overflow: hidden;
   color: #808582;
   text-overflow: ellipsis;
-  font-family: Gilroy-Regular;
+  font-family: var(--font-gilroy);
   font-size: 1.125rem;
   font-style: normal;
   font-weight: 400;

@@ -12,7 +12,7 @@ export const Header = styled.header`
   box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.06);
   margin-left: calc(50% - 50vw);
   margin-right: calc(50% - 50vw);
-  font-family: Gilroy-Medium;
+  font-family: var(--font-gilroy);
   font-size: 20px;
   font-style: normal;
   font-weight: 400;

@@ -2,15 +2,24 @@
 
 import React, { useContext, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import Header from "@/components/Header";
 import LessonCard from "@/components/LessonCard";
+import SearchBar from "@/components/SearchBar";
 import { DataContext } from "@/context/DataContext";
 import { Lesson } from "@/types/schema";
-import { LessonsGrid, PageContainer, Title } from "./style";
+import {
+  LessonsGrid,
+  PageContainer,
+  PageMain,
+  SearchBarRow,
+  Title,
+} from "./style";
 
 export default function LessonsPage() {
   const groupId = useParams().groupId;
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const data = useContext(DataContext);
+  const [searchTerm, setSearchTerm] = useState<string>("");
 
   useEffect(() => {
     function fetchLessons() {
@@ -29,13 +38,19 @@ export default function LessonsPage() {
   }
 
   return (
-    <PageContainer>
-      <Title>My Lessons</Title>
-      <LessonsGrid>
-        {lessons.map(lesson => (
-          <LessonCard key={lesson.id} lessonName={lesson.name} />
-        ))}
-      </LessonsGrid>
-    </PageContainer>
+    <PageMain>
+      <Header />
+      <PageContainer>
+        <Title>My Lessons</Title>
+        <SearchBarRow>
+          <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+        </SearchBarRow>
+        <LessonsGrid>
+          {lessons.map(lesson => (
+            <LessonCard key={lesson.id} lessonName={lesson.name} />
+          ))}
+        </LessonsGrid>
+      </PageContainer>
+    </PageMain>
   );
 }

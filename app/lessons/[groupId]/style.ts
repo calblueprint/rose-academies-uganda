@@ -25,3 +25,12 @@ export const LessonsGrid = styled.section`
   align-self: stretch;
   flex-wrap: wrap;
 `;
+
+export const PageMain = styled.main`
+  padding: 0 1.5rem;
+`;
+
+export const SearchBarRow = styled.div`
+  margin-top: 1.25rem;
+  margin-bottom: 1.5rem;
+`;

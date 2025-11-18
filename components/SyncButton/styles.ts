@@ -13,9 +13,9 @@ const rotate = keyframes`
 export const StyledSyncButton = styled.button`
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.625rem 1.25rem;
-  border-radius: 2rem;
+  gap: 10px;
+  padding: 13px 20px;
+  border-radius: 11.25px;
   border: none;
   background-color: ${COLORS.evergreen};
   color: ${COLORS.white};
@@ -60,7 +60,7 @@ export const SyncIcon = styled.div<SyncIconProps>`
 `;
 
 export const SyncText = styled.span`
-  font-size: 1rem;
-  font-weight: 500;
-  line-height: 1.2;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: normal;
 `;

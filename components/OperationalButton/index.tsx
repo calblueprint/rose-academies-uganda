@@ -1,13 +1,8 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import Icon from "@/components/Icon";
-import {
-  StatusButton,
-  StatusContainer,
-  StatusIcon,
-  StatusText,
-} from "./styles";
+import ActionButton from "@/components/ActionButton";
+import COLORS from "@/styles/colors";
 
 export default function OperationalButton() {
   const [isOperational, setIsOperational] = useState<boolean | null>(null);
@@ -16,7 +11,7 @@ export default function OperationalButton() {
   const checkStatus = async () => {
     setIsLoading(true);
 
-    // Create a minimum loading time promise (1 second)
+    // minimum loading time promise (1 second)
     const minLoadingTime = new Promise(resolve => setTimeout(resolve, 1000));
 
     try {
@@ -40,38 +35,45 @@ export default function OperationalButton() {
   };
 
   useEffect(() => {
-    // Check status on mount
     checkStatus();
 
-    // Poll status every 30 seconds
+    // poll status every 30 seconds
     const interval = setInterval(checkStatus, 30000);
 
     return () => clearInterval(interval);
   }, []);
 
-  const handleClick = () => {
-    checkStatus();
-  };
+  // Determine button appearance based on operational state
+
+  const backgroundColor =
+    isOperational === null
+      ? COLORS.lightGrey
+      : isOperational
+        ? COLORS.lightGreen
+        : COLORS.rose10;
+
+  const textColor =
+    isOperational === false ? COLORS.rose80 : COLORS.activeGreen;
+
+  const iconType = isLoading ? "refresh" : isOperational ? "check" : "error";
+
+  const iconSize = isOperational === false ? "1.5rem" : "1.25rem";
+
+  const text = isOperational === false ? "Inactive" : "Active";
 
   return (
-    <StatusButton
-      onClick={handleClick}
-      $isOperational={isOperational}
+    <ActionButton
+      onClick={() => checkStatus()}
+      backgroundColor={backgroundColor}
+      textColor={textColor}
+      iconColor={textColor}
+      iconType={iconType}
+      iconSize={iconSize}
+      text={text}
+      isLoading={isLoading}
       disabled={isLoading}
       title="Click to refresh status"
-    >
-      <StatusIcon $isOperational={isOperational}>
-        {isLoading ? (
-          <Icon type="refresh" />
-        ) : isOperational ? (
-          <Icon type="check" />
-        ) : (
-          <Icon type="close" />
-        )}
-      </StatusIcon>
-      <StatusContainer>
-        <StatusText>Operational</StatusText>
-      </StatusContainer>
-    </StatusButton>
+      animationDuration="1.5s"
+    />
   );
 }

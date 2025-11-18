@@ -17,17 +17,18 @@ interface StatusButtonProps {
 export const StatusButton = styled.button<StatusButtonProps>`
   display: flex;
   align-items: center;
-  gap: 0.625rem;
-  padding: 0.625rem 1.25rem;
-  border-radius: 2rem;
+  gap: 10px;
+  padding: 13px 20px;
+  border-radius: 11.25px;
   border: none;
   background-color: ${({ $isOperational }) =>
     $isOperational === null
       ? COLORS.lightGrey
       : $isOperational
-        ? COLORS.successGreen
-        : COLORS.errorRed};
-  color: ${COLORS.white};
+        ? COLORS.lightGreen
+        : COLORS.rose10};
+  color: ${({ $isOperational }) =>
+    $isOperational === false ? COLORS.rose80 : COLORS.activeGreen};
   font-family: inherit;
   font-size: 1rem;
   font-weight: 500;
@@ -53,9 +54,12 @@ export const StatusIcon = styled.div<StatusButtonProps>`
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 1.25rem;
-  height: 1.25rem;
-  color: ${COLORS.white};
+  width: ${({ $isOperational }) =>
+    $isOperational === false ? "1.5rem" : "1.25rem"};
+  height: ${({ $isOperational }) =>
+    $isOperational === false ? "1.5rem" : "1.25rem"};
+  color: ${({ $isOperational }) =>
+    $isOperational === false ? COLORS.rose80 : COLORS.activeGreen};
 
   ${StatusButton}:disabled & {
     ${css`
@@ -70,8 +74,11 @@ export const StatusContainer = styled.div`
   align-items: flex-start;
 `;
 
-export const StatusText = styled.span`
-  font-size: 1rem;
-  font-weight: 500;
-  line-height: 1.2;
+export const StatusText = styled.span<StatusButtonProps>`
+  color: ${({ $isOperational }) =>
+    $isOperational === false ? COLORS.rose80 : COLORS.activeGreen};
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
 `;

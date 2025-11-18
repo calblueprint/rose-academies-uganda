@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import Icon from "@/components/Icon";
-import { StyledSyncButton, SyncIcon, SyncText } from "./styles";
+import ActionButton from "@/components/ActionButton";
+import COLORS from "@/styles/colors";
 
 export default function SyncButton() {
   const [isSyncing, setIsSyncing] = useState(false);
@@ -25,11 +25,15 @@ export default function SyncButton() {
   };
 
   return (
-    <StyledSyncButton onClick={handleSync} disabled={isSyncing}>
-      <SyncIcon $isSyncing={isSyncing}>
-        <Icon type="refresh" />
-      </SyncIcon>
-      <SyncText>{isSyncing ? "Syncing..." : "Sync"}</SyncText>
-    </StyledSyncButton>
+    <ActionButton
+      onClick={handleSync}
+      backgroundColor={COLORS.evergreen}
+      textColor={COLORS.white}
+      iconType="refresh"
+      text={isSyncing ? "Syncing..." : "Sync"}
+      isLoading={isSyncing}
+      disabled={isSyncing}
+      animationDuration="1s"
+    />
   );
 }

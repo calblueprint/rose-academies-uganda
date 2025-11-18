@@ -13,7 +13,7 @@ import {
   Title,
 } from "./styles";
 
-export default function SiteHeader() {
+export default function Header() {
   return (
     <HeaderBar>
       <LogoAndTitle>

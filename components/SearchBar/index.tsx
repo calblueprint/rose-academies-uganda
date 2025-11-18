@@ -18,35 +18,25 @@ type Props = {
 
 export default function SearchBar({ searchTerm, setSearchTerm }: Props) {
   return (
-    <SearchBarContainer>
-      <SearchBarField>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 12,
-            width: "100%",
-          }}
-        >
-          <SearchBarIcon />
+    <SearchBarField>
+      <SearchBarContainer>
+        <SearchBarIcon />
+        <SearchInput
+          type="text"
+          placeholder="Search for lesson"
+          value={searchTerm}
+          onChange={e => setSearchTerm(e.target.value)}
+        />
 
-          <SearchInput
-            type="text"
-            placeholder="Search for lesson"
-            value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
-          />
-
-          {searchTerm && (
-            <ClearButton
-              aria-label="Clear search"
-              onClick={() => setSearchTerm("")}
-            >
-              <DeleteIcon />
-            </ClearButton>
-          )}
-        </div>
-      </SearchBarField>
-    </SearchBarContainer>
+        {searchTerm && (
+          <ClearButton
+            aria-label="Clear search"
+            onClick={() => setSearchTerm("")}
+          >
+            <DeleteIcon />
+          </ClearButton>
+        )}
+      </SearchBarContainer>
+    </SearchBarField>
   );
 }

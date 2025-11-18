@@ -1,11 +1,10 @@
 import styled from "styled-components";
 
 export const SearchBarContainer = styled.div`
-  width: 100%;
   display: flex;
   align-items: center;
-  gap: 1.3125rem;
-  align-self: stretch;
+  gap: 0.75rem;
+  width: 100%;
 `;
 
 export const SearchBarField = styled.div`

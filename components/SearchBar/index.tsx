@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { DeleteIcon, SearchBarIcon } from "@/assets/images/SearchBarIcon/icon";
+import { DeleteIcon, SearchBarIcon } from "@/assets/icons/SearchBarIcon/icon";
 import {
   ClearButton,
   SearchBarContainer,

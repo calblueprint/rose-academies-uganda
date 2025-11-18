@@ -1,7 +1,9 @@
 "use client";
 
 import React, { useContext, useEffect, useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
+import RoseLogo from "@/assets/images/rose-academies-logo.png";
 import { DataContext } from "@/context/DataContext";
 import { Group } from "@/types/schema";
 import {
@@ -13,7 +15,7 @@ import {
   HeaderSection,
   Helper,
   JoinButton,
-  Logo,
+  LogoContainer,
   Outer,
   Title,
 } from "./style";
@@ -61,7 +63,9 @@ export default function JoinPage() {
     <Outer>
       <Card>
         <HeaderSection>
-          <Logo />
+          <LogoContainer>
+            <Image src={RoseLogo} alt="Rose Academies Logo" />
+          </LogoContainer>
           <Title>Join Your Class</Title>
           <Helper>Enter the join code provided by your instructor</Helper>
         </HeaderSection>

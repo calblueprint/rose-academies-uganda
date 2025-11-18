@@ -34,11 +34,10 @@ export const HeaderSection = styled.div`
   gap: 0.75rem;
 `;
 
-export const Logo = styled.div`
+export const LogoContainer = styled.div`
   width: 6rem;
   height: 6rem;
   border-radius: 0.625rem;
-  background: url("/Logo.png") center/contain no-repeat;
 `;
 
 export const Title = styled.h1`

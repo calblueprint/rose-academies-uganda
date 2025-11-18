@@ -27,7 +27,7 @@ export const LogoAndTitle = styled.div`
   gap: 0.4375rem;
 `;
 
-export const Logo = styled.div`
+export const LogoContainer = styled.div`
   display: flex;
   align-items: center;
   gap: 0.75rem;

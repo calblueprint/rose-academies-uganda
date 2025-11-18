@@ -3,7 +3,7 @@ import COLORS from "@/styles/colors";
 
 export const Outer = styled.main`
   display: flex;
-  width: 90rem;
+  width: 100%;
   min-height: 100vh;
   padding: 1rem;
   justify-content: center;
@@ -13,7 +13,7 @@ export const Outer = styled.main`
 
 export const Card = styled.section`
   display: flex;
-  padding: 3.5rem 2rem 3.5rem 1.9375rem;
+  padding: 3.5rem 2rem 3.5rem 2rem;
   flex-direction: column;
   align-items: center;
   gap: 1.75rem;
@@ -27,17 +27,23 @@ export const Card = styled.section`
     0 0.625rem 1.375rem 0 rgba(0, 0, 0, 0.05);
 `;
 
-export const Logo = styled.div`
+export const HeaderSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+`;
+
+export const LogoContainer = styled.div`
   width: 6rem;
   height: 6rem;
   border-radius: 0.625rem;
-  background: url("/Logo.png") center/contain no-repeat;
 `;
 
 export const Title = styled.h1`
   color: ${COLORS.veryDarkBlue};
   text-align: center;
-  font-family: Gilroy-Medium;
+  font-family: var(--font-gilroy);
   font-size: 2rem;
   font-style: normal;
   font-weight: 400;
@@ -48,7 +54,7 @@ export const Title = styled.h1`
 export const Helper = styled.p`
   color: ${COLORS.lightGrey};
   text-align: center;
-  font-family: Gilroy-Medium;
+  font-family: var(--font-gilroy);
   font-size: 1.25rem;
   font-style: normal;
   font-weight: 400;
@@ -56,7 +62,21 @@ export const Helper = styled.p`
   width: 19.9375rem;
 `;
 
-export const Input = styled.input`
+export const CodeSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+`;
+
+export const CodeInputSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+`;
+
+export const CodeInput = styled.input<{ $error?: boolean }>`
   width: 23.75rem;
   height: 3.25rem;
   background: ${COLORS.veryLightGrey};
@@ -68,7 +88,7 @@ export const Input = styled.input`
   &::placeholder {
     color: ${COLORS.lightGrey};
     text-align: center;
-    font-family: Gilroy-Regular;
+    font-family: var(--font-gilroy);
     font-size: 1rem;
     font-style: normal;
     font-weight: 400;
@@ -77,11 +97,13 @@ export const Input = styled.input`
   }
 
   &:focus {
-    box-shadow: 0 0 0 0.1875rem rgba(30, 66, 64, 0.18);
+    border-radius: 8px;
+    border: 1.5px solid
+      ${props => (props.$error ? COLORS.red : COLORS.evergreen)};
   }
 `;
 
-export const PrimaryLink = styled.a`
+export const JoinButton = styled.button`
   display: flex;
   width: 23.75rem;
   height: 3.25rem;
@@ -92,10 +114,17 @@ export const PrimaryLink = styled.a`
   background: var(--cyan-12, #1e4240); // TODO: fix stacked components
   color: ${COLORS.white};
   text-align: center;
-  font-family: Gilroy-Medium;
+  font-family: var(--font-gilroy);
   font-size: 1.5rem;
   font-style: normal;
   font-weight: 400;
   line-height: normal;
   text-decoration: none;
+`;
+
+export const ErrorMessage = styled.p`
+  width: 100%;
+  color: ${COLORS.red};
+  font-family: var(--font-gilroy);
+  font-size: 1rem;
 `;

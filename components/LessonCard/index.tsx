@@ -1,18 +1,21 @@
 "use client";
 
 import React from "react";
+import { useRouter } from "next/navigation";
 import { Card, ImageArea, Title, Titleholder } from "./styles";
 
-type LessonCardProps = {
-  title: string;
-};
+export function LessonCard({ lessonName }: { lessonName: string }) {
+  const router = useRouter();
 
-export function LessonCard({ title }: LessonCardProps) {
+  function handleLessonClick() {
+    router.push(`/${lessonName}/files`);
+  }
+
   return (
-    <Card>
+    <Card onClick={handleLessonClick}>
       <ImageArea />
       <Titleholder>
-        <Title>{title}</Title>
+        <Title>{lessonName}</Title>
       </Titleholder>
     </Card>
   );

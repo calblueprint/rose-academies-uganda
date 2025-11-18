@@ -28,9 +28,9 @@ export const Titleholder = styled.div`
 
 export const Title = styled.h3`
   color: ${COLORS.black};
-  font-family: Manrope;
-  font-size: 1.5rem;
+  font-family: var(--font-gilroy);
+  font-size: 1.08625rem;
   font-style: normal;
-  font-weight: 700;
+  font-weight: 500;
   line-height: normal;
 `;

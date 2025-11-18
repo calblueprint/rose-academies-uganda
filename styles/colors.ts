@@ -7,6 +7,12 @@ const COLORS = {
   evergreen: "#1E4240",
   lightGrey: "#747474",
   veryLightYellow: "#f9faf3",
+  successGreen: "#4CAF50",
+  lightGreen: "#F9FAF3",
+  activeGreen: "#1F5A2A",
+  errorRed: "#F44336",
+  rose10: "#FCEFEF",
+  rose80: "#EA6172",
 };
 
 export default COLORS;

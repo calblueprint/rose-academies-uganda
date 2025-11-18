@@ -1,20 +1,52 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
+import LogoImage from "@/assets/images/Logo.png";
 import LessonCard from "@/components/LessonCard";
-import { LessonsGrid, PageContainer, Title } from "./style";
+import OperationalButton from "@/components/OperationalButton";
+import SyncButton from "@/components/SyncButton";
+import {
+  Content,
+  Header,
+  HeaderLeft,
+  HeaderRight,
+  LessonsGrid,
+  Logo,
+  PageContainer,
+  Title,
+} from "./style";
 
 export default function LessonsPage() {
   return (
     <PageContainer>
-      <Title>My Lessons</Title>
-      <LessonsGrid>
-        <LessonCard title="Agriculture" />
-        <LessonCard title="Gardening & Food Security" />
-        <LessonCard title="Family Wellbeing" />
-        <LessonCard title="Nutrition & Wellness" />
-        <LessonCard title="Maternal & Child Health" />
-      </LessonsGrid>
+      <Header>
+        <HeaderLeft>
+          <Logo>
+            <Image
+              src={LogoImage}
+              alt="Rose Academies Uganda"
+              width={40}
+              height={40}
+            />
+            <span>Rose Academies-Uganda</span>
+          </Logo>
+        </HeaderLeft>
+        <HeaderRight>
+          <OperationalButton />
+          <SyncButton />
+        </HeaderRight>
+      </Header>
+      <Content>
+        <Title>My Lessons</Title>
+        <LessonsGrid>
+          <LessonCard title="Agriculture" />
+          <LessonCard title="Gardening & Food Security" />
+          <LessonCard title="Family Wellbeing" />
+          <LessonCard title="Nutrition & Wellness" />
+          <LessonCard title="Maternal & Child Health" />
+        </LessonsGrid>
+      </Content>
     </PageContainer>
   );
 }

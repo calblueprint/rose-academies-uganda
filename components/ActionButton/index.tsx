@@ -4,10 +4,10 @@ import React from "react";
 import Icon from "@/components/Icon";
 import { IconType } from "@/lib/icons";
 import {
-  StyledActionButton,
   ActionIcon,
-  ActionTextContainer,
   ActionText,
+  ActionTextContainer,
+  StyledActionButton,
 } from "./styles";
 
 interface ActionButtonProps {

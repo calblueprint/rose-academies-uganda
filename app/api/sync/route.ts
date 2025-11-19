@@ -1,6 +1,7 @@
 import type { ReadableStream as NodeReadableStream } from "stream/web";
 import { NextResponse } from "next/server";
 import fs from "fs";
+import os from "os";
 import path from "path";
 import { Readable } from "stream";
 import { pipeline } from "stream/promises";
@@ -9,7 +10,9 @@ import mime from "mime-types";
 import supabase from "@/api/supabase/client";
 
 const BUCKET = "lesson-files";
-const LOCAL_DIR = process.env.LOCAL_FILES_DIR ?? "/home/pi/rose-files";
+// Create local directory as /home/<user>/rose-files.
+const LOCAL_DIR =
+  process.env.LOCAL_FILES_DIR ?? path.join(os.homedir(), "rose-files");
 
 type DB = InstanceType<typeof Database>;
 

@@ -33,6 +33,10 @@ export default function LessonsPage() {
     fetchLessons();
   }, [data, groupId]);
 
+  const filteredLessons = lessons.filter(lesson =>
+    lesson.name.toLowerCase().includes(searchTerm.toLowerCase()),
+  );
+
   if (!data) {
     return <div>Loading...</div>;
   }
@@ -46,9 +50,13 @@ export default function LessonsPage() {
           <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
         </SearchBarRow>
         <LessonsGrid>
-          {lessons.map(lesson => (
-            <LessonCard key={lesson.id} lessonName={lesson.name} />
-          ))}
+          {filteredLessons.length > 0 ? (
+            filteredLessons.map(lesson => (
+              <LessonCard key={lesson.id} lessonName={lesson.name} />
+            ))
+          ) : (
+            <div>No lessons found.</div>
+          )}
         </LessonsGrid>
       </PageContainer>
     </PageMain>

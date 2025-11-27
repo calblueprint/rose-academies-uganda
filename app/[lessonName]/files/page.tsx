@@ -1,18 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { fetchLocalDatabase } from "@/api/sqlite/queries/query";
 import FilePreview from "@/components/FilePreview/";
+import { FileRow, FilesTable } from "@/components/FilesTable";
 import { LocalFile } from "@/types/schema";
-import {
-  FileContainer,
-  FileHeaders,
-  NameHeader,
-  OtherHeaders,
-  PageContainer,
-  Title,
-} from "./style";
+import { PageContainer, Title } from "./style";
 
 // Modal for displaying file preview. Needs styling.
 function Modal({
@@ -52,41 +46,42 @@ function Modal({
 
 export default function FilesPage() {
   const lessonName = useParams().lessonName;
-
   const [files, setFiles] = useState<LocalFile[]>([]);
   const [selectedFile, setSelectedFile] = useState<LocalFile | null>(null);
 
   useEffect(() => {
     async function load() {
       const localData = await fetchLocalDatabase();
-      // Temporarily use all files.
-      // TODO: set my lesson
       setFiles(localData.files);
     }
     load();
   }, []);
 
+  const tableFiles: FileRow[] = useMemo(
+    () =>
+      files.map(file => ({
+        id: file.id,
+        name: file.name,
+        // TODO: dates are not currently in LocalFile type, should probably add them
+        dateAdded: "N/A",
+        dateModified: "N/A",
+        sizeBytes: file.size_bytes,
+      })),
+    [files],
+  );
+
+  function handleRowClick(row: FileRow) {
+    const file = files.find(f => f.id === row.id);
+    if (file) {
+      setSelectedFile(file);
+    }
+  }
+
   return (
     <PageContainer>
       <Title>{lessonName}</Title>
 
-      <FileContainer>
-        <FileHeaders>
-          <NameHeader>Name</NameHeader>
-          <OtherHeaders>
-            <p>Date Added</p>
-            <p>Date Modified</p>
-            <p>File Size</p>
-            <p>File Type</p>
-          </OtherHeaders>
-        </FileHeaders>
-
-        {files.map(file => (
-          <div key={file.id} onClick={() => setSelectedFile(file)}>
-            <NameHeader>{file.name}</NameHeader>
-          </div>
-        ))}
-      </FileContainer>
+      <FilesTable files={tableFiles} onRowClick={handleRowClick} />
 
       {selectedFile && (
         <Modal onClose={() => setSelectedFile(null)}>

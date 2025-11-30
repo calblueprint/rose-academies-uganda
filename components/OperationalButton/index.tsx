@@ -5,10 +5,18 @@ import ActionButton from "@/components/ActionButton";
 import COLORS from "@/styles/colors";
 
 export default function OperationalButton() {
-  const [isOperational, setIsOperational] = useState<boolean | null>(null);
+  const [isOperational, setIsOperational] = useState<boolean | null>(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const [isChecking, setIsChecking] = useState(false);
 
   const checkStatus = async () => {
+    // Guard: prevent concurrent status checks
+    if (isChecking) {
+      return;
+    }
+
+    setIsChecking(true);
     setIsLoading(true);
 
     // minimum loading time promise (1 second)
@@ -31,6 +39,8 @@ export default function OperationalButton() {
       setIsOperational(false);
     } finally {
       setIsLoading(false);
+      setIsInitialLoad(false);
+      setIsChecking(false);
     }
   };
 
@@ -55,7 +65,8 @@ export default function OperationalButton() {
   const textColor =
     isOperational === false ? COLORS.rose80 : COLORS.activeGreen;
 
-  const iconType = isLoading ? "refresh" : isOperational ? "check" : "error";
+  const iconType =
+    isLoading && !isInitialLoad ? "refresh" : isOperational ? "check" : "error";
 
   const iconSize = isOperational === false ? "1.5rem" : "1.25rem";
 
@@ -70,10 +81,10 @@ export default function OperationalButton() {
       iconType={iconType}
       iconSize={iconSize}
       text={text}
-      isLoading={isLoading}
+      isLoading={isLoading && !isInitialLoad}
       disabled={isLoading}
       title="Click to refresh status"
-      animationDuration="1.5s"
+      animationDuration="1s"
     />
   );
 }

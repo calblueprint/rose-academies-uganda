@@ -3,6 +3,7 @@
 import React from "react";
 import Image from "next/image";
 import RoseLogo from "@/assets/images/rose-academies-logo.png";
+import OperationalButton from "@/components/OperationalButton";
 import SyncButton from "@/components/SyncButton";
 import {
   Header as HeaderBar,
@@ -23,8 +24,10 @@ export default function Header() {
           <Title>Rose Academies-Uganda</Title>
         </LogoContainer>
       </LogoAndTitle>
-      <SyncButton></SyncButton>
-      <HeaderRight />
+      <HeaderRight>
+        <OperationalButton />
+        <SyncButton />
+      </HeaderRight>
     </HeaderBar>
   );
 }

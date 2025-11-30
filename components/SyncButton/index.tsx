@@ -9,8 +9,16 @@ export default function SyncButton() {
 
   const handleSync = async () => {
     setIsSyncing(true);
+
+    // minimum loading time promise (1 second)
+    const minLoadingTime = new Promise(resolve => setTimeout(resolve, 1000));
+
     try {
       const response = await fetch("/api/sync");
+
+      // Wait for minimum loading time before updating
+      await minLoadingTime;
+
       if (response.ok) {
         // Optional: Show success message
         console.log("Sync successful");
@@ -19,6 +27,7 @@ export default function SyncButton() {
       }
     } catch (error) {
       console.error("Error syncing:", error);
+      await minLoadingTime;
     } finally {
       setIsSyncing(false);
     }
@@ -33,6 +42,7 @@ export default function SyncButton() {
       text={isSyncing ? "Syncing..." : "Sync"}
       isLoading={isSyncing}
       disabled={isSyncing}
+      title="Click to sync data from cloud"
       animationDuration="1s"
     />
   );

@@ -63,20 +63,20 @@ export async function GET(): Promise<NextResponse> {
             operational: false,
             message: "Unable to check WiFi status (fallback)",
           },
-          { status: 200 },
+          { status: 500 },
         );
       }
     }
 
     return NextResponse.json(
       { operational: false, message: "Unable to check WiFi status (fallback)" },
-      { status: 200 },
+      { status: 500 },
     );
   } catch (error) {
     console.error("Error checking WiFi status:", error);
     return NextResponse.json(
       { operational: false, message: "Unable to check WiFi status" },
-      { status: 200 },
+      { status: 500 },
     );
   }
 }

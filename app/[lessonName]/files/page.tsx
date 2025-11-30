@@ -6,7 +6,13 @@ import { fetchLocalDatabase } from "@/api/sqlite/queries/query";
 import FilePreview from "@/components/FilePreview/";
 import { FileRow, FilesTable } from "@/components/FilesTable";
 import { LocalFile } from "@/types/schema";
-import { PageContainer, Title } from "./style";
+import {
+  ModalBackdrop,
+  ModalContent,
+  ModalPanel,
+  PageContainer,
+  Title,
+} from "./style";
 
 // Modal for displaying file preview. Needs styling.
 function Modal({
@@ -17,30 +23,11 @@ function Modal({
   onClose: () => void;
 }) {
   return (
-    <div
-      style={{
-        position: "fixed",
-        inset: 0,
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        zIndex: 9999,
-      }}
-      onClick={onClose}
-    >
-      <div
-        style={{
-          background: "white",
-          width: "90%",
-          height: "90%",
-          overflow: "hidden",
-          display: "flex",
-        }}
-        onClick={e => e.stopPropagation()}
-      >
-        <div style={{ flex: 1 }}>{children}</div>
-      </div>
-    </div>
+    <ModalBackdrop onClick={onClose}>
+      <ModalPanel onClick={e => e.stopPropagation()}>
+        <ModalContent>{children}</ModalContent>
+      </ModalPanel>
+    </ModalBackdrop>
   );
 }
 

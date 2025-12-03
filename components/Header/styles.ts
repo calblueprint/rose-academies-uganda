@@ -2,7 +2,7 @@ import styled from "styled-components";
 import COLORS from "@/styles/colors";
 
 export const Header = styled.header`
-  width: 110%;
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -10,8 +10,6 @@ export const Header = styled.header`
   background-color: ${COLORS.white};
   border-bottom: 1px solid ${COLORS.veryLightGrey};
   box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.06);
-  margin-left: calc(50% - 50vw);
-  margin-right: calc(50% - 50vw);
   font-family: var(--font-gilroy);
   font-size: 20px;
   font-style: normal;

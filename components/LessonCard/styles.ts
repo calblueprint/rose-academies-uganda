@@ -9,7 +9,6 @@ export const Card = styled.article`
   box-shadow: 0 0.25rem 0.25rem 0.063rem rgba(0, 0, 0, 0.08);
   display: flex;
   flex-direction: column;
-  cursor: pointer;
 `;
 
 export const ImageArea = styled.div`

@@ -6,7 +6,9 @@ export const Header = styled.header`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.81rem 6.5rem;
+  padding: 1.5rem 2rem;
+  background-color: ${COLORS.white};
+  border-bottom: 1px solid ${COLORS.veryLightGrey};
   box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.06);
   font-family: var(--font-gilroy);
   font-size: 20px;

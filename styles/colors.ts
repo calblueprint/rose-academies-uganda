@@ -8,6 +8,8 @@ const COLORS = {
   lightGrey: "#747474",
   veryLightYellow: "#f9faf3",
   red: "#AF2028",
+  gray10: "#FAFAFA",
+  gray40: "#D9D9D9",
   gray60: "#808582",
   lightGreen: "#F9FAF3",
   activeGreen: "#1F5A2A",

@@ -27,16 +27,15 @@ export default function SearchBar({ searchTerm, setSearchTerm }: Props) {
           value={searchTerm}
           onChange={e => setSearchTerm(e.target.value)}
         />
-
-        {searchTerm && (
-          <ClearButton
-            aria-label="Clear search"
-            onClick={() => setSearchTerm("")}
-          >
-            <DeleteIcon />
-          </ClearButton>
-        )}
       </SearchBarContainer>
+      {searchTerm && (
+        <ClearButton
+          aria-label="Clear search"
+          onClick={() => setSearchTerm("")}
+        >
+          <DeleteIcon />
+        </ClearButton>
+      )}
     </SearchBarField>
   );
 }

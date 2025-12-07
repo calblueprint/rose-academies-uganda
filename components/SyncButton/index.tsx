@@ -1,14 +1,19 @@
 "use client";
 
+import type { ModalVariant } from "@/components/SyncModal/styles";
 import React, { useState } from "react";
 import ActionButton from "@/components/ActionButton";
+import SyncModal from "@/components/SyncModal";
 import COLORS from "@/styles/colors";
 
 export default function SyncButton() {
   const [isSyncing, setIsSyncing] = useState(false);
+  const [modalVariant, setModalVariant] = useState<ModalVariant | null>(null);
+  // null = no modal shown; "success" or "error" = show that modal
 
   const handleSync = async () => {
     setIsSyncing(true);
+    setModalVariant(null);
 
     // minimum loading time promise (1 second)
     const minLoadingTime = new Promise(resolve => setTimeout(resolve, 1000));
@@ -22,8 +27,10 @@ export default function SyncButton() {
       if (response.ok) {
         // Optional: Show success message
         console.log("Sync successful");
+        setModalVariant("success");
       } else {
         console.error("Sync failed");
+        setModalVariant("error");
       }
     } catch (error) {
       console.error("Error syncing:", error);
@@ -34,16 +41,25 @@ export default function SyncButton() {
   };
 
   return (
-    <ActionButton
-      onClick={handleSync}
-      backgroundColor={COLORS.evergreen}
-      textColor={COLORS.white}
-      iconType="refresh"
-      text={isSyncing ? "Syncing..." : "Sync"}
-      isLoading={isSyncing}
-      disabled={isSyncing}
-      title="Click to sync data from cloud"
-      animationDuration="1s"
-    />
+    <>
+      <ActionButton
+        onClick={handleSync}
+        backgroundColor={COLORS.evergreen}
+        textColor={COLORS.white}
+        iconType="refresh"
+        text={isSyncing ? "Syncing..." : "Sync"}
+        isLoading={isSyncing}
+        disabled={isSyncing}
+        title="Click to sync data from cloud"
+        animationDuration="1s"
+      />
+
+      {modalVariant && (
+        <SyncModal
+          variant={modalVariant}
+          onClose={() => setModalVariant(null)}
+        />
+      )}
+    </>
   );
 }

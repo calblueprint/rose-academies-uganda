@@ -15,6 +15,8 @@ const COLORS = {
   activeGreen: "#1F5A2A",
   rose10: "#FCEFEF",
   rose80: "#EA6172",
+  rose11: "#F393A5",
+  whiteSmoke: "#F4F5F7",
 };
 
 export default COLORS;

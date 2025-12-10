@@ -113,11 +113,11 @@ export function FilesTable({ files, onRowClick }: FilesTableProps) {
     <TableContainer>
       <StyledTable>
         <colgroup>
-          <col style={{ width: "40%" }} /> {/* Name */}
-          <col style={{ width: "20%" }} /> {/* Date Added */}
-          <col style={{ width: "20%" }} /> {/* Date Modified */}
-          <col style={{ width: "18%" }} /> {/* File Size */}
-          <col style={{ width: "6%" }} /> {/* Download icon */}
+          <col style={{ width: "40%" }} />
+          <col style={{ width: "20%" }} />
+          <col style={{ width: "20%" }} />
+          <col style={{ width: "18%" }} />
+          <col style={{ width: "6%" }} />
         </colgroup>
 
         <thead>

@@ -7,6 +7,7 @@ import FilePreview from "@/components/FilePreview/";
 import FilePreviewModal from "@/components/FilePreviewModal";
 import { FileRow, FilesTable } from "@/components/FilesTable";
 import FileTypeDropdown from "@/components/FileTypeDropdown";
+import LessonHeader from "@/components/LessonHeader";
 import SearchBarComponent from "@/components/SearchBar";
 import { LocalFile } from "@/types/schema";
 import {
@@ -14,7 +15,6 @@ import {
   BackButtonIconSlot,
   HeaderRight,
   HeaderRow,
-  LessonHeader,
   PageContainer,
   SearchBar as SearchBarWrapper,
   Title,
@@ -56,25 +56,7 @@ export default function FilesPage() {
 
   return (
     <PageContainer>
-      <LessonHeader>
-        <BackButton>
-          <BackButtonIconSlot>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="8"
-              height="11"
-              viewBox="0 0 8 11"
-              fill="none"
-            >
-              <path
-                d="M0 5.5L6.47542 11L8 9.70691L3.04377 5.5L8 1.29401L6.4765 0L0 5.5Z"
-                fill="white"
-              />
-            </svg>
-          </BackButtonIconSlot>
-          <span>My Lessons</span>
-        </BackButton>
-      </LessonHeader>
+      <LessonHeader label="My Lessons" />
 
       <HeaderRow>
         <Title>{lessonName}</Title>

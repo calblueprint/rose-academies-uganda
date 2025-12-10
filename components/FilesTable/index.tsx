@@ -45,7 +45,6 @@ type FilesTableProps = {
  * - Clicking a header toggles the sort on that column.
  * - Clicking a row calls `onRowClick` with the FileRow (if provided).
  */
-
 export function FilesTable({ files, onRowClick }: FilesTableProps) {
   const [sortKey, setSortKey] = useState<SortKey>("name");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
@@ -113,6 +112,14 @@ export function FilesTable({ files, onRowClick }: FilesTableProps) {
   return (
     <TableContainer>
       <StyledTable>
+        <colgroup>
+          <col style={{ width: "40%" }} /> {/* Name */}
+          <col style={{ width: "20%" }} /> {/* Date Added */}
+          <col style={{ width: "20%" }} /> {/* Date Modified */}
+          <col style={{ width: "18%" }} /> {/* File Size */}
+          <col style={{ width: "6%" }} /> {/* Download icon */}
+        </colgroup>
+
         <thead>
           <HeadRow>
             <HeadCell $isSortable onClick={() => handleHeaderClick("name")}>

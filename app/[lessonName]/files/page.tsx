@@ -11,8 +11,6 @@ import LessonHeader from "@/components/LessonHeader";
 import SearchBarComponent from "@/components/SearchBar";
 import { LocalFile } from "@/types/schema";
 import {
-  BackButton,
-  BackButtonIconSlot,
   HeaderRight,
   HeaderRow,
   PageContainer,

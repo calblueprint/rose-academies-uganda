@@ -14,16 +14,21 @@ type Props = {
   setSearchTerm: React.Dispatch<React.SetStateAction<string>>;
   view?: "grid" | "list";
   onChangeView?: (v: "grid" | "list") => void;
+  placeholder?: string;
 };
 
-export default function SearchBar({ searchTerm, setSearchTerm }: Props) {
+export default function SearchBar({
+  searchTerm,
+  setSearchTerm,
+  placeholder = "Search for lesson",
+}: Props) {
   return (
     <SearchBarField>
       <SearchBarContainer>
         <SearchBarIcon />
         <SearchInput
           type="text"
-          placeholder="Search for lesson"
+          placeholder={placeholder}
           value={searchTerm}
           onChange={e => setSearchTerm(e.target.value)}
         />

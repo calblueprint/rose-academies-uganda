@@ -176,5 +176,71 @@ export const IconSvgs = {
       />
     </svg>
   ),
+  // NEW: back chevron (Lesson header)
+  backChevron: (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="8"
+      height="11"
+      viewBox="0 0 8 11"
+      fill="none"
+    >
+      <path
+        d="M0 5.5L6.47542 11L8 9.70691L3.04377 5.5L8 1.29401L6.4765 0L0 5.5Z"
+        fill="white"
+      />
+    </svg>
+  ),
+
+  // NEW: download icon
+  download: (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="18"
+      height="20"
+      viewBox="0 0 18 20"
+      fill="none"
+    >
+      <path
+        d="M0.787598 14.2876V16.9876C0.787598 17.465 0.97724 17.9228 1.31481 18.2604C1.65237 18.598 2.11021 18.7876 2.5876 18.7876H15.1876C15.665 18.7876 16.1228 18.598 16.4604 18.2604C16.798 17.9228 16.9876 17.465 16.9876 16.9876V14.2876M5.2876 9.7876L8.8876 13.3876M8.8876 13.3876L12.4876 9.7876M8.8876 13.3876V0.787598"
+        stroke="#4B4A49"
+        strokeWidth="1.575"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  ),
+
+  // NEW: file tile icon (white file shape)
+  fileTile: (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="25"
+      height="25"
+      viewBox="0 0 25 25"
+      fill="none"
+    >
+      <path
+        d="M10.4168 4.1665H4.16683C3.021 4.1665 2.09391 5.104 2.09391 6.24984L2.0835 18.7498C2.0835 19.8957 3.021 20.8332 4.16683 20.8332H20.8335C21.9793 20.8332 22.9168 19.8957 22.9168 18.7498V8.33317C22.9168 7.18734 21.9793 6.24984 20.8335 6.24984H12.5002L10.4168 4.1665Z"
+        fill="white"
+      />
+    </svg>
+  ),
+
+  // NEW: small dropdown chevron (File type dropdown)
+  dropdownChevronSmall: (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="11"
+      height="7"
+      viewBox="0 0 11 7"
+      fill="none"
+    >
+      <path
+        d="M5.22262 6.45224L10.4452 1.22962L9.21736 0L5.22262 3.99735L1.22875 0L0 1.22875L5.22262 6.45224Z"
+        fill="#808582"
+      />
+    </svg>
+  ),
 };
 export type IconType = keyof typeof IconSvgs;

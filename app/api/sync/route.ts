@@ -20,6 +20,7 @@ export async function GET(): Promise<NextResponse> {
       `CREATE TABLE IF NOT EXISTS lessons (
         id INTEGER PRIMARY KEY,
         name TEXT,
+        image_path TEXT,
         group_id INTEGER,
         FOREIGN KEY (group_id) REFERENCES groups(id)
       )`,
@@ -76,10 +77,10 @@ export async function GET(): Promise<NextResponse> {
 
     const insertLessons = db.transaction(lessons => {
       const stmt = db.prepare(
-        "INSERT OR REPLACE INTO lessons (id, name, group_id) VALUES (?, ?, ?)",
+        "INSERT OR REPLACE INTO lessons (id, name, image_path, group_id) VALUES (?, ?, ?, ?)",
       );
       for (const lesson of lessons) {
-        stmt.run(lesson.id, lesson.name, lesson.group_id);
+        stmt.run(lesson.id, lesson.name, lesson.image_path, lesson.group_id);
       }
     });
     insertLessons(lessons);

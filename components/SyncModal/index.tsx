@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Cross, SyncFail, SyncSuccess } from "@/lib/icons";
+import { IconSvgs } from "@/lib/icons";
 import {
   ActionsRow,
   Body,
@@ -20,19 +20,24 @@ import {
 export interface SyncModalProps {
   variant: ModalVariant; // "success" or "error"
   onClose: () => void;
+  onSyncAgain?: () => void;
 }
 
-const SyncModal: React.FC<SyncModalProps> = ({ variant, onClose }) => {
+const SyncModal: React.FC<SyncModalProps> = ({
+  variant,
+  onClose,
+  onSyncAgain,
+}) => {
   const isSuccess = variant === "success";
 
   return (
-    <Overlay onClick={onClose}>
-      <Card onClick={e => e.stopPropagation()}>
-        <CloseButton onClick={onClose}>
-          <Cross />
-        </CloseButton>
+    <Overlay>
+      <Card>
+        <CloseButton onClick={onClose}>{IconSvgs.Cross}</CloseButton>
 
-        <IconWrapper>{isSuccess ? <SyncSuccess /> : <SyncFail />}</IconWrapper>
+        <IconWrapper>
+          {isSuccess ? IconSvgs.syncSuccess : IconSvgs.syncFail}
+        </IconWrapper>
 
         <Title>
           {isSuccess ? "Syncing Successful!" : "Error! Syncing Failed"}
@@ -53,7 +58,7 @@ const SyncModal: React.FC<SyncModalProps> = ({ variant, onClose }) => {
         ) : (
           <ActionsRow>
             <TryLaterButton onClick={onClose}>Try Later</TryLaterButton>
-            <SyncAgainButton onClick={onClose}>Sync Again</SyncAgainButton>
+            <SyncAgainButton onClick={onSyncAgain}>Sync Again</SyncAgainButton>
           </ActionsRow>
         )}
       </Card>

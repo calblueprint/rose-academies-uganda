@@ -35,6 +35,7 @@ export default function SyncButton() {
     } catch (error) {
       console.error("Error syncing:", error);
       await minLoadingTime;
+      setModalVariant("error");
     } finally {
       setIsSyncing(false);
     }
@@ -58,6 +59,7 @@ export default function SyncButton() {
         <SyncModal
           variant={modalVariant}
           onClose={() => setModalVariant(null)}
+          onSyncAgain={handleSync}
         />
       )}
     </>

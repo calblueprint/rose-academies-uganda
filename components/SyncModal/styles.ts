@@ -104,7 +104,7 @@ export const ContinueButton = styled.button`
   background: ${COLORS.evergreen};
 `;
 
-export const ContinueText = styled.text`
+export const ContinueText = styled.span`
   color: ${COLORS.white};
 `;
 

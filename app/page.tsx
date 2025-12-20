@@ -1,20 +1,5 @@
-import React, { CSSProperties } from "react";
-import JoinPage from "./join/page";
+import { redirect } from "next/navigation";
 
 export default function Home() {
-  return (
-    <main style={mainStyles}>
-      <JoinPage />
-    </main>
-  );
+  return redirect("/join");
 }
-// CSS styles
-
-const mainStyles: CSSProperties = {
-  width: "100%",
-  height: "100vh",
-  display: "flex",
-  flexDirection: "column",
-  alignItems: "center",
-  justifyContent: "center",
-};

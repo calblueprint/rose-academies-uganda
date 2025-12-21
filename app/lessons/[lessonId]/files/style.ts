@@ -1,7 +1,9 @@
 import styled from "styled-components";
 
 export const PageContainer = styled.div`
-  padding: 7rem;
+  padding-top: 1.25rem;
+  padding-left: 6.875rem;
+  padding-right: 6.875rem;
   background-color: #fafafa;
 `;
 

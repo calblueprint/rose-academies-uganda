@@ -19,12 +19,21 @@ import {
 } from "./style";
 
 export default function FilesPage() {
-  const lessonName = useParams().lessonName;
+  const lessonId = Number(useParams().lessonId);
   const data = useContext(DataContext);
+
   const [selectedFile, setSelectedFile] = useState<LocalFile | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const files = data?.files ?? [];
+  const lesson = useMemo(() => {
+    if (!data) return null;
+    return data.lessons.find(l => l.id === lessonId);
+  }, [data, lessonId]);
+
+  const files = useMemo(() => {
+    if (!data) return [];
+    return data.files.filter(file => file.lesson_id === lessonId);
+  }, [data, lessonId]);
 
   const filteredFiles = useMemo(
     () =>
@@ -48,7 +57,7 @@ export default function FilesPage() {
   );
 
   function handleRowClick(row: FileRow) {
-    const file = files.find(f => f.id === row.id);
+    const file = filteredFiles.find(f => f.id === row.id);
     if (file) {
       setSelectedFile(file);
     }
@@ -63,7 +72,7 @@ export default function FilesPage() {
       <LessonHeader label="My Lessons" />
 
       <HeaderRow>
-        <Title>{lessonName}</Title>
+        <Title>{lesson?.name ?? "Lesson Files"}</Title>
 
         <HeaderRight>
           <SearchBarWrapper>
@@ -78,7 +87,11 @@ export default function FilesPage() {
         </HeaderRight>
       </HeaderRow>
 
-      <FilesTable files={tableFiles} onRowClick={handleRowClick} />
+      {tableFiles.length === 0 ? (
+        <div>No files in this lesson yet.</div>
+      ) : (
+        <FilesTable files={tableFiles} onRowClick={handleRowClick} />
+      )}
 
       {selectedFile && (
         <FilePreviewModal onClose={() => setSelectedFile(null)}>

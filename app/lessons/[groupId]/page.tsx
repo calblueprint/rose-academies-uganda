@@ -74,7 +74,11 @@ export default function LessonsPage() {
           <LessonsGrid>
             {filteredLessons.length > 0 ? (
               filteredLessons.map(lesson => (
-                <LessonCard key={lesson.id} lessonName={lesson.name} />
+                <LessonCard
+                  key={lesson.id}
+                  lessonId={lesson.id}
+                  lessonName={lesson.name}
+                />
               ))
             ) : (
               <div>No lessons found.</div>

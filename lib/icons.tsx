@@ -242,5 +242,55 @@ export const IconSvgs = {
       />
     </svg>
   ),
+
+  syncSuccess: (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="71"
+      height="71"
+      viewBox="0 0 71 71"
+      fill="none"
+    >
+      <path
+        d="M35.5 0C15.8951 0 0 15.8951 0 35.5C0 55.1049 15.8951 71 35.5 71C55.1049 71 71 55.1049 71 35.5C71 15.8951 55.1049 0 35.5 0ZM55.3415 28.7165L32.9765 51.0815C32.4204 51.6377 31.669 51.9483 30.885 51.9483C30.101 51.9483 29.3467 51.6377 28.7935 51.0815L18.5783 40.8664C17.4216 39.7097 17.4216 37.84 18.5783 36.6833C19.735 35.5266 21.6047 35.5266 22.7614 36.6833L30.885 44.8069L51.1585 24.5335C52.3152 23.3768 54.1848 23.3768 55.3415 24.5335C56.4983 25.6902 56.4983 27.5598 55.3415 28.7165Z"
+        fill="#1F5A2A"
+      />
+    </svg>
+  ),
+  syncFail: (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="71"
+      height="71"
+      viewBox="0 0 71 71"
+      fill="none"
+    >
+      <circle cx="35.5" cy="35.5" r="35.5" fill="#F393A5" />
+
+      <circle cx="35.5" cy="35.5" r="31" fill="#EA6172" />
+
+      <path
+        d="M21 21L50 50M50 21L21 50"
+        stroke="white"
+        strokeWidth="4"
+        strokeLinecap="round"
+      />
+    </svg>
+  ),
+  Cross: (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="10"
+      height="10"
+      viewBox="0 0 10 10"
+      fill="none"
+    >
+      <path
+        d="M5 3.88906L8.88906 0L10 1.11094L6.11094 5L10 8.88906L8.88906 10L5 6.11094L1.11094 10L0 8.88906L3.88906 5L0 1.11094L1.11094 0L5 3.88906Z"
+        fill="black"
+      />
+    </svg>
+  ),
 };
+
 export type IconType = keyof typeof IconSvgs;

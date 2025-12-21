@@ -50,7 +50,7 @@ export default function JoinPage() {
     }
 
     // If the join code is valid, navigate to the main app page
-    router.push("/lessons/" + groupId);
+    router.push(`/groups/${groupId}/lessons`);
     setError("");
     setJoinCode("");
   }

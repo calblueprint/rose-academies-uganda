@@ -14,7 +14,7 @@ export default function LessonCard({
   const router = useRouter();
 
   return (
-    <Card onClick={() => router.push(`/${lessonId}/files`)}>
+    <Card onClick={() => router.push(`/lessons/${lessonId}/files`)}>
       <ImageArea />
       <Titleholder>
         <Title>{lessonName}</Title>

@@ -32,6 +32,7 @@ export const BackButton = styled.button`
   font-family: var(--font-gilroy);
   font-size: 1rem;
   font-weight: 500;
+  white-space: nowrap;
 `;
 
 export const BackButtonIconSlot = styled.div`

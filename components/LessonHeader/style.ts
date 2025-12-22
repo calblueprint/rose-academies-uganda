@@ -4,7 +4,7 @@ import COLORS from "@/styles/colors";
 export const LessonHeaderContainer = styled.div`
   display: flex;
   width: 100%;
-  max-width: 1048px;
+  // max-width: 1048px;
   height: 141px;
   padding: 12px 931px 96px 25px;
   align-items: center;

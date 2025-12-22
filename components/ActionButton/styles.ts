@@ -13,6 +13,7 @@ interface ActionButtonProps {
   $backgroundColor: string;
   $textColor: string;
   $iconColor?: string;
+  $borderColor?: string;
 }
 
 export const StyledActionButton = styled.button<ActionButtonProps>`
@@ -24,6 +25,8 @@ export const StyledActionButton = styled.button<ActionButtonProps>`
   border: none;
   background-color: ${({ $backgroundColor }) => $backgroundColor};
   color: ${({ $textColor }) => $textColor};
+  border: ${({ $borderColor }) =>
+    $borderColor ? `1px solid ${$borderColor}` : "none"};
   font-family: inherit;
   font-size: 1rem;
   font-weight: 500;

@@ -22,6 +22,7 @@ interface ActionButtonProps {
   disabled?: boolean;
   title?: string;
   animationDuration?: string;
+  borderColor?: string;
 }
 
 export default function ActionButton({
@@ -36,6 +37,7 @@ export default function ActionButton({
   disabled = false,
   title,
   animationDuration = "1.5s",
+  borderColor,
 }: ActionButtonProps) {
   return (
     <StyledActionButton
@@ -44,6 +46,7 @@ export default function ActionButton({
       $textColor={textColor}
       disabled={disabled}
       title={title}
+      $borderColor={borderColor}
     >
       <ActionIcon
         $iconColor={iconColor || textColor}

@@ -85,7 +85,11 @@ export default function LessonsPage() {
         <LessonsList>
           {filteredLessons.length > 0 ? (
             filteredLessons.map(lesson => (
-              <LessonItem key={lesson.id} lessonName={lesson.name} />
+              <LessonItem
+                key={lesson.id}
+                lessonId={lesson.id}
+                lessonName={lesson.name}
+              />
             ))
           ) : (
             <div>No lessons found.</div>

@@ -69,7 +69,7 @@ export default function FilesPage() {
 
   return (
     <PageContainer>
-      <LessonHeader label="My Lessons" />
+      <LessonHeader label="My Lessons" image={lesson?.image_path} />
 
       <HeaderRow>
         <Title>{lesson?.name ?? "Lesson Files"}</Title>

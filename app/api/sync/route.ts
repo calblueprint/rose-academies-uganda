@@ -18,7 +18,12 @@ type DB = InstanceType<typeof Database>;
 
 type Teacher = { id: number; name: string };
 type Group = { id: number; name: string; join_code: string | null };
-type Lesson = { id: number; name: string; group_id: number };
+type Lesson = {
+  id: number;
+  name: string;
+  image_path: string | null;
+  group_id: number;
+};
 type FileRow = {
   id: number;
   name: string;
@@ -45,6 +50,7 @@ function createSchema(db: DB) {
     `CREATE TABLE IF NOT EXISTS lessons (
       id INTEGER PRIMARY KEY,
       name TEXT,
+      image_path TEXT,
       group_id INTEGER,
       FOREIGN KEY (group_id) REFERENCES groups(id)
     )`,
@@ -132,9 +138,9 @@ function insertIntoSQLite(
 
   const insertLessons = db.transaction((rows: Lesson[]) => {
     const stmt = db.prepare(
-      "INSERT OR REPLACE INTO lessons (id, name, group_id) VALUES (?, ?, ?)",
+      "INSERT OR REPLACE INTO lessons (id, name, image_path, group_id) VALUES (?, ?, ?, ?)",
     );
-    for (const r of rows) stmt.run(r.id, r.name, r.group_id);
+    for (const r of rows) stmt.run(r.id, r.name, r.image_path, r.group_id);
   });
   insertLessons(lessons);
 

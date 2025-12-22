@@ -75,6 +75,7 @@ export default function LessonsPage() {
                 key={lesson.id}
                 lessonId={lesson.id}
                 lessonName={lesson.name}
+                lessonImage={lesson.image_path}
               />
             ))
           ) : (

@@ -2,35 +2,36 @@ import styled from "styled-components";
 import COLORS from "@/styles/colors";
 
 export const LessonHeaderContainer = styled.div`
+  position: relative;
   display: flex;
+  align-items: center;
+  background-color: ${COLORS.evergreen};
   width: 100%;
-  // max-width: 1048px;
   height: 141px;
   padding: 12px 931px 96px 25px;
-  align-items: center;
-  flex-shrink: 0;
   border-radius: 10px;
-  background-color: ${COLORS.evergreen};
+  overflow: hidden;
+`;
+
+export const BackgroundImage = styled.div`
+  position: absolute;
+  inset: 0;
+  z-index: 0;
 `;
 
 export const BackButton = styled.button`
+  position: relative;
+  z-index: 2;
   display: flex;
-  padding: 8px 0;
   align-items: center;
   gap: 12px;
-  border-radius: 12px;
-
   background: transparent;
   border: none;
   cursor: pointer;
-
   color: #ffffff;
   font-family: var(--font-gilroy);
   font-size: 1rem;
-  font-style: normal;
   font-weight: 500;
-  line-height: normal;
-
   white-space: nowrap;
 `;
 
@@ -40,5 +41,4 @@ export const BackButtonIconSlot = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
 `;

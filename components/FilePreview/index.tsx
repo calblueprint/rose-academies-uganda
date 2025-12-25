@@ -16,9 +16,12 @@ import {
 export default function FilePreview({ file }: { file: LocalFile }) {
   if (!file) return <p>No file selected.</p>;
 
-  const src = `/api/sqlite/files/${file.id}`;
+  const src = file.storage_path;
 
-  // Prefer stored mime_type, fall back to guessing from file name.
+  if (!src) {
+    return <p>File unavailable.</p>;
+  }
+
   const mimeType =
     file.mime_type || (mime.lookup(file.name || "") || "").toString() || "";
 
@@ -30,7 +33,6 @@ export default function FilePreview({ file }: { file: LocalFile }) {
     return <PdfPreview src={src} fileName={file.name} />;
   }
 
-  // If file is not image or pdf. Includes APKs.
   return <GenericPreview src={src} fileName={file.name} mimeType={mimeType} />;
 }
 

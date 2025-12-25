@@ -39,7 +39,14 @@ export default function LessonItem({
       <LessonHeader onClick={() => setOpened(prev => !prev)}>
         <LessonLeft>
           <LessonIcon />
-          <LessonName>{lessonName}</LessonName>
+          <LessonName
+            onClick={e => {
+              e.stopPropagation();
+              router.push(`/lessons/${lessonId}/files`);
+            }}
+          >
+            {lessonName}
+          </LessonName>
         </LessonLeft>
 
         <LessonRight>

@@ -1,0 +1,43 @@
+{
+  "name": "local-app",
+  "version": "0.1.1",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --webpack",
+    "build": "next build --webpack",
+    "start": "next start",
+    "lint": "pnpm exec eslint .",
+    "lint:fix": "pnpm exec eslint . --fix",
+    "tsc": "pnpm exec tsc --noEmit",
+    "prettier": "pnpm exec prettier --check .",
+    "prettier:fix": "pnpm exec prettier --write ."
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.52.1",
+    "better-sqlite3": "^12.4.1",
+    "eslint-plugin-react-hooks": "^7.0.0",
+    "mime-types": "^3.0.1",
+    "next": "^16.1.1",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "styled-components": "^6.3.10"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.3.1",
+    "@ianvs/prettier-plugin-sort-imports": "^4.7.0",
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/mime-types": "^3.0.1",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@typescript-eslint/eslint-plugin": "^8.41.0",
+    "@typescript-eslint/parser": "^8.41.0",
+    "concurrently": "^9.2.1",
+    "eslint": "^9.32.0",
+    "eslint-config-next": "15.5.2",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.4",
+    "prettier": "^3.6.2",
+    "typescript": "^5"
+  }
+}

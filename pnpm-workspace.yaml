@@ -1,2 +1,5 @@
-onlyBuiltDependencies:
-  - sharp
+packages:
+  - "apps/*"
+  - "packages/*"
+# onlyBuiltDependencies:
+#   - sharp

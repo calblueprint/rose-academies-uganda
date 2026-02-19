@@ -5,6 +5,8 @@
     "dev:local": "pnpm -C apps/local dev",
     "build:local": "pnpm -C apps/local build",
     "start:local": "pnpm -C apps/local start",
+    "lint": "pnpm -C apps/local lint",
+    "tsc": "pnpm -C apps/local tsc",
     "lint:local": "pnpm -C apps/local lint",
     "tsc:local": "pnpm -C apps/local tsc",
     "prettier": "prettier --check .",

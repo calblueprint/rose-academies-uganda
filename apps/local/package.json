@@ -39,17 +39,5 @@
     "eslint-plugin-prettier": "^5.5.4",
     "prettier": "^3.6.2",
     "typescript": "^5"
-  },
-  "pnpm": {
-    "overrides": {
-      "nanoid": "^3.3.8"
-    },
-    "onlyBuiltDependencies": [
-      "better-sqlite3",
-      "sharp"
-    ]
-  },
-  "overrides": {
-    "nanoid": "^3.3.8"
   }
 }

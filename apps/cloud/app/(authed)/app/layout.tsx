@@ -5,6 +5,7 @@
 
 import type { ReactNode } from "react";
 import Link from "next/link";
+import LogoutButton from "@/components/LogoutButton";
 
 export default function AppLayout({ children }: { children: ReactNode }) {
   return (
@@ -15,7 +16,9 @@ export default function AppLayout({ children }: { children: ReactNode }) {
           {" | "}
           <Link href="/app/offline-library">Offline Library</Link>
           {" | "}
-          <Link href="/login">Logout (placeholder)</Link>
+          <div style={{ display: "flex", justifyContent: "flex-end" }}>
+            <LogoutButton />
+          </div>
         </nav>
       </header>
 

@@ -47,7 +47,7 @@ export default function LessonDetailPage({ params }: PageProps) {
         <p>No files (mock data).</p>
       ) : (
         <ul>
-          {files.map((f) => (
+          {files.map(f => (
             <li key={f.id}>
               {f.name}{" "}
               <button

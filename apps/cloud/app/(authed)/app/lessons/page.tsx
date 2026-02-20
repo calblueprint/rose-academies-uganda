@@ -32,7 +32,7 @@ export default function LessonsListPage() {
       </p>
 
       <ul>
-        {MOCK_LESSONS.map((l) => (
+        {MOCK_LESSONS.map(l => (
           <li key={l.id}>
             <Link href={`/app/lessons/${l.id}`}>{l.title}</Link>
           </li>

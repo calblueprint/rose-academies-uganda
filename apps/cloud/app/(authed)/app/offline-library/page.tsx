@@ -24,8 +24,7 @@ export default function OfflineLibraryPage() {
         {MOCK_OFFLINE_ITEMS.map((item, idx) => (
           <li key={idx}>
             {item.fileName} (from{" "}
-            <Link href={`/app/lessons/${item.lessonId}`}>{item.lessonId}</Link>)
-            {" "}
+            <Link href={`/app/lessons/${item.lessonId}`}>{item.lessonId}</Link>){" "}
             <button
               type="button"
               onClick={() => {

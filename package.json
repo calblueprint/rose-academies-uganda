@@ -5,22 +5,33 @@
     "dev:local": "pnpm -C apps/local dev",
     "build:local": "pnpm -C apps/local build",
     "start:local": "pnpm -C apps/local start",
-    "lint": "pnpm -C apps/local lint",
-    "tsc": "pnpm -C apps/local tsc",
-    "lint:local": "pnpm -C apps/local lint",
-    "tsc:local": "pnpm -C apps/local tsc",
-    "prettier": "prettier --check .",
-    "prettier:fix": "prettier --write .",
-    "pre-commit": "pnpm -C apps/local tsc && pnpm -C apps/local lint && pnpm exec prettier --check apps/local",
-    "prepare": "husky",
     "dev:cloud": "pnpm -C apps/cloud dev",
     "build:cloud": "pnpm -C apps/cloud build",
-    "start:cloud": "pnpm -C apps/cloud start"
+    "start:cloud": "pnpm -C apps/cloud start",
+    "lint": "pnpm exec eslint apps",
+    "lint:fix": "pnpm exec eslint apps --fix",
+    "tsc": "pnpm -C apps/cloud exec tsc --noEmit && pnpm -C apps/local exec tsc --noEmit",
+    "prettier": "pnpm exec prettier --check .",
+    "prettier:fix": "pnpm exec prettier --write .",
+    "prepare": "husky",
+    "pre-commit": "concurrently \"pnpm run tsc\" \"pnpm run lint\" \"pnpm run prettier\""
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.3.1",
     "@ianvs/prettier-plugin-sort-imports": "^4.7.0",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@typescript-eslint/eslint-plugin": "^8.41.0",
+    "@typescript-eslint/parser": "^8.41.0",
+    "concurrently": "^9.2.1",
+    "eslint": "^9.32.0",
+    "eslint-config-next": "16.1.6",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.4",
     "husky": "^9.1.5",
-    "prettier": "^3.6.2"
+    "prettier": "^3.6.2",
+    "typescript": "^5"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
@@ -30,5 +41,8 @@
     "overrides": {
       "nanoid": "^3.3.8"
     }
+  },
+  "overrides": {
+    "nanoid": "^3.3.8"
   }
 }

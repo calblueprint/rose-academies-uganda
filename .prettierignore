@@ -21,3 +21,12 @@ README.md
 package-lock.json
 pnpm-lock.yaml
 next-env.d.ts
+
+**/node_modules/**
+**/.next/**
+**/dist/**
+**/build/**
+**/.turbo/**
+**/coverage/**
+**/*.tsbuildinfo
+apps/local/rose-academies-uganda.db

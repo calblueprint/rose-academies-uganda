@@ -2,10 +2,9 @@
 
 import { createContext, useEffect, useState } from "react";
 import { fetchLocalDatabase } from "@/api/sqlite/queries/query";
-import { Group, Lesson, LocalFile, Teacher } from "@/types/schema";
+import { Group, Lesson, LocalFile } from "@/types/schema";
 
 interface DataContextType {
-  teachers: Teacher[];
   groups: Group[];
   lessons: Lesson[];
   files: LocalFile[];

@@ -16,7 +16,6 @@ const LOCAL_DIR =
 
 type DB = InstanceType<typeof Database>;
 
-type Teacher = { id: number; name: string };
 type Group = { id: number; name: string; join_code: string | null };
 type Lesson = {
   id: number;
@@ -38,10 +37,6 @@ type FileRow = {
  */
 function createSchema(db: DB) {
   const tableSchemaSql = [
-    `CREATE TABLE IF NOT EXISTS teachers (
-      id INTEGER PRIMARY KEY,
-      name TEXT
-    )`,
     `CREATE TABLE IF NOT EXISTS groups (
       id INTEGER PRIMARY KEY,
       name TEXT,
@@ -77,17 +72,13 @@ function createSchema(db: DB) {
 }
 
 /**
- * Fetches the latest Teachers, Groups, Lessons, and Files data from Supabase.
+ * Fetches the latest Groups, Lessons, and Files data from Supabase.
  */
 async function fetchFromSupabase(): Promise<{
-  teachers: Teacher[];
   groups: Group[];
   lessons: Lesson[];
   files: FileRow[];
 }> {
-  const { data: teachers, error: teacherError } = await supabase
-    .from("Teachers")
-    .select("*");
   const { data: groups, error: groupError } = await supabase
     .from("Groups")
     .select("*");
@@ -98,12 +89,11 @@ async function fetchFromSupabase(): Promise<{
     .from("Files")
     .select("*");
 
-  if (teacherError || groupError || lessonError || fileError) {
+  if (groupError || lessonError || fileError) {
     throw new Error("Error fetching data from Supabase");
   }
 
   return {
-    teachers: teachers ?? [],
     groups: groups ?? [],
     lessons: lessons ?? [],
     files: files ?? [],
@@ -115,19 +105,10 @@ async function fetchFromSupabase(): Promise<{
  */
 function insertIntoSQLite(
   db: DB,
-  teachers: Teacher[],
   groups: Group[],
   lessons: Lesson[],
   files: FileRow[],
 ) {
-  const insertTeachers = db.transaction((rows: Teacher[]) => {
-    const stmt = db.prepare(
-      "INSERT OR REPLACE INTO teachers (id, name) VALUES (?, ?)",
-    );
-    for (const r of rows) stmt.run(r.id, r.name);
-  });
-  insertTeachers(teachers);
-
   const insertGroups = db.transaction((rows: Group[]) => {
     const stmt = db.prepare(
       "INSERT OR REPLACE INTO groups (id, name, join_code) VALUES (?, ?, ?)",
@@ -235,8 +216,8 @@ export async function GET(): Promise<NextResponse> {
     const db = new Database("rose-academies-uganda.db");
 
     createSchema(db);
-    const { teachers, groups, lessons, files } = await fetchFromSupabase();
-    insertIntoSQLite(db, teachers, groups, lessons, files);
+    const { groups, lessons, files } = await fetchFromSupabase();
+    insertIntoSQLite(db, groups, lessons, files);
     await downloadFiles(db, files);
     db.close();
 

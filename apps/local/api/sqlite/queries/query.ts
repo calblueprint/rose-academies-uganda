@@ -1,15 +1,13 @@
-import { Group, Lesson, LocalFile, Teacher } from "@/types/schema";
+import { Group, Lesson, LocalFile } from "@/types/schema";
 
 /**
  * Fetches the local SQLite database and returns its contents.
  * @returns An object containing the database's contents, with the following properties:
- *   - teachers: An array of Teacher objects.
  *   - groups: An array of Group objects.
  *   - lessons: An array of Lesson objects.
  *   - files: An array of LocalFile objects.
  */
 export async function fetchLocalDatabase(): Promise<{
-  teachers: Teacher[];
   groups: Group[];
   lessons: Lesson[];
   files: LocalFile[];
@@ -21,7 +19,6 @@ export async function fetchLocalDatabase(): Promise<{
     }
     const data = await response.json();
     return {
-      teachers: data.teachers,
       groups: data.groups,
       lessons: data.lessons,
       files: data.files,
@@ -29,7 +26,6 @@ export async function fetchLocalDatabase(): Promise<{
   } catch (error) {
     console.error("Error fetching data from local database:", error);
     return {
-      teachers: [],
       groups: [],
       lessons: [],
       files: [],

@@ -47,14 +47,6 @@ export type Lesson = {
 };
 
 /**
- * A teacher for the Teachers table.
- */
-export type Teacher = {
-  id: number;
-  name: string;
-};
-
-/**
  * A file from Canvas.
  */
 export type CanvasFile = {

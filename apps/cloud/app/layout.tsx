@@ -5,10 +5,12 @@
 
 import "./globals.css";
 import type { ReactNode } from "react";
+import HeaderWrapper from "@/components/HeaderWrapper";
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
+      <HeaderWrapper />
       <body>{children}</body>
     </html>
   );

@@ -10,8 +10,9 @@ import HeaderWrapper from "@/components/HeaderWrapper";
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
-      <HeaderWrapper />
-      <body>{children}</body>
+      <body>
+        <HeaderWrapper />
+        {children}</body>
     </html>
   );
 }

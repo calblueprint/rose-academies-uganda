@@ -2,9 +2,8 @@
 
 import type { ModalVariant } from "@/components/SyncModal/styles";
 import React, { useState } from "react";
-import ActionButton from "@/components/ActionButton";
 import SyncModal from "@/components/SyncModal";
-import COLORS from "@/styles/colors";
+import { ButtonWrapper } from "./style";
 
 export default function SyncButton() {
   const [isSyncing, setIsSyncing] = useState(false);
@@ -43,17 +42,13 @@ export default function SyncButton() {
 
   return (
     <>
-      <ActionButton
+      <ButtonWrapper
         onClick={handleSync}
-        backgroundColor={COLORS.evergreen}
-        textColor={COLORS.white}
-        iconType="refresh"
-        text={isSyncing ? "Syncing..." : "Sync"}
-        isLoading={isSyncing}
         disabled={isSyncing}
         title="Click to sync data from cloud"
-        animationDuration="1s"
-      />
+      >
+        {"Sync Lessons"}
+      </ButtonWrapper>
 
       {modalVariant && (
         <SyncModal

@@ -1,12 +1,20 @@
 "use client";
 
 import SyncButton from "@/components/SyncButton";
+import { Card, Header, Outer, Subtitle, Title } from "./style";
 
 export default function SyncPage() {
   return (
-    <>
-      <span>hiuhihi</span>
-      <SyncButton />
-    </>
+    <Outer>
+      <Card>
+        <Header>
+          <Title>Sync Lessons</Title>
+          <Subtitle>
+            Manage lesson synchronization with the Raspberry Pi
+          </Subtitle>
+        </Header>
+        <SyncButton />
+      </Card>
+    </Outer>
   );
 }

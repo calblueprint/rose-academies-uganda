@@ -9,7 +9,22 @@ export const Outer = styled.main`
   background: ${COLORS.gray10};
 `;
 
-export const Card = styled.section`
+export const Cards = styled.section`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
+
+export const Wrapper = styled.section`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 16px;
+  justify-content: center;
+  gap: 28px;
+`;
+
+export const SyncCard = styled.section`
   display: flex;
   flex-direction: column;
   align-items: center;

@@ -7,6 +7,7 @@ import RoseLogo from "@/assets/images/rose-academies-logo.png";
 import { DataContext } from "@/context/DataContext";
 import { Group } from "@/types/schema";
 import {
+  AdminLink,
   Card,
   CodeInput,
   CodeInputSection,
@@ -74,7 +75,7 @@ export default function JoinPage() {
             <CodeInput
               id="joinCode"
               name="joinCode"
-              placeholder="Enter Code"
+              placeholder="Code"
               onChange={e => setJoinCode(e.target.value)}
               $error={error !== ""}
             />
@@ -82,8 +83,12 @@ export default function JoinPage() {
           </CodeInputSection>
           <JoinButton onClick={e => handleJoin(e)}>Join</JoinButton>
         </CodeSection>
-        <Helper>Need to sync?</Helper>
-        <Helper>Join as administrator</Helper>
+        <Helper>
+          Need to sync?{" "}
+          <AdminLink onClick={() => router.push("/sync")}>
+            Join as administrator
+          </AdminLink>
+        </Helper>
       </Card>
     </Outer>
   );

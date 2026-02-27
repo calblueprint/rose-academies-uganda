@@ -5,6 +5,7 @@ export const PageContainer = styled.div`
   padding-left: 6.875rem;
   padding-right: 6.875rem;
   background-color: #fafafa;
+  min-height: 100dvh;
 `;
 
 export const Title = styled.h2`

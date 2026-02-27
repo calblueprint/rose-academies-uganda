@@ -82,6 +82,8 @@ export default function JoinPage() {
           </CodeInputSection>
           <JoinButton onClick={e => handleJoin(e)}>Join</JoinButton>
         </CodeSection>
+        <Helper>Need to sync?</Helper>
+        <Helper>Join as administrator</Helper>
       </Card>
     </Outer>
   );

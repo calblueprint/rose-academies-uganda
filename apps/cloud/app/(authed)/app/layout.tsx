@@ -6,23 +6,26 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import LogoutButton from "@/components/LogoutButton";
+import { DataContextProvider } from "@/context/DataContext";
 
 export default function AppLayout({ children }: { children: ReactNode }) {
   return (
-    <div>
-      <header>
-        <nav>
-          <Link href="/app/lessons">Lessons</Link>
-          {" | "}
-          <Link href="/app/offline-library">Offline Library</Link>
-          {" | "}
-          <div style={{ display: "flex", justifyContent: "flex-end" }}>
-            <LogoutButton />
-          </div>
-        </nav>
-      </header>
+    <DataContextProvider>
+      <div>
+        <header>
+          <nav>
+            <Link href="/app/lessons">Lessons</Link>
+            {" | "}
+            <Link href="/app/offline-library">Offline Library</Link>
+            {" | "}
+            <div style={{ display: "flex", justifyContent: "flex-end" }}>
+              <LogoutButton />
+            </div>
+          </nav>
+        </header>
 
-      <main>{children}</main>
-    </div>
+        <main>{children}</main>
+      </div>
+    </DataContextProvider>
   );
 }

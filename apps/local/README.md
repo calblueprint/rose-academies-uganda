@@ -18,13 +18,13 @@ We strongly recommend using a Node version manager like [nvm](https://github.com
 After installing Node, you most likely have npm installed as well (check by running `npm -v`). If you have npm installed, simply run `npm install -g pnpm` to install pnpm. If your command line does not recognize npm as a command, refer to [this article](https://www.geeksforgeeks.org/how-to-resolve-npm-command-not-found-error-in-node-js/) to troubleshoot.
 
 Additional resources:
+
 - [Downloading and installing Node.js and npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm)
 - [Installing pnpm without npm](https://pnpm.io/installation)
 
 ### Installation
 
 1. Clone the repo & install dependencies
-
    1. Clone this repo
       - using SSH (recommended)
         ```bash

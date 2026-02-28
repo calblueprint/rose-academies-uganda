@@ -5,6 +5,7 @@
 // - Later: replace with Supabase Auth / your own login form.
 
 import { loginWithEmailPassword } from "@/actions/login";
+import * as S from "./style";
 
 export default function LoginPage() {
   async function loginAction(formData: FormData) {
@@ -15,38 +16,33 @@ export default function LoginPage() {
   }
 
   return (
-    <main style={{ maxWidth: 360, margin: "80px auto", padding: 16 }}>
-      <h1>Login</h1>
+    <S.Main>
+      <S.Card>
+        <S.LogoWrap>
+          <S.Logo src="/logo.png" alt="Logo" />
+        </S.LogoWrap>
+        <S.H1>Login</S.H1>
 
-      <form action={loginAction} style={{ display: "grid", gap: 12 }}>
-        <label>
-          Email
-          <input
-            name="email"
+        <S.Form action={loginAction}>
+          <S.Input
+            placeholder="Email"
             type="email"
             required
             autoComplete="email"
-            style={{ width: "100%", padding: 8 }}
           />
-        </label>
-
-        <label>
-          Password
-          <input
-            name="password"
+          <S.Input
+            placeholder="Password"
             type="password"
             required
             autoComplete="current-password"
-            style={{ width: "100%", padding: 8 }}
           />
-        </label>
+          <S.Button type="submit">Join</S.Button>
+        </S.Form>
 
-        <button type="submit">Log in</button>
-      </form>
-
-      <p style={{ marginTop: 12, fontSize: 14, opacity: 0.75 }}>
-        Invite-only: ask an admin to create your account.
-      </p>
-    </main>
+        <S.Paragraph>
+          Invite-only: ask an admin to create your account.
+        </S.Paragraph>
+      </S.Card>
+    </S.Main>
   );
 }

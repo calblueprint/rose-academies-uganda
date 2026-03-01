@@ -7,7 +7,6 @@ export default function WifiStatus() {
   return (
     <Card>
       <IconWrapper>{IconSvgs.wifi}</IconWrapper>
-
       <Content>
         <Title>Pi WiFi Status</Title>
         <StatusText>Broadcasting</StatusText>

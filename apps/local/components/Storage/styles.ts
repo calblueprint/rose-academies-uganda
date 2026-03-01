@@ -33,6 +33,13 @@ export const Content = styled.div`
   flex-direction: column;
 `;
 
+export const StorageInfo = styled.div`
+  display: flex;
+  width: 520px;
+  justify-content: space-between;
+  align-items: center;
+`;
+
 export const Title = styled.div`
   color: #000;
 
@@ -46,9 +53,11 @@ export const Title = styled.div`
 
 export const StatusText = styled.div`
   color: #000;
+
+  /* Subtitle 2 */
   font-family: var(--font-gilroy);
-  font-size: 20px;
+  font-size: 14px;
   font-style: normal;
   font-weight: 500;
-  line-height: 25px; /* 125% */
+  line-height: normal;
 `;

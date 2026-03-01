@@ -85,7 +85,7 @@ export default function JoinPage() {
         </CodeSection>
         <Helper>
           Need to sync?{" "}
-          <AdminLink onClick={() => router.push("/sync")}>
+          <AdminLink type="button" onClick={() => router.push("/sync")}>
             Join as administrator
           </AdminLink>
         </Helper>

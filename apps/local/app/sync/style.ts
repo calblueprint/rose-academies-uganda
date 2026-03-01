@@ -5,7 +5,7 @@ export const Outer = styled.main`
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
+  min-height: 90vh;
   background: ${COLORS.gray10};
 `;
 
@@ -21,7 +21,7 @@ export const Wrapper = styled.section`
   align-items: center;
   padding: 16px;
   justify-content: center;
-  gap: 28px;
+  gap: 18px;
 `;
 
 export const SyncCard = styled.section`
@@ -30,7 +30,7 @@ export const SyncCard = styled.section`
   align-items: center;
   gap: 2rem;
   width: 100%;
-  max-width: 700px;
+  max-width: 676px;
   padding: 3rem 2rem;
   border-radius: 1rem;
   background: ${COLORS.white};

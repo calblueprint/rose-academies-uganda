@@ -3,7 +3,8 @@
 import type { ModalVariant } from "@/components/SyncModal/styles";
 import React, { useState } from "react";
 import SyncModal from "@/components/SyncModal";
-import { ButtonWrapper } from "./style";
+import { IconSvgs } from "@/lib/icons";
+import { ButtonWrapper, IconWrapper } from "./style";
 
 export default function SyncButton() {
   const [isSyncing, setIsSyncing] = useState(false);
@@ -47,9 +48,9 @@ export default function SyncButton() {
         disabled={isSyncing}
         title="Click to sync data from cloud"
       >
+        <IconWrapper>{IconSvgs.refresh}</IconWrapper>
         {"Sync Lessons"}
       </ButtonWrapper>
-
       {modalVariant && (
         <SyncModal
           variant={modalVariant}

@@ -7,7 +7,6 @@ export default function Storage() {
   return (
     <Card>
       <IconWrapper>{IconSvgs.storage}</IconWrapper>
-
       <Content>
         <Title>Pi Storage</Title>
         <StatusText>Feb 1, 12:00 pm.</StatusText>

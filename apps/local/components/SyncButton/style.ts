@@ -11,7 +11,7 @@ export const ButtonWrapper = styled.button`
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  gap: 22.474px;
+  gap: 8px;
 
   border-radius: 20px;
   background: ${COLORS.evergreen};
@@ -19,7 +19,7 @@ export const ButtonWrapper = styled.button`
   cursor: pointer;
   color: ${COLORS.white};
   font-size: 16px;
-  font-weight: 500;
+  font-weight: 400;
 
   transition: opacity 0.2s ease;
 
@@ -27,4 +27,10 @@ export const ButtonWrapper = styled.button`
     opacity: 0.6;
     cursor: not-allowed;
   }
+`;
+
+export const IconWrapper = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
 `;

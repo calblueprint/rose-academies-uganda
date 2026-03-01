@@ -1,46 +1,80 @@
-// Offline Library page.
-// Purpose:
-// - Shows the set of lesson files marked to be available offline.
-// - Sync execution happens from the local (Pi) app, not here.
-// - For MVP: list + remove action placeholder.
+// app/(authed)/app/offline-library/page.tsx
+import { getSupabaseServerClient } from "@/api/supabase/server";
+import InfoBoxes from "@/components/InfoBoxes";
+import LessonItem from "@/components/LessonItem";
+import {
+  Content,
+  LessonsStack,
+  PageSubtitle,
+  PageTitle,
+  PageWrapper,
+  SectionTitle,
+} from "./styles";
 
-"use client";
+type OfflineLibraryLessonRow = {
+  id: number;
+  name: string;
+  image_path: string | null;
+  group_id: number | null;
+};
 
-import Link from "next/link";
+export default async function OfflineLibraryPage() {
+  const supabase = await getSupabaseServerClient();
 
-const MOCK_OFFLINE_ITEMS = [
-  { lessonId: "lesson-001", fileName: "Fractions Worksheet.pdf" },
-  { lessonId: "lesson-002", fileName: "Plant Diagram.png" },
-];
+  const { data, error } = await supabase
+    .from("OfflineLibraryNathanH") // Temp database till we figure out how exactly we want to structure OfflineLibrary
+    .select("id,name,image_path,group_id")
+    .order("id", { ascending: true });
 
-export default function OfflineLibraryPage() {
+  if (error) {
+    return (
+      <PageWrapper>
+        <PageTitle>Offline Library</PageTitle>
+        <PageSubtitle>Could not load offline library.</PageSubtitle>
+        <pre
+          style={{ marginTop: 12, whiteSpace: "pre-wrap", color: "crimson" }}
+        >
+          {error.message}
+        </pre>
+      </PageWrapper>
+    );
+  }
+
+  const lessons: OfflineLibraryLessonRow[] = data ?? [];
+
+  // Placeholder stats for now (per sprint requirement)
+  // Later: compute from DataContext or from a real "sync status" source.
+  const availableOfflineCount = 5;
+  const pendingDownloadCount = 8;
+  const lastSyncedLabel = "Feb 1, 12:00 pm";
+
   return (
-    <main>
-      <h1>Offline Library</h1>
+    <PageWrapper>
+      <Content>
+        <PageTitle>Offline Library</PageTitle>
+        <PageSubtitle>
+          Lessons in this library will be available offline after you open the
+          local app and run sync
+        </PageSubtitle>
 
-      <p>Items marked for offline (mock data).</p>
+        <InfoBoxes
+          availableOfflineCount={availableOfflineCount}
+          pendingDownloadCount={pendingDownloadCount}
+          lastSyncedLabel={lastSyncedLabel}
+        />
 
-      <ul>
-        {MOCK_OFFLINE_ITEMS.map((item, idx) => (
-          <li key={idx}>
-            {item.fileName} (from{" "}
-            <Link href={`/app/lessons/${item.lessonId}`}>{item.lessonId}</Link>){" "}
-            <button
-              type="button"
-              onClick={() => {
-                // Placeholder for later "remove from offline set"
-                alert("Remove from Offline (placeholder)");
-              }}
-            >
-              Remove (placeholder)
-            </button>
-          </li>
-        ))}
-      </ul>
+        <SectionTitle>Synced Lessons</SectionTitle>
 
-      <p>
-        <Link href="/app/lessons">Back to Lessons</Link>
-      </p>
-    </main>
+        <LessonsStack>
+          {lessons.map(lesson => (
+            <LessonItem
+              key={lesson.id}
+              lessonId={lesson.id}
+              lessonName={lesson.name}
+            />
+          ))}
+        </LessonsStack>
+      </Content>
+    </PageWrapper>
   );
 }

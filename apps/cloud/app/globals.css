@@ -40,3 +40,7 @@ a {
     color-scheme: dark;
   }
 }
+
+html {
+  overflow-y: scroll;
+}

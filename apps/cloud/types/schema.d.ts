@@ -42,6 +42,7 @@ export type CanvasModuleItem = {
 export type Lesson = {
   id: number;
   name: string;
+  description: string | null;
   image_path: string | null;
   group_id: number;
 };

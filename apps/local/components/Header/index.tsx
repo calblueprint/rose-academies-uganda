@@ -5,7 +5,6 @@ import Image from "next/image";
 import RoseLogo from "@/assets/images/rose-academies-logo.png";
 import ExitClassButton from "@/components/ExitClassButton";
 import OperationalButton from "@/components/OperationalButton";
-import SyncButton from "@/components/SyncButton";
 import {
   Header as HeaderBar,
   HeaderRight,
@@ -27,7 +26,6 @@ export default function Header() {
       </LogoAndTitle>
       <HeaderRight>
         <OperationalButton />
-        <SyncButton />
         <ExitClassButton />
       </HeaderRight>
     </HeaderBar>

@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import COLORS from "@/styles/colors";
 
 export const SearchBarContainer = styled.div`
   display: flex;
@@ -9,30 +10,31 @@ export const SearchBarContainer = styled.div`
 
 export const SearchBarField = styled.div`
   display: flex;
-  gap: 1rem;
-  width: 100%;
-  height: 2.71556rem;
-  padding: 0.27156rem 1.3035rem;
+  width: 876px;
+  height: 44px;
+  padding: 4.367px 20.96px;
+  flex-direction: column;
   justify-content: space-between;
   align-items: center;
-  border-radius: 1.08625rem;
-  border-top: 0.434px solid var(--gray, #d9d9d9);
-  border-right: 0.869px solid var(--gray, #d9d9d9);
-  border-bottom: 1.303px solid var(--gray, #d9d9d9);
-  border-left: 0.869px solid var(--gray, #d9d9d9);
+  flex-shrink: 0;
+  border-radius: 16px;
+  border-top: 0.437px solid var(--gray, #d9d9d9);
+  border-right: 0.873px solid var(--gray, #d9d9d9);
+  border-bottom: 1.31px solid var(--gray, #d9d9d9);
+  border-left: 0.873px solid var(--gray, #d9d9d9);
   background: var(--white, #fff);
 `;
 
 export const SearchInput = styled.input`
   width: 100%;
   overflow: hidden;
-  color: #808582;
+  color: ${COLORS.gray60};
   text-overflow: ellipsis;
-  font-family: var(--font-gilroy);
-  font-size: 1.125rem;
+  // font-family: var(--font-gilroy);
+  font-size: 0.875rem;
   font-style: normal;
-  font-weight: 300;
-  line-height: 1.125rem;
+  font-weight: 500;
+  line-height: 2rem;
   border: none;
   outline: none;
 `;

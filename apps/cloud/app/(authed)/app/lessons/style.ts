@@ -38,15 +38,15 @@ export const SearchBarRow = styled.div`
 
 export const ViewToggleButton = styled.div`
   display: flex;
-  height: 2.71556rem;
-  padding: 0.6rem 1rem;
-  align-items: center;
-  gap: 0.44rem;
-  border-radius: 1.08625rem;
-  border-top: 0.434px solid var(--gray, #d9d9d9);
-  border-right: 0.869px solid var(--gray, #d9d9d9);
-  border-bottom: 1.303px solid var(--gray, #d9d9d9);
-  border-left: 0.869px solid var(--gray, #d9d9d9);
+  height: 44px;
+  padding: 10px 14px;
+  align-items: flex-start;
+  gap: 10px;
+  border-radius: 16px;
+  border-top: 0.437px solid var(--gray, #d9d9d9);
+  border-right: 0.873px solid var(--gray, #d9d9d9);
+  border-bottom: 1.31px solid var(--gray, #d9d9d9);
+  border-left: 0.873px solid var(--gray, #d9d9d9);
   background: var(--white, #fff);
 `;
 
@@ -57,12 +57,30 @@ export const ToggleDivider = styled.div`
   border-radius: 0.08rem;
 `;
 
-export const GridToggle = styled.div`
-  height: 28px;
-  cursor: pointer;
+export const ToggleText = styled.div`
+  font-family: var(--font-gilroy);
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 500;
 `;
 
-export const ListToggle = styled.div`
-  height: 28px;
+interface ToggleProps {
+  $active?: boolean;
+}
+
+export const GridToggle = styled.div<ToggleProps>`
+  display: flex;
+  height: 22px;
   cursor: pointer;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  line-height: normal;
+
+  ${ToggleText} {
+    color: ${({ $active }) =>
+      $active
+        ? "var(--evergreen-100, #1E4240)"
+        : "var(--gray-40, var(--gray, #D9D9D9))"};
+  }
 `;

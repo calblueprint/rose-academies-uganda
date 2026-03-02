@@ -10,11 +10,11 @@ import {
   GridToggle,
   LessonsGrid,
   LessonsList,
-  ListToggle,
   PageContainer,
   SearchBarRow,
   Title,
   ToggleDivider,
+  ToggleText,
   ViewToggleButton,
 } from "./style";
 
@@ -55,21 +55,23 @@ export default function LessonsPage() {
 
   return (
     <PageContainer>
-      <Title>My Lessons</Title>
+      <Title>Lessons Dashboard</Title>
 
       <SearchBarRow>
         <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
 
         <ViewToggleButton>
-          <GridToggle onClick={() => setView("grid")}>
+          <GridToggle $active={view === "grid"} onClick={() => setView("grid")}>
             {view === "grid" ? IconSvgs.gridActive : IconSvgs.gridInactive}
+            <ToggleText>Card</ToggleText>
           </GridToggle>
 
           <ToggleDivider />
 
-          <ListToggle onClick={() => setView("list")}>
+          <GridToggle $active={view === "list"} onClick={() => setView("list")}>
             {view === "list" ? IconSvgs.listActive : IconSvgs.listInactive}
-          </ListToggle>
+            <ToggleText>List</ToggleText>
+          </GridToggle>
         </ViewToggleButton>
       </SearchBarRow>
 

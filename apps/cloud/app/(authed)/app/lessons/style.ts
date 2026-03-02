@@ -19,6 +19,12 @@ export const Title = styled.h1`
   line-height: normal;
 `;
 
+export const Header = styled.div`
+  display: flex;
+  flex-direction: row;
+  gap: 38.75rem;
+`;
+
 export const LessonsGrid = styled.div`
   display: flex;
   gap: 2.5rem 2.1725rem;

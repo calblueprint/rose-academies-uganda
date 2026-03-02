@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import CreateButton from "@/components/CreateLessonButton";
 import LessonCard from "@/components/LessonCard";
 import LessonItem from "@/components/LessonItem";
 import SearchBar from "@/components/SearchBar";
@@ -8,6 +9,7 @@ import { IconSvgs } from "@/lib/icons";
 import { Lesson } from "@/types/schema";
 import {
   GridToggle,
+  Header,
   LessonsGrid,
   LessonsList,
   PageContainer,
@@ -41,6 +43,27 @@ const DUMMY_LESSONS: Lesson[] = [
       "https://tyckvrwfblheqxuliscl.supabase.co/storage/v1/object/public/lesson-images/default-figma.png",
     group_id: 2,
   },
+  {
+    id: 4,
+    name: "Safety & Sanitation",
+    image_path:
+      "https://tyckvrwfblheqxuliscl.supabase.co/storage/v1/object/public/lesson-images/default-figma.png",
+    group_id: 2,
+  },
+  {
+    id: 5,
+    name: "Sustainable Living",
+    image_path:
+      "https://tyckvrwfblheqxuliscl.supabase.co/storage/v1/object/public/lesson-images/default-figma.png",
+    group_id: 2,
+  },
+  {
+    id: 6,
+    name: "Nutrition 101",
+    image_path:
+      "https://tyckvrwfblheqxuliscl.supabase.co/storage/v1/object/public/lesson-images/default-figma.png",
+    group_id: 2,
+  },
 ];
 
 export default function LessonsPage() {
@@ -55,8 +78,10 @@ export default function LessonsPage() {
 
   return (
     <PageContainer>
-      <Title>Lessons Dashboard</Title>
-
+      <Header>
+        <Title>Lessons Dashboard</Title>
+        <CreateButton />
+      </Header>
       <SearchBarRow>
         <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
 

@@ -13,7 +13,6 @@ export const SearchBarField = styled.div`
   width: 876px;
   height: 44px;
   padding: 4.367px 20.96px;
-  flex-direction: column;
   justify-content: space-between;
   align-items: center;
   flex-shrink: 0;
@@ -30,7 +29,7 @@ export const SearchInput = styled.input`
   overflow: hidden;
   color: ${COLORS.gray60};
   text-overflow: ellipsis;
-  // font-family: var(--font-gilroy);
+  font-family: var(--font-gilroy);
   font-size: 0.875rem;
   font-style: normal;
   font-weight: 500;
@@ -45,8 +44,7 @@ export const ClearButton = styled.button`
   align-items: center;
   justify-content: center;
   line-height: 0;
-  width: 0.75rem;
-  height: 0.75rem;
   aspect-ratio: 1 / 1;
   fill: var(--Gray, #808582);
+  cursor: pointer;
 `;

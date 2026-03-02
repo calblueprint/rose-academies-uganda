@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import { usePathname, useRouter } from "next/navigation";
 import RoseLogo from "@/assets/images/rose-academies-logo.png";
 import {
   DropdownDivider,
@@ -24,10 +25,12 @@ import {
 } from "./styles";
 
 export default function Header() {
-  const [activeTab, setActiveTab] = useState("Lessons");
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -56,13 +59,18 @@ export default function Header() {
       </LogoAndTitle>
 
       <Nav>
-        {["Lessons", "Offline Library"].map(tab => (
+        {[
+          { label: "Lessons", href: "/app/lessons" },
+          { label: "Offline Library", href: "/app/offline-library" },
+        ].map(tab => (
           <NavTab
-            key={tab}
-            $active={activeTab === tab}
-            onClick={() => setActiveTab(tab)}
+            key={tab.label}
+            $active={pathname === tab.href}
+            onClick={() => {
+              router.push(tab.href);
+            }}
           >
-            {tab}
+            {tab.label}
           </NavTab>
         ))}
       </Nav>

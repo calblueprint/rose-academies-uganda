@@ -2,11 +2,12 @@
 // Purpose:
 // - Shows teacher's lessons.
 // - Clicking a lesson goes to /app/lessons/[lessonId].
-// - "New Lesson" will eventually open a modal (ignored for now).
+// - "New Lesson" opens the create lesson modal (via test page for now).
 
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 const MOCK_LESSONS = [
   { id: "lesson-001", title: "healthcare" },
@@ -15,6 +16,8 @@ const MOCK_LESSONS = [
 ];
 
 export default function LessonsListPage() {
+  const router = useRouter();
+
   return (
     <main>
       <h1>Lessons</h1>
@@ -22,12 +25,9 @@ export default function LessonsListPage() {
       <p>
         <button
           type="button"
-          onClick={() => {
-            // Placeholder for future modal open
-            alert("New Lesson (modal later)");
-          }}
+          onClick={() => router.push("/app/test-create-lesson")}
         >
-          New Lesson (placeholder)
+          New Lesson
         </button>
       </p>
 

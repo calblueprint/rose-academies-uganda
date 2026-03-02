@@ -1,9 +1,13 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import RoseLogo from "../../../local/assets/images/rose-academies-logo.png";
 import {
+  DropdownDivider,
+  DropdownItem,
+  DropdownMenu,
+  DropdownWrapper,
   Header as HeaderBar,
   HeaderRight,
   LogoAndTitle,
@@ -11,6 +15,7 @@ import {
   Nav,
   NavTab,
   PageShell,
+  ProfileButton,
   Subtitle,
   Title,
   TitleWrapper,
@@ -20,6 +25,22 @@ import {
 
 export default function Header() {
   const [activeTab, setActiveTab] = useState("Lessons");
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(e.target as Node)
+      ) {
+        setDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   return (
     <HeaderBar>
@@ -47,8 +68,27 @@ export default function Header() {
       </Nav>
 
       <HeaderRight>
-        <UserImg>SJ</UserImg>
-        <UserName>Sylvia Johnson</UserName>
+        <DropdownWrapper ref={dropdownRef}>
+          <ProfileButton onClick={() => setDropdownOpen(prev => !prev)}>
+            <UserImg>SJ</UserImg>
+            <UserName>Sylvia Johnson</UserName>
+          </ProfileButton>
+
+          {dropdownOpen && (
+            <DropdownMenu>
+              <DropdownItem onClick={() => console.log("Clicked Settings")}>
+                Settings
+              </DropdownItem>
+              <DropdownItem onClick={() => console.log("Clicked Information")}>
+                Information
+              </DropdownItem>
+              <DropdownDivider />
+              <DropdownItem onClick={() => console.log("Clicked Sign Out")}>
+                Sign Out
+              </DropdownItem>
+            </DropdownMenu>
+          )}
+        </DropdownWrapper>
       </HeaderRight>
     </HeaderBar>
   );

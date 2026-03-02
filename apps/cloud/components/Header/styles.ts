@@ -111,11 +111,69 @@ export const UserImg = styled.div`
   font-size: 0.8rem;
   font-weight: 600;
   color: ${COLORS.gray60};
-  overflow: hidden; /* so an <img> inside gets clipped to the circle */
+  overflow: hidden;
 `;
 
 export const UserName = styled.span`
   font-size: 0.875rem;
   font-weight: 500;
   color: ${COLORS.black};
+`;
+
+export const DropdownWrapper = styled.div`
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+`;
+
+export const ProfileButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+`;
+
+export const DropdownMenu = styled.div`
+  position: absolute;
+  top: calc(100% + 0.75rem);
+  right: 0;
+  min-width: 11rem;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  padding: 0.5rem 0;
+  z-index: 100;
+`;
+
+export const DropdownItem = styled.button`
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.65rem 1.25rem;
+  background: none;
+  border: none;
+  font-family: var(--font-gilroy);
+  font-size: 0.9375rem;
+  color: ${COLORS.black};
+  cursor: pointer;
+  text-align: left;
+
+  &:hover {
+    background: ${COLORS.gray10};
+  }
+
+  svg {
+    color: ${COLORS.gray60};
+    flex-shrink: 0;
+  }
+`;
+
+export const DropdownDivider = styled.hr`
+  margin: 0.35rem 0;
+  border: none;
+  border-top: 1px solid ${COLORS.gray40};
 `;

@@ -1,42 +1,42 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useRef, useState } from "react";
 import { getSupabaseBrowserClient } from "@/api/supabase/browser";
 import { uploadFile } from "@/api/supabase/files";
 import {
-  Overlay,
-  ModalCard,
-  ModalHeader,
-  ModalTitle,
-  CloseButton,
-  FieldSection,
-  FieldLabel,
-  TextInput,
-  TextArea,
-  DropZone,
-  DropZoneText,
-  DropZoneSubtext,
+  ActionRow,
   BrowseButton,
-  FileQueueList,
-  FileQueueItemWrapper,
-  FileQueueItemRow,
+  CancelButton,
+  CloseButton,
+  CreateButton,
+  DropZone,
+  DropZoneSubtext,
+  DropZoneText,
+  ErrorText,
+  FieldLabel,
+  FieldSection,
   FileBadge,
   FileBadgeText,
   FileInfo,
   FileNameText,
+  FileQueueItemRow,
+  FileQueueItemWrapper,
+  FileQueueList,
   FileSubtext,
-  ProgressTrack,
-  ProgressFill,
-  OfflineRow,
-  OfflineLabel,
-  ToggleWrapper,
   HiddenCheckbox,
-  ToggleTrack,
+  ModalCard,
+  ModalHeader,
+  ModalTitle,
+  OfflineLabel,
+  OfflineRow,
+  Overlay,
+  ProgressFill,
+  ProgressTrack,
+  TextArea,
+  TextInput,
   ToggleThumb,
-  ErrorText,
-  ActionRow,
-  CancelButton,
-  CreateButton,
+  ToggleTrack,
+  ToggleWrapper,
 } from "./styles";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -171,7 +171,11 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
               idx === i ? { ...entry, status: "done" } : entry,
             ),
           );
-        } catch {
+        } catch (uploadErr) {
+          console.error(
+            `Failed to upload file "${snapshot[i].file.name}":`,
+            uploadErr,
+          );
           setFiles(prev =>
             prev.map((entry, idx) =>
               idx === i ? { ...entry, status: "error" } : entry,
@@ -292,7 +296,9 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
               />
             </svg>
 
-            <DropZoneText>Choose a file or drag &amp; drop it here</DropZoneText>
+            <DropZoneText>
+              Choose a file or drag &amp; drop it here
+            </DropZoneText>
             <DropZoneSubtext>
               JPEG, PNG, PDF, and MP4 formats accepted
             </DropZoneSubtext>

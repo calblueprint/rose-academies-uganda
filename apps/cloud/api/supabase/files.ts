@@ -1,5 +1,5 @@
-import { getSupabaseBrowserClient } from "./browser";
 import type { LocalFile } from "@/types/schema";
+import { getSupabaseBrowserClient } from "./browser";
 
 /**
  * Uploads a file to Supabase Storage and inserts a corresponding row in the Files table.
@@ -13,7 +13,7 @@ export async function uploadFile(
 ): Promise<LocalFile> {
   const supabase = getSupabaseBrowserClient();
 
-  const storagePath = `lessons/${lessonId}/${Date.now()}-${file.name}`;
+  const storagePath = `village_1/${file.name}`;
 
   const { error: storageError } = await supabase.storage
     .from("lesson-files")

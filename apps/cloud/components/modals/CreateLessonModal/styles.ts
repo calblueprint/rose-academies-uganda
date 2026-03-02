@@ -208,6 +208,25 @@ export const FileQueueItemRow = styled.div`
   gap: 0.75rem;
 `;
 
+export const DeleteFileButton = styled.button`
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: ${COLORS.lightGrey};
+  border-radius: 4px;
+  flex-shrink: 0;
+  margin-left: auto;
+  transition: color 0.15s;
+
+  &:hover {
+    color: ${COLORS.red};
+  }
+`;
+
 export const FileBadge = styled.div<{ $color: string }>`
   width: 42px;
   height: 42px;
@@ -246,7 +265,10 @@ export const FileNameText = styled.p`
   text-overflow: ellipsis;
 `;
 
-export const FileSubtext = styled.p`
+export const FileSubtext = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
   font-family: var(--font-gilroy);
   font-size: 0.75rem;
   color: ${COLORS.lightGrey};
@@ -261,20 +283,12 @@ export const ProgressTrack = styled.div`
   overflow: hidden;
 `;
 
-export const ProgressFill = styled.div<{
-  $status: "uploading" | "done" | "error";
-}>`
+export const ProgressFill = styled.div`
   height: 100%;
   border-radius: 2px;
-  background: ${({ $status }) =>
-    $status === "error" ? COLORS.red : COLORS.activeGreen};
-  width: ${({ $status }) =>
-    $status === "done" || $status === "error" ? "100%" : "85%"};
-  transition: ${({ $status }) => {
-    if ($status === "uploading") return "width 2.5s ease-in-out";
-    if ($status === "done" || $status === "error") return "width 0.3s ease";
-    return "none";
-  }};
+  background: ${COLORS.activeGreen};
+  width: 85%;
+  transition: width 2.5s ease-in-out;
 `;
 
 export const OfflineRow = styled.div`

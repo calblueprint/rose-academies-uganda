@@ -9,6 +9,7 @@ import {
   CancelButton,
   CloseButton,
   CreateButton,
+  DeleteFileButton,
   DropZone,
   DropZoneSubtext,
   DropZoneText,
@@ -90,6 +91,10 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
   if (!isOpen) return null;
 
   // ─── File queue ─────────────────────────────────────────────────────────
+
+  function removeFile(id: string) {
+    setFiles(prev => prev.filter(entry => entry.id !== id));
+  }
 
   function addFiles(fileList: FileList | null) {
     if (!fileList) return;
@@ -184,7 +189,10 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
         }
       }
 
-      // 3. Reset and hand back to parent (parent calls router.refresh())
+      // 3. Brief pause so the user sees final upload statuses before closing
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // 4. Reset and hand back to parent (parent calls router.refresh())
       setTitle("");
       setDescription("");
       setFiles([]);
@@ -364,17 +372,86 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
                     <FileInfo>
                       <FileNameText>{entry.file.name}</FileNameText>
                       <FileSubtext>
-                        {formatBytes(entry.file.size)}
-                        {entry.status === "uploading" && " • Uploading..."}
-                        {entry.status === "done" && " • Uploaded"}
-                        {entry.status === "error" && " • Failed"}
+                        <span>{formatBytes(entry.file.size)}</span>
+                        {entry.status === "uploading" && (
+                          <span>&nbsp;• Uploading...</span>
+                        )}
+                        {entry.status === "done" && (
+                          <>
+                            <span>&nbsp;•</span>
+                            {/* Green filled checkmark */}
+                            <svg
+                              width="12"
+                              height="12"
+                              viewBox="0 0 12 12"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <circle cx="6" cy="6" r="6" fill="#1F5A2A" />
+                              <path
+                                d="M3.5 6L5.2 7.7L8.5 4.5"
+                                stroke="white"
+                                strokeWidth="1.2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                            </svg>
+                            <span>Completed</span>
+                          </>
+                        )}
+                        {entry.status === "error" && (
+                          <>
+                            <span>&nbsp;•</span>
+                            {/* Red filled X */}
+                            <svg
+                              width="12"
+                              height="12"
+                              viewBox="0 0 12 12"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <circle cx="6" cy="6" r="6" fill="#AF2028" />
+                              <path
+                                d="M4 4L8 8M8 4L4 8"
+                                stroke="white"
+                                strokeWidth="1.2"
+                                strokeLinecap="round"
+                              />
+                            </svg>
+                            <span>Failed</span>
+                          </>
+                        )}
                       </FileSubtext>
                     </FileInfo>
+
+                    {entry.status !== "uploading" && (
+                      <DeleteFileButton
+                        type="button"
+                        onClick={() => removeFile(entry.id)}
+                        aria-label={`Remove ${entry.file.name}`}
+                      >
+                        <svg
+                          width="14"
+                          height="16"
+                          viewBox="0 0 14 16"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M1 4H13M5 4V2.5C5 2.22386 5.22386 2 5.5 2H8.5C8.77614 2 9 2.22386 9 2.5V4M5.5 7V12.5M8.5 7V12.5M2.5 4L3 13.5C3 13.7761 3.22386 14 3.5 14H10.5C10.7761 14 11 13.7761 11 13.5L11.5 4"
+                            stroke="currentColor"
+                            strokeWidth="1.25"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      </DeleteFileButton>
+                    )}
                   </FileQueueItemRow>
 
-                  {entry.status !== "queued" && (
+                  {entry.status === "uploading" && (
                     <ProgressTrack>
-                      <ProgressFill $status={entry.status} />
+                      <ProgressFill />
                     </ProgressTrack>
                   )}
                 </FileQueueItemWrapper>

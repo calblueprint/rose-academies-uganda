@@ -68,6 +68,4 @@ export type LocalFile = {
   size_bytes: number;
   storage_path: string;
   lesson_id: number | null;
-  mime_type?: string | null; // indicates file format (pdf, jpg, etc.)
-  local_path?: string | null;
 };

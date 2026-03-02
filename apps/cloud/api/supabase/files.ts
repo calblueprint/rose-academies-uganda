@@ -28,7 +28,6 @@ export async function uploadFile(
       size_bytes: file.size,
       storage_path: storagePath,
       lesson_id: lessonId,
-      mime_type: file.type || null,
     })
     .select()
     .single();

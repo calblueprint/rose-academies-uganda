@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import RoseLogo from "../../../local/assets/images/rose-academies-logo.png";
+import RoseLogo from "@/assets/images/rose-academies-logo.png";
 import {
   DropdownDivider,
   DropdownItem,

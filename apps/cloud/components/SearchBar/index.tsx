@@ -20,7 +20,7 @@ type Props = {
 export default function SearchBar({
   searchTerm,
   setSearchTerm,
-  placeholder = "Search for lesson",
+  placeholder = "Search for lesson or file",
 }: Props) {
   return (
     <SearchBarField>

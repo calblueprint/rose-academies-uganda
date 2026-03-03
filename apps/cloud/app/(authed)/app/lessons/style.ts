@@ -27,7 +27,7 @@ export const Header = styled.div`
 
 export const LessonsGrid = styled.div`
   display: flex;
-  gap: 2.5rem 2.1725rem;
+  gap: 2.5rem 1.8125rem;
   flex-wrap: wrap;
 `;
 

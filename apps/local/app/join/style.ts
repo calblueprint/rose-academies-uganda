@@ -59,7 +59,18 @@ export const Helper = styled.p`
   font-style: normal;
   font-weight: 400;
   line-height: normal;
-  width: 19.9375rem;
+  width: 20.5rem;
+`;
+
+export const AdminLink = styled.button`
+  color: ${COLORS.evergreen};
+  text-decoration: underline;
+  cursor: pointer;
+  font-family: var(--font-gilroy);
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  font-weight: 400;
 `;
 
 export const CodeSection = styled.div`
@@ -115,7 +126,7 @@ export const JoinButton = styled.button`
   color: ${COLORS.white};
   text-align: center;
   font-family: var(--font-gilroy);
-  font-size: 1.5rem;
+  font-size: 1.125rem;
   font-style: normal;
   font-weight: 400;
   line-height: normal;

@@ -25,6 +25,7 @@ const DUMMY_LESSONS: Lesson[] = [
   {
     id: 1,
     name: "Healthcare Basics",
+    description: "placeholder description",
     image_path:
       "https://tyckvrwfblheqxuliscl.supabase.co/storage/v1/object/public/lesson-images/health-figma.png",
     group_id: 1,
@@ -32,6 +33,7 @@ const DUMMY_LESSONS: Lesson[] = [
   {
     id: 2,
     name: "Postnatal Care",
+    description: "placeholder description",
     image_path:
       "https://tyckvrwfblheqxuliscl.supabase.co/storage/v1/object/public/lesson-images/default2-figma.png",
     group_id: 1,
@@ -39,6 +41,7 @@ const DUMMY_LESSONS: Lesson[] = [
   {
     id: 3,
     name: "Vocational Training",
+    description: "placeholder description",
     image_path:
       "https://tyckvrwfblheqxuliscl.supabase.co/storage/v1/object/public/lesson-images/default-figma.png",
     group_id: 2,
@@ -46,6 +49,7 @@ const DUMMY_LESSONS: Lesson[] = [
   {
     id: 4,
     name: "Safety & Sanitation",
+    description: "placeholder description",
     image_path:
       "https://tyckvrwfblheqxuliscl.supabase.co/storage/v1/object/public/lesson-images/default-figma.png",
     group_id: 2,
@@ -53,6 +57,7 @@ const DUMMY_LESSONS: Lesson[] = [
   {
     id: 5,
     name: "Sustainable Living",
+    description: "placeholder description",
     image_path:
       "https://tyckvrwfblheqxuliscl.supabase.co/storage/v1/object/public/lesson-images/default-figma.png",
     group_id: 2,
@@ -60,6 +65,7 @@ const DUMMY_LESSONS: Lesson[] = [
   {
     id: 6,
     name: "Nutrition 101",
+    description: "placeholder description",
     image_path:
       "https://tyckvrwfblheqxuliscl.supabase.co/storage/v1/object/public/lesson-images/default-figma.png",
     group_id: 2,
@@ -82,6 +88,7 @@ export default function LessonsPage() {
         <Title>Lessons Dashboard</Title>
         <CreateButton />
       </Header>
+
       <SearchBarRow>
         <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
 

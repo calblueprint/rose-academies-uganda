@@ -1,7 +1,7 @@
 import styled from "styled-components";
 
 export const PageWrapper = styled.main`
-  padding: 2rem 2.25rem;
+  padding: 1.44rem 7.25rem;
   background: var(--gray-10, #fafafa);
   min-height: 100dvh;
 `;
@@ -38,8 +38,8 @@ export const PageSubtitle = styled.p`
   font-style: normal;
   font-weight: 400;
   line-height: 25px; /* 125% */
-  padding-top: 0.75rem;
-  padding-bottom: 0.75rem;
+  padding-top: 1rem;
+  padding-bottom: 1.5rem;
 `;
 
 export const SectionTitle = styled.h2`
@@ -48,6 +48,7 @@ export const SectionTitle = styled.h2`
   font-size: 20px;
   font-style: normal;
   font-weight: 400;
+  padding: 1.25rem 0rem 0.5rem 0rem;
 `;
 
 export const LessonsStack = styled.div`

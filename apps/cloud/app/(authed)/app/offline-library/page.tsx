@@ -1,5 +1,5 @@
 // app/(authed)/app/offline-library/page.tsx
-import { getSupabaseServerClient } from "@/api/supabase/server";
+import { getSupabaseServerClientReadOnly } from "@/api/supabase/server-readonly";
 import InfoBoxes from "@/components/InfoBoxes";
 import LessonItem from "@/components/LessonItem";
 import {
@@ -19,7 +19,7 @@ type OfflineLibraryLessonRow = {
 };
 
 export default async function OfflineLibraryPage() {
-  const supabase = await getSupabaseServerClient();
+  const supabase = await getSupabaseServerClientReadOnly();
 
   const { data, error } = await supabase
     .from("OfflineLibraryNathanH") // Temp database till we figure out how exactly we want to structure OfflineLibrary

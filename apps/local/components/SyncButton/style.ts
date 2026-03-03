@@ -1,5 +1,14 @@
-import styled from "styled-components";
+import styled, { css, keyframes } from "styled-components";
 import COLORS from "@/styles/colors";
+
+const spin = keyframes`
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+`;
 
 export const ButtonWrapper = styled.button`
   display: flex;
@@ -29,8 +38,14 @@ export const ButtonWrapper = styled.button`
   }
 `;
 
-export const IconWrapper = styled.div`
+export const IconWrapper = styled.div<{ $isSpinning?: boolean }>`
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
+
+  ${({ $isSpinning }) =>
+    $isSpinning &&
+    css`
+      animation: ${spin} 0.8s linear infinite;
+    `}
 `;

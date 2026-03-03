@@ -45,7 +45,7 @@ const SyncModal: React.FC<SyncModalProps> = ({
 
         <Body>
           {isSuccess
-            ? "Possibly adding explanation successful sync lorem ipsum"
+            ? "All changes have been successfully synced."
             : "Explanation for syncing was not successful because lorem ipsum"}
         </Body>
 

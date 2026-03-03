@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
+import { signOut } from "@/actions/logout";
 import RoseLogo from "@/assets/images/rose-academies-logo.png";
 import {
   DropdownDivider,
@@ -91,9 +92,10 @@ export default function Header() {
                 Information
               </DropdownItem>
               <DropdownDivider />
-              <DropdownItem onClick={() => console.log("Clicked Sign Out")}>
-                Sign Out
-              </DropdownItem>
+
+              <form action={signOut}>
+                <DropdownItem type="submit">Sign Out</DropdownItem>
+              </form>
             </DropdownMenu>
           )}
         </DropdownWrapper>

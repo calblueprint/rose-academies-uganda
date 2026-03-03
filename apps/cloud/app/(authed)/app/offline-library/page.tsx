@@ -24,7 +24,7 @@ export default async function OfflineLibraryPage() {
   const { data, error } = await supabase
     .from("OfflineLibraryNathanH") // Temp database till we figure out how exactly we want to structure OfflineLibrary
     .select("id,name,image_path,group_id")
-    .order("id", { ascending: true });
+    .order("id", { ascending: false });
 
   if (error) {
     return (

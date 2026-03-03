@@ -1,8 +1,8 @@
-import { getSupabaseServerClient } from "@/api/supabase/server";
+import { getSupabaseServerClientReadOnly } from "@/api/supabase/server-readonly";
 import LessonsClient from "./LessonsClient";
 
 export default async function LessonsPage() {
-  const supabase = await getSupabaseServerClient();
+  const supabase = await getSupabaseServerClientReadOnly();
 
   const { data: lessons, error } = await supabase
     .from("Lessons")

@@ -1,11 +1,10 @@
 "use client";
 
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import RoseLogo from "@/assets/images/rose-academies-logo.png";
 import { DataContext } from "@/context/DataContext";
-import { Group } from "@/types/schema";
 import {
   AdminLink,
   Card,
@@ -24,18 +23,10 @@ import {
 export default function JoinPage() {
   const router = useRouter();
   const [joinCode, setJoinCode] = useState("");
-  const [groups, setGroups] = useState<Group[]>([]);
   const [error, setError] = useState("");
   const data = useContext(DataContext);
 
-  useEffect(() => {
-    function fetchGroups() {
-      if (data) {
-        setGroups(data.groups);
-      }
-    }
-    fetchGroups();
-  }, [data]);
+  const groups = data?.groups ?? [];
 
   function handleJoin(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
     e.preventDefault();

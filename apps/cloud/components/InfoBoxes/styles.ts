@@ -9,12 +9,12 @@ export const BoxesRow = styled.div`
 
 export const InfoBox = styled.div`
   display: flex;
-  padding: 16px 80px 16px 32px;
+  padding: 1rem 5rem 1rem 2rem;
   justify-content: center;
   align-items: center;
-  gap: 28px;
+  gap: 1.75rem;
 
-  border-radius: 12px;
+  border-radius: 0.75rem;
   border-right: 1px solid var(--gray, #d9d9d9);
   border-bottom: 1px solid var(--gray, #d9d9d9);
   border-left: 1px solid var(--gray, #d9d9d9);
@@ -58,17 +58,19 @@ export const InfoLabel = styled.div`
 
   /* Subtitle 1 */
   font-family: var(--font-gilroy);
-  font-size: 18px;
+  font-size: 1.125rem;
   font-style: normal;
   font-weight: 400;
   line-height: normal;
+  white-space: nowrap;
 `;
 
 export const InfoValue = styled.div`
   color: #000;
   font-family: var(--font-gilroy);
-  font-size: 20px;
+  font-size: 1.25rem;
   font-style: normal;
   font-weight: 500;
   line-height: 25px; /* 125% */
+  white-space: nowrap;
 `;

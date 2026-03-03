@@ -40,6 +40,7 @@ export const LessonsList = styled.div`
 export const SearchBarRow = styled.div`
   display: flex;
   gap: 1.14rem;
+  padding: 0.75rem 0rem;
 `;
 
 export const ViewToggleButton = styled.div`

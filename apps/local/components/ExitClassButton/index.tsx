@@ -11,9 +11,9 @@ export default function ExitClassButton() {
   return (
     <ActionButton
       onClick={() => router.push("/join")}
-      backgroundColor={COLORS.white}
-      textColor={COLORS.black}
-      iconColor={COLORS.black}
+      backgroundColor={COLORS.evergreen}
+      textColor={COLORS.white}
+      iconColor={COLORS.white}
       iconType={"exitClass"}
       text={"Exit Class"}
       title="Click to refresh status"

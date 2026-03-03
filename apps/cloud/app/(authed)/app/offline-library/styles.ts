@@ -3,6 +3,7 @@ import styled from "styled-components";
 export const PageWrapper = styled.main`
   padding: 2rem 2.25rem;
   background: var(--gray-10, #fafafa);
+  min-height: 100dvh;
 `;
 
 export const PageTitle = styled.h1`

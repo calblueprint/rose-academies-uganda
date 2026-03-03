@@ -4,6 +4,7 @@ import { useState } from "react";
 import CreateButton from "@/components/CreateLessonButton";
 import LessonCard from "@/components/LessonCard";
 import LessonItem from "@/components/LessonItem";
+import CreateLessonModal from "@/components/modals/CreateLessonModal/CreateLessonModal";
 import SearchBar from "@/components/SearchBar";
 import { IconSvgs } from "@/lib/icons";
 import { Lesson } from "@/types/schema";
@@ -75,6 +76,7 @@ const DUMMY_LESSONS: Lesson[] = [
 export default function LessonsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [view, setView] = useState<"grid" | "list">("grid");
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
 
   const lessons = DUMMY_LESSONS;
 
@@ -86,8 +88,13 @@ export default function LessonsPage() {
     <PageContainer>
       <Header>
         <Title>Lessons Dashboard</Title>
-        <CreateButton />
+        <CreateButton onClick={() => setIsCreateOpen(true)} />
       </Header>
+
+      <CreateLessonModal
+        isOpen={isCreateOpen}
+        onClose={() => setIsCreateOpen(false)}
+      />
 
       <SearchBarRow>
         <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />

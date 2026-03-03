@@ -4,9 +4,13 @@ import React from "react";
 import { IconSvgs } from "@/lib/icons";
 import { Button, Label } from "./styles";
 
-export default function CreateButton() {
+type Props = {
+  onClick: () => void;
+};
+
+export default function CreateButton({ onClick }: Props) {
   return (
-    <Button>
+    <Button type="button" onClick={onClick}>
       {IconSvgs.plus}
       <Label>Create</Label>
     </Button>

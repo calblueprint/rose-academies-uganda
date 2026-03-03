@@ -1,5 +1,7 @@
 import { redirect } from "next/navigation";
 import { getSupabaseServerClientReadOnly } from "@/api/supabase/server-readonly";
+import Header from "@/components/Header";
+import { DataContextProvider } from "@/context/DataContext";
 
 export default async function AuthedLayout({
   children,
@@ -16,5 +18,10 @@ export default async function AuthedLayout({
     redirect("/login");
   }
 
-  return <>{children}</>;
+  return (
+    <DataContextProvider>
+      <Header />
+      {children}
+    </DataContextProvider>
+  );
 }

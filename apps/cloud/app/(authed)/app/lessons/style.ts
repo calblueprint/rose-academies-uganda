@@ -22,7 +22,7 @@ export const Title = styled.h1`
 export const Header = styled.div`
   display: flex;
   flex-direction: row;
-  gap: 38.75rem;
+  justify-content: space-between;
 `;
 
 export const LessonsGrid = styled.div`

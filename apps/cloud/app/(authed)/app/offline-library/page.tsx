@@ -44,8 +44,8 @@ export default async function OfflineLibraryPage() {
 
   // Placeholder stats for now (per sprint requirement)
   // Later: compute from DataContext or from a real "sync status" source.
-  const availableOfflineCount = 5;
-  const pendingDownloadCount = 8;
+  const availableOfflineCount = 3;
+  const pendingDownloadCount = 1;
   const lastSyncedLabel = "Feb 1, 12:00 pm";
 
   return (

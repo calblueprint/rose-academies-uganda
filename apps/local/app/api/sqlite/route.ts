@@ -1,10 +1,22 @@
 import { NextResponse } from "next/server";
+import fs from "fs";
+import path from "path";
 import Database from "better-sqlite3";
 import { Group, Lesson, LocalFile } from "@/types/schema";
 
 export async function GET(): Promise<NextResponse> {
   try {
-    const db = new Database("rose-academies-uganda.db");
+    const DB_PATH = path.join(
+      process.cwd(),
+      "apps",
+      "local",
+      "rose-academies-uganda.db",
+    );
+
+    // ensure directory exists
+    fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
+
+    const db = new Database(DB_PATH);
 
     const groups = db.prepare("SELECT * FROM groups").all() as Group[];
     const lessons = db.prepare("SELECT * FROM lessons").all() as Lesson[];

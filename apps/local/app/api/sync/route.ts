@@ -152,14 +152,34 @@ function storageUrlToKey(url: string, bucket: string): string {
  * Downloads all files listed in the `files` table from Supabase Storage.
  * Writes them to disk under LOCAL_DIR, determines basic MIME type from extension,
  * and updates the corresponding database rows with mime_type and local_path.
+ *
+ * Also logs which lessons are being synced.
  */
-async function downloadFiles(db: DB, files: FileRow[]) {
+async function downloadFiles(db: DB, files: FileRow[], lessons: Lesson[]) {
   const updateStmt = db.prepare(
     "UPDATE files SET mime_type = ?, local_path = ? WHERE id = ?",
   );
 
+  const lessonMap = new Map<number, string>();
+  for (const lesson of lessons) {
+    lessonMap.set(lesson.id, lesson.name);
+  }
+
+  const printedLessons = new Set<number>();
+
   for (const file of files) {
     if (!file.storage_path) continue;
+
+    const lessonId = file.lesson_id ?? null;
+
+    if (lessonId !== null && !printedLessons.has(lessonId)) {
+      console.log(
+        `Syncing lesson: "${lessonMap.get(lessonId) ?? "Unknown Lesson"}" (lesson_id=${lessonId})`,
+      );
+      printedLessons.add(lessonId);
+    } else if (lessonId === null) {
+      console.log(`Syncing file "${file.name}" with no lesson_id`);
+    }
 
     const objectKey = storageUrlToKey(file.storage_path, BUCKET);
 
@@ -211,14 +231,20 @@ async function downloadFiles(db: DB, files: FileRow[]) {
  */
 export async function GET(): Promise<NextResponse> {
   try {
-    // Make sure that the local directory exists.
     fs.mkdirSync(LOCAL_DIR, { recursive: true });
-    const db = new Database("rose-academies-uganda.db");
+    const DB_PATH = path.join(
+      process.cwd(),
+      "apps",
+      "local",
+      "rose-academies-uganda.db",
+    );
+
+    const db = new Database(DB_PATH);
 
     createSchema(db);
     const { groups, lessons, files } = await fetchFromSupabase();
     insertIntoSQLite(db, groups, lessons, files);
-    await downloadFiles(db, files);
+    await downloadFiles(db, files, lessons);
     db.close();
 
     // Return success response or report errors.

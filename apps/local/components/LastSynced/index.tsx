@@ -9,7 +9,7 @@ export default function LastSynced() {
       <IconWrapper>{IconSvgs.clock}</IconWrapper>
       <Content>
         <Title>Last Synced</Title>
-        <StatusText>Feb 1, 12:00 pm.</StatusText>
+        <StatusText>Mar 2, 12:00 pm.</StatusText>
       </Content>
     </Card>
   );

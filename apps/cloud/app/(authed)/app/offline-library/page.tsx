@@ -46,7 +46,7 @@ export default async function OfflineLibraryPage() {
   // Later: compute from DataContext or from a real "sync status" source.
   const availableOfflineCount = 3;
   const pendingDownloadCount = 1;
-  const lastSyncedLabel = "Feb 1, 12:00 pm";
+  const lastSyncedLabel = "Mar 2, 12:00 pm";
 
   return (
     <PageWrapper>

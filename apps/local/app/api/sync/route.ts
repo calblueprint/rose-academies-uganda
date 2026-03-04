@@ -167,6 +167,7 @@ async function downloadFiles(db: DB, files: FileRow[], lessons: Lesson[]) {
 
   const printedLessons = new Set<number>();
 
+  console.log("Printing all lessons synced with at least one file...");
   for (const file of files) {
     if (!file.storage_path) continue;
 

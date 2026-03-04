@@ -49,8 +49,8 @@ export default function FilesPage() {
         id: file.id,
         name: file.name,
         // TODO: dates are not currently in LocalFile type, should probably add them
-        dateAdded: "Feb 12, 2022",
-        dateModified: "Feb 12, 2022",
+        dateAdded: "Mar 4, 2026",
+        dateModified: "Mar 4, 2026",
         sizeBytes: file.size_bytes,
       })),
     [filteredFiles],

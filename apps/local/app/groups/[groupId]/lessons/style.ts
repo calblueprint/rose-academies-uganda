@@ -21,7 +21,7 @@ export const Title = styled.h1`
 
 export const LessonsGrid = styled.div`
   display: flex;
-  gap: 2.5rem 2.1725rem;
+  gap: 1.8125rem;
   flex-wrap: wrap;
 `;
 

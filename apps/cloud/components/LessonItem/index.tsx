@@ -32,7 +32,7 @@ export default function LessonItem({
   const router = useRouter();
 
   // some random set data for determing which lessons have which tags
-  const AVAILABLE_LESSONS = new Set([1, 4, 6]);
+  const AVAILABLE_LESSONS = new Set([1, 3, 5]);
 
   const status: "available" | "pending" = AVAILABLE_LESSONS.has(lessonId)
     ? "available"

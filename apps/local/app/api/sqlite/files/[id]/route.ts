@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import fs from "fs";
+import path from "path";
 import Database from "better-sqlite3";
 
 type FileRow = {
@@ -8,6 +9,12 @@ type FileRow = {
   mime_type: string | null;
   local_path: string | null;
 };
+const DB_PATH = path.join(
+  process.cwd(),
+  "apps",
+  "local",
+  "rose-academies-uganda.db",
+);
 
 export async function GET(
   _req: NextRequest,
@@ -15,7 +22,7 @@ export async function GET(
 ) {
   const { id } = await params;
 
-  const db = new Database("rose-academies-uganda.db");
+  const db = new Database(DB_PATH);
   // Look up the file row by numeric id.
   const row = db.prepare("SELECT * FROM files WHERE id = ?").get(Number(id)) as
     | FileRow

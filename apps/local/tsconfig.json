@@ -30,5 +30,5 @@
     "eslint.config.mjs",
     ".next/dev/types/**/*.ts"
   ],
-  "exclude": ["node_modules", "setup-scripts"]
+  "exclude": ["node_modules", "setup-scripts", ".next"]
 }

@@ -22,12 +22,12 @@ export const Title = styled.h1`
 export const Header = styled.div`
   display: flex;
   flex-direction: row;
-  gap: 38.75rem;
+  justify-content: space-between;
 `;
 
 export const LessonsGrid = styled.div`
   display: flex;
-  gap: 2.5rem 2.1725rem;
+  gap: 1.8125rem;
   flex-wrap: wrap;
 `;
 
@@ -40,6 +40,7 @@ export const LessonsList = styled.div`
 export const SearchBarRow = styled.div`
   display: flex;
   gap: 1.14rem;
+  padding: 0.75rem 0rem;
 `;
 
 export const ViewToggleButton = styled.div`

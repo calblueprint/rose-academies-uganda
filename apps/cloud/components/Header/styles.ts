@@ -7,16 +7,13 @@ export const Header = styled.header`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.81rem 6.5rem;
+  padding: 0.81rem 7.25rem;
   box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.06);
   font-family: var(--font-gilroy);
   font-size: 20px;
   font-style: normal;
   font-weight: 400;
   line-height: 23.343px;
-`;
-export const PageShell = styled.div`
-  --gutter: 7.25rem;
 `;
 export const LogoAndTitle = styled.div`
   display: flex;
@@ -90,10 +87,10 @@ export const NavTab = styled.button<{ $active?: boolean }>`
   border: none;
   border-bottom: 2px solid
     ${({ $active }) => ($active ? COLORS.evergreen : "transparent")};
-  color: ${({ $active }) => ($active ? COLORS.black : COLORS.gray60)};
+  color: ${({ $active }) => ($active ? COLORS.evergreen : COLORS.gray60)};
   font-family: var(--font-gilroy);
   font-size: 0.9375rem;
-  font-weight: ${({ $active }) => ($active ? "600" : "400")};
+  font-weight: 400;
   cursor: pointer;
   transition:
     color 0.15s,

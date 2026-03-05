@@ -1,5 +1,5 @@
 // app/(authed)/app/offline-library/page.tsx
-import { getSupabaseServerClient } from "@/api/supabase/server";
+import { getSupabaseServerClientReadOnly } from "@/api/supabase/server-readonly";
 import InfoBoxes from "@/components/InfoBoxes";
 import LessonItem from "@/components/LessonItem";
 import {
@@ -19,12 +19,12 @@ type OfflineLibraryLessonRow = {
 };
 
 export default async function OfflineLibraryPage() {
-  const supabase = await getSupabaseServerClient();
+  const supabase = await getSupabaseServerClientReadOnly();
 
   const { data, error } = await supabase
     .from("OfflineLibraryNathanH") // Temp database till we figure out how exactly we want to structure OfflineLibrary
     .select("id,name,image_path,group_id")
-    .order("id", { ascending: true });
+    .order("id", { ascending: false });
 
   if (error) {
     return (
@@ -44,9 +44,9 @@ export default async function OfflineLibraryPage() {
 
   // Placeholder stats for now (per sprint requirement)
   // Later: compute from DataContext or from a real "sync status" source.
-  const availableOfflineCount = 5;
-  const pendingDownloadCount = 8;
-  const lastSyncedLabel = "Feb 1, 12:00 pm";
+  const availableOfflineCount = 3;
+  const pendingDownloadCount = 1;
+  const lastSyncedLabel = "Mar 2, 12:00 pm";
 
   return (
     <PageWrapper>

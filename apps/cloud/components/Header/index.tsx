@@ -16,7 +16,6 @@ import {
   LogoContainer,
   Nav,
   NavTab,
-  PageShell,
   ProfileButton,
   Subtitle,
   Title,
@@ -49,7 +48,6 @@ export default function Header() {
   return (
     <HeaderBar>
       <LogoAndTitle>
-        <PageShell />
         <LogoContainer>
           <Image src={RoseLogo} alt="Rose Academies Logo" />
           <TitleWrapper>
@@ -79,8 +77,8 @@ export default function Header() {
       <HeaderRight>
         <DropdownWrapper ref={dropdownRef}>
           <ProfileButton onClick={() => setDropdownOpen(prev => !prev)}>
-            <UserImg>SJ</UserImg>
-            <UserName>Sylvia Johnson</UserName>
+            <UserImg>NH</UserImg>
+            <UserName>Neha Hussain</UserName>
           </ProfileButton>
 
           {dropdownOpen && (

@@ -5,7 +5,7 @@ import ActionButton from "@/components/ActionButton";
 import COLORS from "@/styles/colors";
 
 export default function OperationalButton() {
-  const [isOperational, setIsOperational] = useState<boolean | null>(false);
+  const [isOperational, setIsOperational] = useState<boolean | null>(true);
   const [isLoading, setIsLoading] = useState(false);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [isChecking, setIsChecking] = useState(false);
@@ -36,7 +36,11 @@ export default function OperationalButton() {
     } catch (error) {
       console.error("Failed to check operational status:", error);
       await minLoadingTime;
-      setIsOperational(false);
+      // TEMP CHANGE: CHANGE LATER!
+      setIsOperational(true);
+
+      // go back to this:
+      // setIsOperational(false);
     } finally {
       setIsLoading(false);
       setIsInitialLoad(false);
@@ -44,14 +48,15 @@ export default function OperationalButton() {
     }
   };
 
-  useEffect(() => {
-    checkStatus();
+  // TODO: ADD THIS BACK!!!
+  // useEffect(() => {
+  //   checkStatus();
 
-    // poll status every 30 seconds
-    const interval = setInterval(checkStatus, 30000);
+  //   // poll status every 30 seconds
+  //   const interval = setInterval(checkStatus, 30000);
 
-    return () => clearInterval(interval);
-  }, []);
+  //   return () => clearInterval(interval);
+  // }, []);
 
   // Determine button appearance based on operational state
 

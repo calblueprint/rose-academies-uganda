@@ -1,68 +1,81 @@
 "use client";
 
-import { createContext, useEffect, useState } from "react";
+import type { Group, Lesson, LocalFile } from "@/types/schema";
+import React, { createContext, useCallback, useEffect, useState } from "react";
 import supabase from "@/api/supabase/client";
-import { Group, Lesson, LocalFile } from "@/types/schema";
 
 interface DataContextType {
   groups: Group[];
   lessons: Lesson[];
   files: LocalFile[];
+  refresh: () => Promise<void>;
 }
 
-const EMPTY_DATA: DataContextType = {
-  groups: [],
-  lessons: [],
-  files: [],
-};
+const EMPTY_ARRAY: never[] = [];
 
-export const DataContext = createContext<DataContextType>(EMPTY_DATA);
+export const DataContext = createContext<DataContextType>({
+  groups: EMPTY_ARRAY as Group[],
+  lessons: EMPTY_ARRAY as Lesson[],
+  files: EMPTY_ARRAY as LocalFile[],
+  refresh: async () => {},
+});
 
 export function DataContextProvider({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const [data, setData] = useState<DataContextType>(EMPTY_DATA);
+  const [groups, setGroups] = useState<Group[]>([]);
+  const [lessons, setLessons] = useState<Lesson[]>([]);
+  const [files, setFiles] = useState<LocalFile[]>([]);
+
+  const fetchData = useCallback(async () => {
+    const [
+      { data: groupsData, error: groupsError },
+      { data: lessonsData, error: lessonsError },
+      { data: filesData, error: filesError },
+    ] = await Promise.all([
+      supabase.from("Groups").select("*"),
+      supabase.from("Lessons").select("*"),
+      supabase.from("Files").select("*"),
+    ]);
+
+    if (groupsError) throw groupsError;
+    if (lessonsError) throw lessonsError;
+    if (filesError) throw filesError;
+
+    setGroups(groupsData ?? []);
+    setLessons(lessonsData ?? []);
+    setFiles(filesData ?? []);
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
 
-    async function fetchData() {
+    (async () => {
       try {
-        const [
-          { data: groups, error: groupsError },
-          { data: lessons, error: lessonsError },
-          { data: files, error: filesError },
-        ] = await Promise.all([
-          supabase.from("Groups").select("*"),
-          supabase.from("Lessons").select("*"),
-          supabase.from("Files").select("*"),
-        ]);
-
-        if (groupsError) throw groupsError;
-        if (lessonsError) throw lessonsError;
-        if (filesError) throw filesError;
-
-        if (!isMounted) return;
-
-        setData({
-          groups: groups ?? [],
-          lessons: lessons ?? [],
-          files: files ?? [],
-        });
+        await fetchData();
       } catch (error) {
         console.error("Error fetching Supabase data:", error);
-        if (isMounted) setData(EMPTY_DATA);
+        if (isMounted) {
+          setGroups([]);
+          setLessons([]);
+          setFiles([]);
+        }
       }
-    }
-
-    fetchData();
+    })();
 
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [fetchData]);
 
-  return <DataContext.Provider value={data}>{children}</DataContext.Provider>;
+  const value: DataContextType = {
+    groups,
+    lessons,
+    files,
+    refresh: fetchData,
+  };
+
+  return <DataContext.Provider value={value}>{children}</DataContext.Provider>;
 }

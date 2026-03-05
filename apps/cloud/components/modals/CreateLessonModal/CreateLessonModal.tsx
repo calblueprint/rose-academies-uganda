@@ -1,8 +1,9 @@
 "use client";
 
-import { useRef, useState } from "react";
+import React, { useContext, useRef, useState } from "react";
 import { getSupabaseBrowserClient } from "@/api/supabase/browser";
 import { uploadFile } from "@/api/supabase/files";
+import { DataContext } from "@/context/DataContext";
 import {
   ActionRow,
   BrowseButton,
@@ -87,10 +88,9 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
   const [error, setError] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const data = useContext(DataContext);
 
   if (!isOpen) return null;
-
-  // ─── File queue ─────────────────────────────────────────────────────────
 
   function removeFile(id: string) {
     setFiles(prev => prev.filter(entry => entry.id !== id));
@@ -105,8 +105,6 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
     }));
     setFiles(prev => [...prev, ...newEntries]);
   }
-
-  // ─── Drag & drop ────────────────────────────────────────────────────────
 
   function handleDragOver(e: React.DragEvent) {
     e.preventDefault();
@@ -124,8 +122,6 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
     addFiles(e.dataTransfer.files);
   }
 
-  // ─── Close ──────────────────────────────────────────────────────────────
-
   function handleClose() {
     if (isSubmitting) return;
     setTitle("");
@@ -136,17 +132,14 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
     onClose();
   }
 
-  // ─── Submit ─────────────────────────────────────────────────────────────
-
   async function handleSubmit() {
     if (!title.trim() || isSubmitting) return;
     setIsSubmitting(true);
     setError(null);
 
-    try {
-      const supabase = getSupabaseBrowserClient();
+    const supabase = getSupabaseBrowserClient();
 
-      // 1. Create the lesson row
+    try {
       const { data: lesson, error: lessonError } = await supabase
         .from("Lessons")
         .insert({
@@ -160,8 +153,8 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
 
       if (lessonError) throw lessonError;
 
-      // 2. Upload files sequentially, updating per-file status as we go
       const snapshot = files;
+
       for (let i = 0; i < snapshot.length; i++) {
         setFiles(prev =>
           prev.map((entry, idx) =>
@@ -169,30 +162,35 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
           ),
         );
 
-        try {
-          await uploadFile(lesson.id, snapshot[i].file);
-          setFiles(prev =>
-            prev.map((entry, idx) =>
-              idx === i ? { ...entry, status: "done" } : entry,
-            ),
-          );
-        } catch (uploadErr) {
-          console.error(
-            `Failed to upload file "${snapshot[i].file.name}":`,
-            uploadErr,
-          );
-          setFiles(prev =>
-            prev.map((entry, idx) =>
-              idx === i ? { ...entry, status: "error" } : entry,
-            ),
-          );
-        }
+        await uploadFile(lesson.id, snapshot[i].file);
+
+        setFiles(prev =>
+          prev.map((entry, idx) =>
+            idx === i ? { ...entry, status: "done" } : entry,
+          ),
+        );
       }
 
-      // 3. Brief pause so the user sees final upload statuses before closing
+      if (sendToOffline) {
+        const { error: offlineError } = await supabase
+          .from("OfflineLibraryNathanH")
+          .upsert(
+            {
+              id: lesson.id,
+              name: lesson.name,
+              image_path: lesson.image_path ?? null,
+              group_id: lesson.group_id ?? 1,
+            },
+            { onConflict: "id" },
+          );
+
+        if (offlineError) throw offlineError;
+      }
+
+      await data.refresh();
+
       await new Promise(resolve => setTimeout(resolve, 1000));
 
-      // 4. Reset and hand back to parent (parent calls router.refresh())
       setTitle("");
       setDescription("");
       setFiles([]);
@@ -201,17 +199,21 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
       onClose();
     } catch (err) {
       console.error("Failed to create lesson:", err);
+
+      setFiles(prev =>
+        prev.map(f =>
+          f.status === "uploading" ? { ...f, status: "error" } : f,
+        ),
+      );
+
       setError("Failed to create lesson. Please try again.");
       setIsSubmitting(false);
     }
   }
 
-  // ─── Render ─────────────────────────────────────────────────────────────
-
   return (
     <Overlay onClick={handleClose}>
       <ModalCard onClick={e => e.stopPropagation()}>
-        {/* Header */}
         <ModalHeader>
           <ModalTitle>Create New Lesson</ModalTitle>
           <CloseButton
@@ -237,7 +239,6 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
           </CloseButton>
         </ModalHeader>
 
-        {/* Title */}
         <FieldSection>
           <FieldLabel htmlFor="lesson-title">Title</FieldLabel>
           <TextInput
@@ -249,7 +250,6 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
           />
         </FieldSection>
 
-        {/* Description */}
         <FieldSection>
           <FieldLabel htmlFor="lesson-description">Description</FieldLabel>
           <TextArea
@@ -262,7 +262,6 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
           />
         </FieldSection>
 
-        {/* Upload files */}
         <FieldSection>
           <FieldLabel>Upload Files</FieldLabel>
 
@@ -273,7 +272,6 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
             onDrop={handleDrop}
             onClick={() => !isSubmitting && fileInputRef.current?.click()}
           >
-            {/* Cloud upload icon */}
             <svg
               width="36"
               height="30"
@@ -335,7 +333,6 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
             />
           </DropZone>
 
-          {/* File queue */}
           {files.length > 0 && (
             <FileQueueList>
               {files.map(entry => (
@@ -377,49 +374,10 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
                           <span>&nbsp;• Uploading...</span>
                         )}
                         {entry.status === "done" && (
-                          <>
-                            <span>&nbsp;•</span>
-                            {/* Green filled checkmark */}
-                            <svg
-                              width="12"
-                              height="12"
-                              viewBox="0 0 12 12"
-                              fill="none"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <circle cx="6" cy="6" r="6" fill="#1F5A2A" />
-                              <path
-                                d="M3.5 6L5.2 7.7L8.5 4.5"
-                                stroke="white"
-                                strokeWidth="1.2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
-                            </svg>
-                            <span>Completed</span>
-                          </>
+                          <span>&nbsp;• Completed</span>
                         )}
                         {entry.status === "error" && (
-                          <>
-                            <span>&nbsp;•</span>
-                            {/* Red filled X */}
-                            <svg
-                              width="12"
-                              height="12"
-                              viewBox="0 0 12 12"
-                              fill="none"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <circle cx="6" cy="6" r="6" fill="#AF2028" />
-                              <path
-                                d="M4 4L8 8M8 4L4 8"
-                                stroke="white"
-                                strokeWidth="1.2"
-                                strokeLinecap="round"
-                              />
-                            </svg>
-                            <span>Failed</span>
-                          </>
+                          <span>&nbsp;• Failed</span>
                         )}
                       </FileSubtext>
                     </FileInfo>
@@ -460,7 +418,6 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
           )}
         </FieldSection>
 
-        {/* Offline toggle (visual only) */}
         <OfflineRow>
           <OfflineLabel>Send Lesson to Offline Library?</OfflineLabel>
           <ToggleWrapper>
@@ -478,7 +435,6 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
 
         {error && <ErrorText>{error}</ErrorText>}
 
-        {/* Actions */}
         <ActionRow>
           <CancelButton
             type="button"

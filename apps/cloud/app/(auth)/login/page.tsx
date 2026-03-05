@@ -27,7 +27,7 @@ export default function LoginPage() {
               name="email"
               type="email"
               required
-              autoComplete="email"
+              autoComplete="off"
               placeholder="Email"
             />
           </S.Label>

@@ -31,6 +31,13 @@ export default function LessonItem({
   const data = useContext(DataContext);
   const router = useRouter();
 
+  // some random set data for determing which lessons have which tags
+  const AVAILABLE_LESSONS = new Set([1, 3, 5]);
+
+  const status: "available" | "pending" = AVAILABLE_LESSONS.has(lessonId)
+    ? "available"
+    : "pending";
+
   const files = useMemo(() => {
     if (!data) return [];
     return data.files.filter(file => file.lesson_id === lessonId);
@@ -46,7 +53,7 @@ export default function LessonItem({
 
         <LessonRight>
           <StatusPill
-            status={"pending"} // can change to "pending" as well, just temp placeholder
+            status={status} // can change to "pending" as well, just temp placeholder
           />
           {opened ? IconSvgs.upArrow : IconSvgs.downArrow}
         </LessonRight>

@@ -48,7 +48,7 @@ export default function SyncButton() {
         disabled={isSyncing}
         title="Click to sync data from cloud"
       >
-        <IconWrapper>{IconSvgs.refresh}</IconWrapper>
+        <IconWrapper $isSpinning={isSyncing}>{IconSvgs.refresh}</IconWrapper>
         {"Sync Lessons"}
       </ButtonWrapper>
       {modalVariant && (

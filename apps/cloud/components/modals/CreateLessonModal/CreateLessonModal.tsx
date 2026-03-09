@@ -160,15 +160,12 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
 
       if (sendToOffline) {
         const { error: offlineError } = await supabase
-          .from("OfflineLibraryNathanH")
+          .from("OfflineLibrary")
           .upsert(
             {
-              id: lesson.id,
-              name: lesson.name,
-              image_path: lesson.image_path ?? null,
-              group_id: lesson.group_id ?? 1,
+              lesson_id: lesson.id,
             },
-            { onConflict: "id" },
+            { onConflict: "lesson_id" },
           );
 
         if (offlineError) throw offlineError;

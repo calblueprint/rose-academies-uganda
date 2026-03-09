@@ -18,13 +18,18 @@ type OfflineLibraryLessonRow = {
   group_id: number | null;
 };
 
+type OfflineLibraryRow = {
+  lesson_id: number;
+  Lessons: OfflineLibraryLessonRow | OfflineLibraryLessonRow[] | null;
+};
+
 export default async function OfflineLibraryPage() {
   const supabase = await getSupabaseServerClientReadOnly();
 
   const { data, error } = await supabase
-    .from("OfflineLibraryNathanH") // Temp database till we figure out how exactly we want to structure OfflineLibrary
-    .select("id,name,image_path,group_id")
-    .order("id", { ascending: false });
+    .from("OfflineLibrary")
+    .select("lesson_id, Lessons(id, name, image_path, group_id)")
+    .order("lesson_id", { ascending: false });
 
   if (error) {
     return (
@@ -40,7 +45,16 @@ export default async function OfflineLibraryPage() {
     );
   }
 
-  const lessons: OfflineLibraryLessonRow[] = data ?? [];
+  const lessons: OfflineLibraryLessonRow[] =
+    (data as OfflineLibraryRow[] | null)
+      ?.map(row => {
+        const lesson = Array.isArray(row.Lessons)
+          ? row.Lessons[0]
+          : row.Lessons;
+        return lesson ?? null;
+      })
+      .filter((lesson): lesson is OfflineLibraryLessonRow => lesson !== null) ??
+    [];
 
   // Placeholder stats for now (per sprint requirement)
   // Later: compute from DataContext or from a real "sync status" source.

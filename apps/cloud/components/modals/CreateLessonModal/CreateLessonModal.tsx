@@ -3,6 +3,7 @@
 import React, { useContext, useRef, useState } from "react";
 import { getSupabaseBrowserClient } from "@/api/supabase/browser";
 import { uploadFile } from "@/api/supabase/files";
+import FileTypeBadge from "@/components/FileTypeBadge";
 import { DataContext } from "@/context/DataContext";
 import {
   ActionRow,
@@ -17,8 +18,6 @@ import {
   ErrorText,
   FieldLabel,
   FieldSection,
-  FileBadge,
-  FileBadgeText,
   FileInfo,
   FileNameText,
   FileQueueItemRow,
@@ -57,18 +56,6 @@ interface Props {
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
-
-function getFileBadgeColor(file: File): string {
-  const { type } = file;
-  if (type === "application/pdf") return "#C0392B";
-  if (type.startsWith("image/")) return "#2980B9";
-  if (type.startsWith("video/")) return "#7D3C98";
-  return "#808582";
-}
-
-function getFileExtension(file: File): string {
-  return file.name.split(".").pop()?.toUpperCase() ?? "FILE";
-}
 
 function formatBytes(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
@@ -338,34 +325,7 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
               {files.map(entry => (
                 <FileQueueItemWrapper key={entry.id}>
                   <FileQueueItemRow>
-                    <FileBadge $color={getFileBadgeColor(entry.file)}>
-                      <svg
-                        width="14"
-                        height="16"
-                        viewBox="0 0 14 16"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M8.5 1H2.5C1.67 1 1 1.67 1 2.5V13.5C1 14.33 1.67 15 2.5 15H11.5C12.33 15 13 14.33 13 13.5V5.5L8.5 1Z"
-                          stroke="white"
-                          strokeWidth="1.2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                        <path
-                          d="M8.5 1V5.5H13"
-                          stroke="white"
-                          strokeWidth="1.2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                      <FileBadgeText>
-                        {getFileExtension(entry.file)}
-                      </FileBadgeText>
-                    </FileBadge>
-
+                    <FileTypeBadge fileName={entry.file.name} />
                     <FileInfo>
                       <FileNameText>{entry.file.name}</FileNameText>
                       <FileSubtext>

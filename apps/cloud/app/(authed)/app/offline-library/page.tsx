@@ -1,5 +1,6 @@
 // app/(authed)/app/offline-library/page.tsx
 import { getSupabaseServerClientReadOnly } from "@/api/supabase/server-readonly";
+import CloudSyncButton from "@/components/CloudSyncButton";
 import InfoBoxes from "@/components/InfoBoxes";
 import LessonItem from "@/components/LessonItem";
 import {
@@ -9,6 +10,7 @@ import {
   PageTitle,
   PageWrapper,
   SectionTitle,
+  SyncButtonWrapper,
 } from "./styles";
 
 type OfflineLibraryLessonRow = {
@@ -67,9 +69,11 @@ export default async function OfflineLibraryPage() {
       <Content>
         <PageTitle>Offline Library</PageTitle>
         <PageSubtitle>
-          Lessons in this library will be available offline after you open the
-          local app and run sync
+          Lessons in this library will be available offline after you run sync
         </PageSubtitle>
+        <SyncButtonWrapper>
+          <CloudSyncButton />
+        </SyncButtonWrapper>
 
         <InfoBoxes
           availableOfflineCount={availableOfflineCount}

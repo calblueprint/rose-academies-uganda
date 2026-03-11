@@ -3,6 +3,7 @@ import StyledComponentsRegistry from "@/lib/registry";
 import "@/styles/global.css";
 import localFont from "next/font/local";
 import HeaderWrapper from "@/components/HeaderWrapper";
+import SyncPoller from "@/components/SyncPoller";
 import { DataContextProvider } from "@/context/DataContext";
 
 // font definitions
@@ -129,7 +130,10 @@ export default function RootLayout({
       <body className={gilroy.variable}>
         <StyledComponentsRegistry>
           <HeaderWrapper />
-          <DataContextProvider>{children}</DataContextProvider>
+          <DataContextProvider>
+            <SyncPoller />
+            {children}
+          </DataContextProvider>
         </StyledComponentsRegistry>
       </body>
     </html>

@@ -5,7 +5,8 @@ import { startSyncPolling } from "@/lib/pollSync";
 
 export default function SyncPoller() {
   useEffect(() => {
-    startSyncPolling();
+    const cleanup = startSyncPolling();
+    return cleanup;
   }, []);
 
   return null;

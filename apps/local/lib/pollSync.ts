@@ -4,9 +4,16 @@ const DEVICE_ID = "nathans-pi"; // hardcoded for now
 
 console.log("pollSync file loaded.");
 
+let intervalId: ReturnType<typeof setInterval> | null = null;
+let isTriggeringSync = false;
+
 export function startSyncPolling() {
+  if (intervalId) {
+    return () => {};
+  }
+
   async function poll() {
-    console.log("Polling for sync...");
+    console.log("Polling for sync...", new Date().toLocaleTimeString());
 
     const { data, error } = await supabase
       .from("devices")
@@ -19,23 +26,50 @@ export function startSyncPolling() {
       return;
     }
 
-    if (data?.sync_requested_at) {
-      console.log("SYNC STARTED");
+    if (!data?.sync_requested_at) {
+      return;
+    }
 
-      // We clear the request so that sync doesn't run multiple times.
+    if (isTriggeringSync) {
+      console.log("Sync trigger already in progress.");
+      return;
+    }
+
+    isTriggeringSync = true;
+
+    try {
+      console.log("SYNC REQUEST DETECTED");
+
+      const response = await fetch("/api/sync");
+
+      if (!response.ok) {
+        console.error("Local sync route failed:", response.status);
+        return;
+      }
+
+      console.log("SYNC FINISHED");
+
       await supabase
         .from("devices")
         .update({ sync_requested_at: null })
         .eq("id", DEVICE_ID);
-
-      // This currently does not actually run our sync -- it just prints to console.
+    } catch (err) {
+      console.error("Error triggering local sync:", err);
+    } finally {
+      isTriggeringSync = false;
     }
   }
 
-  // Run poll once immediately.
-  poll();
+  void poll();
 
-  // We currently have it set to poll every 30 seconds, but we can
-  // change this in the future.
-  setInterval(poll, 30000);
+  intervalId = setInterval(() => {
+    void poll();
+  }, 30000);
+
+  return () => {
+    if (intervalId) {
+      clearInterval(intervalId);
+      intervalId = null;
+    }
+  };
 }

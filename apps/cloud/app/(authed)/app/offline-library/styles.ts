@@ -56,3 +56,9 @@ export const LessonsStack = styled.div`
   flex-direction: column;
   gap: 0.9rem;
 `;
+
+export const SyncButtonWrapper = styled.div`
+  display: flex;
+  justify-content: center;
+  margin: 0 0 2.4rem 0;
+`;

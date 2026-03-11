@@ -6,12 +6,7 @@ import { Group, Lesson, LocalFile } from "@/types/schema";
 
 export async function GET(): Promise<NextResponse> {
   try {
-    const DB_PATH = path.join(
-      process.cwd(),
-      "apps",
-      "local",
-      "rose-academies-uganda.db",
-    );
+    const DB_PATH = path.join(process.cwd(), "rose-academies-uganda.db");
 
     // ensure directory exists
     fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });

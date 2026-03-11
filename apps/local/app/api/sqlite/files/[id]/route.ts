@@ -9,12 +9,7 @@ type FileRow = {
   mime_type: string | null;
   local_path: string | null;
 };
-const DB_PATH = path.join(
-  process.cwd(),
-  "apps",
-  "local",
-  "rose-academies-uganda.db",
-);
+const DB_PATH = path.join(process.cwd(), "rose-academies-uganda.db");
 
 export async function GET(
   _req: NextRequest,

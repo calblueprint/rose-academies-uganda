@@ -216,12 +216,7 @@ export async function runSync() {
   try {
     fs.mkdirSync(LOCAL_DIR, { recursive: true });
 
-    const DB_PATH = path.join(
-      process.cwd(),
-      "apps",
-      "local",
-      "rose-academies-uganda.db",
-    );
+    const DB_PATH = path.join(process.cwd(), "rose-academies-uganda.db");
 
     const db = new Database(DB_PATH);
 

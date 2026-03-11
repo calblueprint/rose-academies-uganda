@@ -1,36 +1,18 @@
 [//]: # "Feel free to customize this template and the emojis to your project's vibes"
+### linked issue
+closes #__
 
-## 👍 What's new in this PR
-### Description
-[//]: # "Required - Describe what's new in this PR in a few lines. A description and bullet points for specifics will suffice."
+### description / changes made
+[//]: # "list (in bullet points) the main changes of this PR, especially if it's something that wasn't mentioned in the original issue."
 
+### screenshots / demo vids
+[//]: # "especially important if this PR changed the UI."
 
+### next steps
+[//]: # "is there anything in this PR that does NOT work yet or needs to be refined later? are there any temporary fixes or files that need to be cleaned up later? did this PR involve any implementation decisions that will affect future PRs?"
 
-### Screenshots
-[//]: # "Required for frontend changes, otherwise optional but strongly recommended. Add screenshots of expected behavior - GIFs if you're feeling fancy! Use the provided image template. Drag the desired image into the PR, then copy the link into the placeholder."
-
-[image placeholder]: <img src="place image link here!!!" width="240" height="540">
-
-
-
-## 👍 How to review
-[//]: # 'Required - Describe the order in which to review files and what to expect when testing locally. Is there anything specifically you want feedback on? Should this be reviewed commit by commit, or all at once? What are some user flows to test? What are some edge cases to look out for?'
-
-
-
-## 👍 Next steps
-[//]: # "Optional - What's NOT in this PR, doesn't work yet, and/or still needs to be done. Note any temporary fixes in this PR that should be cleaned up later."
-
-
-
-## 👍 Relevant links
-### Online sources
-[//]: # 'Copy links to any tutorials or documentation that was useful to you when working on this PR'
-
-
-
-### Related PRs
-[//]: # "Add related PRs you're waiting on/ PRs that will conflict, etc; if this is a refactor, feel free to add PRs that previously modified this code"
+### notes
+[//]: # "is there anything else that the reviewer of this PR should know? is there anything you'd like feedback on?"
 
 
 

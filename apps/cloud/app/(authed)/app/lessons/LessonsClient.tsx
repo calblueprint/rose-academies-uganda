@@ -2,6 +2,7 @@
 
 import type { Lesson } from "@/types/schema";
 import { useMemo, useState } from "react";
+import ArchiveToggle from "@/components/ArchiveToggle/ArchiveToggle";
 import CreateButton from "@/components/CreateLessonButton";
 import LessonCard from "@/components/LessonCard";
 import LessonItem from "@/components/LessonItem";
@@ -72,12 +73,17 @@ export default function LessonsClient({
         <LessonsGrid>
           {filteredLessons.length > 0 ? (
             filteredLessons.map(lesson => (
-              <LessonCard
-                key={lesson.id}
-                lessonId={lesson.id}
-                lessonName={lesson.name}
-                lessonImage={lesson.image_path}
-              />
+              <div key={lesson.id}>
+                <LessonCard
+                  lessonId={lesson.id}
+                  lessonName={lesson.name}
+                  lessonImage={lesson.image_path}
+                />
+                <ArchiveToggle
+                  lesson_Id={lesson.id}
+                  isArchived={lesson.is_archived}
+                />
+              </div>
             ))
           ) : (
             <div>No lessons found.</div>

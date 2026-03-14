@@ -35,7 +35,7 @@ async function getDiskInfo() {
 
 async function getDirectorySizeKb(directory: string) {
   // Check directory size of passed in directory
-  const { stdout } = await execFileAsync("df", ["-sk", directory]);
+  const { stdout } = await execFileAsync("du", ["-sk", directory]);
 
   // Parse line
   const parts = stdout.trim().split(/\s+/);

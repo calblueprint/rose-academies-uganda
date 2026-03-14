@@ -18,6 +18,7 @@ type Group = { id: number; name: string; join_code: string | null };
 type Lesson = {
   id: number;
   name: string;
+  description: string | null;
   image_path: string | null;
   group_id: number;
 };
@@ -39,6 +40,7 @@ function createSchema(db: DB) {
     `CREATE TABLE IF NOT EXISTS lessons (
       id INTEGER PRIMARY KEY,
       name TEXT,
+      description TEXT,
       image_path TEXT,
       group_id INTEGER,
       FOREIGN KEY (group_id) REFERENCES groups(id)
@@ -56,6 +58,10 @@ function createSchema(db: DB) {
   for (const sql of tableSchemaSql) {
     db.prepare(sql).run();
   }
+
+  try {
+    db.prepare(`ALTER TABLE lessons ADD COLUMN description TEXT`).run();
+  } catch {}
 
   try {
     db.prepare(`ALTER TABLE files ADD COLUMN mime_type TEXT`).run();
@@ -108,9 +114,10 @@ function insertIntoSQLite(
 
   const insertLessons = db.transaction((rows: Lesson[]) => {
     const stmt = db.prepare(
-      "INSERT OR REPLACE INTO lessons (id, name, image_path, group_id) VALUES (?, ?, ?, ?)",
+      "INSERT OR REPLACE INTO lessons (id, name, description, image_path, group_id) VALUES (?, ?, ?, ?, ?)",
     );
-    for (const r of rows) stmt.run(r.id, r.name, r.image_path, r.group_id);
+    for (const r of rows)
+      stmt.run(r.id, r.name, r.description, r.image_path, r.group_id);
   });
   insertLessons(lessons);
 

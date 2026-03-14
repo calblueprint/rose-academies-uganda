@@ -11,6 +11,7 @@ import SearchBarComponent from "@/components/SearchBar";
 import { DataContext } from "@/context/DataContext";
 import { LocalFile } from "@/types/schema";
 import {
+  DescriptionText,
   HeaderRight,
   HeaderRow,
   PageContainer,
@@ -29,6 +30,7 @@ export default function FilesPage() {
     if (!data) return null;
     return data.lessons.find(l => l.id === lessonId);
   }, [data, lessonId]);
+  console.log(lesson)
 
   const files = useMemo(() => {
     if (!data) return [];
@@ -86,6 +88,10 @@ export default function FilesPage() {
           <FileTypeDropdown />
         </HeaderRight>
       </HeaderRow>
+
+      {lesson?.description && (
+        <DescriptionText>{lesson.description}</DescriptionText>
+      )}
 
       {tableFiles.length === 0 ? (
         <div>No files in this lesson yet.</div>

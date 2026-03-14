@@ -39,3 +39,13 @@ export const SearchBar = styled.div`
   display: flex;
   width: 17.375rem;
 `;
+
+export const DescriptionText = styled.p`
+  font-family: var(--font-gilroy);
+  font-size: 1.125rem;
+  font-weight: 400;
+  color: #808582;
+  margin-top: 23px;
+  margin-bottom: 23px;
+  line-height: normal;
+`;

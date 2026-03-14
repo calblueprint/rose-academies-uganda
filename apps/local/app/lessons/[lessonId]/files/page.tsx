@@ -30,7 +30,6 @@ export default function FilesPage() {
     if (!data) return null;
     return data.lessons.find(l => l.id === lessonId);
   }, [data, lessonId]);
-  console.log(lesson)
 
   const files = useMemo(() => {
     if (!data) return [];

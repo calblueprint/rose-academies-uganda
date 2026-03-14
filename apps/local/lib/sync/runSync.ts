@@ -51,6 +51,12 @@ function createSchema(db: DB) {
       lesson_id INTEGER,
       FOREIGN KEY (lesson_id) REFERENCES lessons(id)
     )`,
+    `CREATE TABLE IF NOT EXISTS sync_runs (
+    id INTEGER PRIMARY KEY,
+    started_at TEXT NOT NULL,
+    finished_at TEXT,
+    status TEXT NOT NULL
+    )`,
   ];
 
   for (const sql of tableSchemaSql) {
@@ -212,35 +218,66 @@ export async function runSync() {
   }
 
   isSyncRunning = true;
-
+  let runId: number | bigint | undefined;
+  let startedAt = "";
+  let finishedAt = "";
+  let db: any | null = null;
   try {
     fs.mkdirSync(LOCAL_DIR, { recursive: true });
 
     const DB_PATH = path.join(process.cwd(), "rose-academies-uganda.db");
 
-    const db = new Database(DB_PATH);
+    db = new Database(DB_PATH);
 
-    try {
-      createSchema(db);
-      const { groups, lessons, files } = await fetchFromSupabase();
-      insertIntoSQLite(db, groups, lessons, files);
-      await downloadFiles(db, files, lessons);
-    } finally {
-      db.close();
-    }
+    createSchema(db);
+
+    startedAt = new Date().toISOString();
+
+    const result = db
+      .prepare("INSERT INTO sync_runs (started_at, status) VALUES (?, ?)")
+      .run(startedAt, "running");
+
+    runId = result.lastInsertRowid;
+
+    const { groups, lessons, files } = await fetchFromSupabase();
+    insertIntoSQLite(db, groups, lessons, files);
+    await downloadFiles(db, files, lessons);
+
+    finishedAt = new Date().toISOString();
+
+    db.prepare(
+      "UPDATE sync_runs SET finished_at = ?, status = ? WHERE id = ?",
+    ).run(finishedAt, "success", runId);
 
     return {
       ok: true,
       message: "Data synchronized successfully",
+      runId,
+      startedAt,
+      finishedAt,
     };
   } catch (error) {
     console.error("Sync failed:", error);
 
+    if (db && runId !== undefined) {
+      finishedAt = new Date().toISOString();
+
+      db.prepare(
+        "UPDATE sync_runs SET finished_at = ?, status = ? WHERE id = ?",
+      ).run(finishedAt, "failed", runId);
+    }
+
     return {
       ok: false,
       message: "Error synchronizing data",
+      runId,
+      startedAt,
+      finishedAt,
     };
   } finally {
+    if (db) {
+      db.close();
+    }
     isSyncRunning = false;
   }
 }

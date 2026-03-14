@@ -1,22 +1,30 @@
 import type { LocalFile } from "@/types/schema";
 import { getSupabaseBrowserClient } from "./browser";
 
+async function hashFile(file: File): Promise<string> {
+  const buffer = await file.arrayBuffer();
+  const hashBuffer = await crypto.subtle.digest("SHA-256", buffer);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+}
+
 export async function uploadFile(
   lessonId: number,
   file: File,
 ): Promise<LocalFile> {
   const supabase = getSupabaseBrowserClient();
 
-  // check if file already exists
+  const hash = await hashFile(file);
+
+  // check if a file with this hash already exists
   const { data: existingFile } = await supabase
     .from("Files")
     .select("*")
-    .eq("name", file.name)
-    .eq("size_bytes", file.size)
+    .eq("hash", hash)
     .maybeSingle();
 
   if (existingFile) {
-    // just link the lesson to the file
+    // reuse the existing file — just link the lesson to it
     const { error } = await supabase.from("LessonFiles").insert({
       lesson_id: lessonId,
       file_id: existingFile.id,
@@ -27,7 +35,7 @@ export async function uploadFile(
     return existingFile as LocalFile;
   }
 
-  // upload new file
+  // truly new file — upload to storage
   const objectPath = `teacher-1/${file.name}`;
 
   const { error: storageError } = await supabase.storage
@@ -41,20 +49,21 @@ export async function uploadFile(
   const publicUrl = pub?.publicUrl;
   if (!publicUrl) throw new Error("Failed to compute public URL");
 
-  // create file row
+  // create Files row with hash
   const { data: fileRow, error: fileError } = await supabase
     .from("Files")
     .insert({
       name: file.name,
       size_bytes: file.size,
       storage_path: publicUrl,
+      hash,
     })
     .select()
     .single();
 
   if (fileError) throw fileError;
 
-  // link lesson + file
+  // link lesson to file
   const { error: joinError } = await supabase.from("LessonFiles").insert({
     lesson_id: lessonId,
     file_id: fileRow.id,

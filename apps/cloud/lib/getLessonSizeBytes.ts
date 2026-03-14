@@ -1,6 +1,6 @@
 import { getSupabaseServerClient } from "../api/supabase/server";
 
-export async function lessonFileSize(lessonId: number): Promise<number> {
+export async function getLessonSizeBytes(lessonId: number): Promise<number> {
   const supabase = await getSupabaseServerClient();
 
   const { data, error } = await supabase

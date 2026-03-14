@@ -28,9 +28,10 @@ export function DataContextProvider({
   const [groups, setGroups] = useState<Group[]>([]);
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [files, setFiles] = useState<LocalFile[]>([]);
+
   type LessonFileRow = {
     lesson_id: number;
-    Files: LocalFile[];
+    Files: LocalFile;
   };
 
   const fetchData = useCallback(async () => {
@@ -52,12 +53,10 @@ export function DataContextProvider({
     if (lessonFilesError) throw lessonFilesError;
 
     const flattenedFiles: LocalFile[] =
-      lessonFilesData?.flatMap((row: LessonFileRow) =>
-        row.Files.map(file => ({
-          ...file,
-          lesson_id: row.lesson_id,
-        })),
-      ) ?? [];
+      (lessonFilesData as unknown as LessonFileRow[])?.map(row => ({
+        ...row.Files,
+        lesson_id: row.lesson_id,
+      })) ?? [];
 
     setGroups(groupsData ?? []);
     setLessons(lessonsData ?? []);

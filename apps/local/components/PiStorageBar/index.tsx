@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { IconSvgs } from "@/lib/icons";
 import {
   Card,
   Content,

@@ -2,6 +2,7 @@
 
 import LastSynced from "@/components/LastSynced";
 import Storage from "@/components/Storage";
+import PiStorageBar from "@/components/PiStorageBar";
 import SyncButton from "@/components/SyncButton";
 import WifiStatus from "@/components/WifiStatus";
 import {
@@ -32,6 +33,7 @@ export default function SyncPage() {
           <LastSynced />
         </Wrapper>
         <Storage />
+        <PiStorageBar />
       </Cards>
     </Outer>
   );

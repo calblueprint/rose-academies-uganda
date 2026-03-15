@@ -1,0 +1,103 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { IconSvgs } from "@/lib/icons";
+import {
+  Card,
+  Content,
+  ProgressBar,
+  ProgressFill,
+  StorageInfo,
+  StatusText,
+  Title,
+} from "./styles";
+
+type StorageResponse = {
+  disk: {
+    totalKb: number;
+    usedKb: number;
+    availableKb: number;
+    usePercent: number;
+  };
+};
+
+// TEMP FLAG
+const USE_PLACEHOLDER_DATA = true;
+
+// TEMP DATA
+const PLACEHOLDER_DATA: StorageResponse = {
+  disk: {
+    totalKb: 64 * 1024 * 1024,
+    usedKb: 32 * 1024 * 1024,
+    availableKb: 48 * 1024 * 1024,
+    usePercent: 50,
+  },
+};
+
+export default function PiStorageBar() {
+  const [storage, setStorage] = useState<StorageResponse | null>(
+    USE_PLACEHOLDER_DATA ? PLACEHOLDER_DATA : null
+  );
+
+  async function fetchStorage() {
+    if (USE_PLACEHOLDER_DATA) return;
+
+    try {
+      const res = await fetch("/api/system/storage");
+      const data = await res.json();
+      setStorage(data);
+    } catch (err) {
+      console.error("Failed to fetch storage:", err);
+    }
+  }
+
+  useEffect(() => {
+    if (USE_PLACEHOLDER_DATA) return;
+
+    async function loadStorage() {
+      try {
+        const res = await fetch("/api/system/storage");
+        const data = await res.json();
+        setStorage(data);
+      } catch (err) {
+        console.error("Failed to fetch storage:", err);
+      }
+    }
+
+    loadStorage();
+  }, []);
+
+  if (!storage) {
+    return (
+      <Card>
+        <Content>
+          <Title>Raspberry Pi</Title>
+          <StatusText>Loading storage...</StatusText>
+        </Content>
+      </Card>
+    );
+  }
+
+  const totalGb = Math.round(storage.disk.totalKb / 1024 / 1024);
+  const usedGb = Math.round(storage.disk.usedKb / 1024 / 1024);
+  const percent = storage.disk.usePercent;
+
+  return (
+    <Card>
+      <Content>
+        <Title>Raspberry Pi</Title>
+
+        <ProgressBar>
+          <ProgressFill percent={percent} />
+        </ProgressBar>
+
+        <StorageInfo>
+          <StatusText>
+            {usedGb} GB of {totalGb} GB Used
+          </StatusText>
+          <StatusText>{percent}% Used</StatusText>
+        </StorageInfo>
+      </Content>
+    </Card>
+  );
+}

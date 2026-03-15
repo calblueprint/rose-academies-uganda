@@ -21,27 +21,10 @@ type StorageResponse = {
   };
 };
 
-// TEMP FLAG
-const USE_PLACEHOLDER_DATA = true;
-
-// TEMP DATA
-const PLACEHOLDER_DATA: StorageResponse = {
-  disk: {
-    totalKb: 64 * 1024 * 1024,
-    usedKb: 32 * 1024 * 1024,
-    availableKb: 48 * 1024 * 1024,
-    usePercent: 50,
-  },
-};
-
 export default function PiStorageBar() {
-  const [storage, setStorage] = useState<StorageResponse | null>(
-    USE_PLACEHOLDER_DATA ? PLACEHOLDER_DATA : null
-  );
+  const [storage, setStorage] = useState<StorageResponse | null>(null);
 
   async function fetchStorage() {
-    if (USE_PLACEHOLDER_DATA) return;
-
     try {
       const res = await fetch("/api/system/storage");
       const data = await res.json();
@@ -52,8 +35,6 @@ export default function PiStorageBar() {
   }
 
   useEffect(() => {
-    if (USE_PLACEHOLDER_DATA) return;
-
     async function loadStorage() {
       try {
         const res = await fetch("/api/system/storage");

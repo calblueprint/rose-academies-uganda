@@ -1,8 +1,8 @@
 "use client";
 
 import LastSynced from "@/components/LastSynced";
-import Storage from "@/components/Storage";
 import PiStorageBar from "@/components/PiStorageBar";
+import Storage from "@/components/Storage";
 import SyncButton from "@/components/SyncButton";
 import WifiStatus from "@/components/WifiStatus";
 import {

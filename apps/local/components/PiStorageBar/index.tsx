@@ -7,8 +7,8 @@ import {
   Content,
   ProgressBar,
   ProgressFill,
-  StorageInfo,
   StatusText,
+  StorageInfo,
   Title,
 } from "./styles";
 
@@ -23,16 +23,6 @@ type StorageResponse = {
 
 export default function PiStorageBar() {
   const [storage, setStorage] = useState<StorageResponse | null>(null);
-
-  async function fetchStorage() {
-    try {
-      const res = await fetch("/api/system/storage");
-      const data = await res.json();
-      setStorage(data);
-    } catch (err) {
-      console.error("Failed to fetch storage:", err);
-    }
-  }
 
   useEffect(() => {
     async function loadStorage() {

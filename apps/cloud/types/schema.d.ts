@@ -68,5 +68,6 @@ export type LocalFile = {
   name: string;
   size_bytes: number;
   storage_path: string;
+  hash: string;
   lesson_id: number | null;
 };

@@ -53,6 +53,12 @@ function createSchema(db: DB) {
       lesson_id INTEGER,
       FOREIGN KEY (lesson_id) REFERENCES lessons(id)
     )`,
+    `CREATE TABLE IF NOT EXISTS sync_runs (
+      id INTEGER PRIMARY KEY,
+      started_at TEXT NOT NULL,
+      finished_at TEXT,
+      status TEXT NOT NULL
+    )`,
   ];
 
   for (const sql of tableSchemaSql) {
@@ -186,7 +192,7 @@ async function downloadFiles(
         response.body as unknown as NodeReadableStream<Uint8Array>;
       const nodeReadable = Readable.fromWeb(webStream);
 
-      await pipeline(nodeReadable, fs.createWriteStream(stagedPath)); // write to Stage Directory
+      await pipeline(nodeReadable, fs.createWriteStream(stagedPath));
     } catch (err) {
       throw new Error(`Streaming failed for ${file.storage_path}, ${err}`);
     }
@@ -210,62 +216,97 @@ export async function runSync() {
   isSyncRunning = true;
 
   let stagingDir: string | null = null;
+  let runId: number | bigint | undefined;
+  let startedAt = "";
+  let finishedAt = "";
+  let db: DB | null = null;
 
   try {
     fs.mkdirSync(LOCAL_DIR, { recursive: true });
-    stagingDir = fs.mkdtempSync(path.join(os.tmpdir(), "rose-sync-")); // Temp Directory for staging
+    stagingDir = fs.mkdtempSync(path.join(os.tmpdir(), "rose-sync-"));
 
     const DB_PATH = path.join(process.cwd(), "rose-academies-uganda.db");
 
-    const db = new Database(DB_PATH);
+    db = new Database(DB_PATH);
 
-    try {
-      createSchema(db);
-      const { groups, lessons, files } = await fetchFromSupabase();
-      await downloadFiles(files, lessons, stagingDir); // pass in staging directory
-      insertIntoSQLite(db, groups, lessons, files);
-      const updateStmt = db.prepare(
-        "UPDATE files SET mime_type = ?, local_path = ? WHERE id = ?",
-      );
-      for (const file of files) {
-        if (!file.storage_path) continue;
+    createSchema(db);
 
-        const objectKey = storageUrlToKey(file.storage_path, BUCKET);
-        const stagedPath = path.join(stagingDir, objectKey);
-        const finalPath = path.join(LOCAL_DIR, objectKey);
+    startedAt = new Date().toISOString();
 
-        if (fs.existsSync(stagedPath)) {
-          // If stagePath exists, we can now write everything to the final path, in one go
-          fs.mkdirSync(path.dirname(finalPath), { recursive: true });
-          fs.renameSync(stagedPath, finalPath);
+    const result = db
+      .prepare("INSERT INTO sync_runs (started_at, status) VALUES (?, ?)")
+      .run(startedAt, "running");
 
-          const inferredMime =
-            mime.lookup(file.name || finalPath) || "application/octet-stream";
+    runId = result.lastInsertRowid;
 
-          updateStmt.run(inferredMime, finalPath, file.id);
-        }
+    const { groups, lessons, files } = await fetchFromSupabase();
+
+    await downloadFiles(files, lessons, stagingDir);
+    insertIntoSQLite(db, groups, lessons, files);
+
+    const updateStmt = db.prepare(
+      "UPDATE files SET mime_type = ?, local_path = ? WHERE id = ?",
+    );
+
+    for (const file of files) {
+      if (!file.storage_path) continue;
+
+      const objectKey = storageUrlToKey(file.storage_path, BUCKET);
+      const stagedPath = path.join(stagingDir, objectKey);
+      const finalPath = path.join(LOCAL_DIR, objectKey);
+
+      if (fs.existsSync(stagedPath)) {
+        fs.mkdirSync(path.dirname(finalPath), { recursive: true });
+        fs.renameSync(stagedPath, finalPath);
+
+        const inferredMime =
+          mime.lookup(file.name || finalPath) || "application/octet-stream";
+
+        updateStmt.run(inferredMime, finalPath, file.id);
       }
-      fs.rmSync(stagingDir, { recursive: true, force: true }); // Cleanup: Remove staging directory
-    } finally {
-      db.close();
     }
+
+    fs.rmSync(stagingDir, { recursive: true, force: true });
+
+    finishedAt = new Date().toISOString();
+
+    db.prepare(
+      "UPDATE sync_runs SET finished_at = ?, status = ? WHERE id = ?",
+    ).run(finishedAt, "success", runId);
 
     return {
       ok: true,
       message: "Data synchronized successfully",
+      runId,
+      startedAt,
+      finishedAt,
     };
   } catch (error) {
     console.error("Sync failed:", error);
 
     if (stagingDir) {
-      fs.rmSync(stagingDir, { recursive: true, force: true }); // remove staging directory and files if sync fails
+      fs.rmSync(stagingDir, { recursive: true, force: true });
+    }
+
+    if (db && runId !== undefined) {
+      finishedAt = new Date().toISOString();
+
+      db.prepare(
+        "UPDATE sync_runs SET finished_at = ?, status = ? WHERE id = ?",
+      ).run(finishedAt, "failed", runId);
     }
 
     return {
       ok: false,
       message: "Error synchronizing data",
+      runId,
+      startedAt,
+      finishedAt,
     };
   } finally {
+    if (db) {
+      db.close();
+    }
     isSyncRunning = false;
   }
 }

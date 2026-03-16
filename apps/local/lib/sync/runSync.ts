@@ -18,6 +18,7 @@ type Group = { id: number; name: string; join_code: string | null };
 type Lesson = {
   id: number;
   name: string;
+  description: string | null;
   image_path: string | null;
   group_id: number;
 };
@@ -39,6 +40,7 @@ function createSchema(db: DB) {
     `CREATE TABLE IF NOT EXISTS lessons (
       id INTEGER PRIMARY KEY,
       name TEXT,
+      description TEXT,
       image_path TEXT,
       group_id INTEGER,
       FOREIGN KEY (group_id) REFERENCES groups(id)
@@ -52,16 +54,20 @@ function createSchema(db: DB) {
       FOREIGN KEY (lesson_id) REFERENCES lessons(id)
     )`,
     `CREATE TABLE IF NOT EXISTS sync_runs (
-    id INTEGER PRIMARY KEY,
-    started_at TEXT NOT NULL,
-    finished_at TEXT,
-    status TEXT NOT NULL
+      id INTEGER PRIMARY KEY,
+      started_at TEXT NOT NULL,
+      finished_at TEXT,
+      status TEXT NOT NULL
     )`,
   ];
 
   for (const sql of tableSchemaSql) {
     db.prepare(sql).run();
   }
+
+  try {
+    db.prepare(`ALTER TABLE lessons ADD COLUMN description TEXT`).run();
+  } catch {}
 
   try {
     db.prepare(`ALTER TABLE files ADD COLUMN mime_type TEXT`).run();
@@ -114,9 +120,10 @@ function insertIntoSQLite(
 
   const insertLessons = db.transaction((rows: Lesson[]) => {
     const stmt = db.prepare(
-      "INSERT OR REPLACE INTO lessons (id, name, image_path, group_id) VALUES (?, ?, ?, ?)",
+      "INSERT OR REPLACE INTO lessons (id, name, description, image_path, group_id) VALUES (?, ?, ?, ?, ?)",
     );
-    for (const r of rows) stmt.run(r.id, r.name, r.image_path, r.group_id);
+    for (const r of rows)
+      stmt.run(r.id, r.name, r.description, r.image_path, r.group_id);
   });
   insertLessons(lessons);
 
@@ -142,11 +149,11 @@ function storageUrlToKey(url: string, bucket: string): string {
   return url.slice(idx + marker.length);
 }
 
-async function downloadFiles(db: DB, files: FileRow[], lessons: Lesson[]) {
-  const updateStmt = db.prepare(
-    "UPDATE files SET mime_type = ?, local_path = ? WHERE id = ?",
-  );
-
+async function downloadFiles(
+  files: FileRow[],
+  lessons: Lesson[],
+  stagingDir: string,
+) {
   const lessonMap = new Map<number, string>();
   for (const lesson of lessons) {
     lessonMap.set(lesson.id, lesson.name);
@@ -174,32 +181,21 @@ async function downloadFiles(db: DB, files: FileRow[], lessons: Lesson[]) {
 
     const response = await fetch(file.storage_path);
     if (!response.ok || !response.body) {
-      console.warn(
-        "Could not stream download",
-        file.storage_path,
-        response.status,
-      );
-      continue;
+      throw new Error(`Download failed for ${file.storage_path}`);
     }
 
-    const localPath = path.join(LOCAL_DIR, objectKey);
-    fs.mkdirSync(path.dirname(localPath), { recursive: true });
+    const stagedPath = path.join(stagingDir, objectKey);
+    fs.mkdirSync(path.dirname(stagedPath), { recursive: true });
 
     try {
       const webStream =
         response.body as unknown as NodeReadableStream<Uint8Array>;
       const nodeReadable = Readable.fromWeb(webStream);
 
-      await pipeline(nodeReadable, fs.createWriteStream(localPath));
+      await pipeline(nodeReadable, fs.createWriteStream(stagedPath));
     } catch (err) {
-      console.warn("Error streaming file to disk", file.storage_path, err);
-      continue;
+      throw new Error(`Streaming failed for ${file.storage_path}, ${err}`);
     }
-
-    const inferredMime =
-      mime.lookup(file.name || localPath) || "application/octet-stream";
-
-    updateStmt.run(inferredMime, localPath, file.id);
   }
 }
 
@@ -218,12 +214,16 @@ export async function runSync() {
   }
 
   isSyncRunning = true;
+
+  let stagingDir: string | null = null;
   let runId: number | bigint | undefined;
   let startedAt = "";
   let finishedAt = "";
-  let db: any | null = null;
+  let db: DB | null = null;
+
   try {
     fs.mkdirSync(LOCAL_DIR, { recursive: true });
+    stagingDir = fs.mkdtempSync(path.join(os.tmpdir(), "rose-sync-"));
 
     const DB_PATH = path.join(process.cwd(), "rose-academies-uganda.db");
 
@@ -240,8 +240,33 @@ export async function runSync() {
     runId = result.lastInsertRowid;
 
     const { groups, lessons, files } = await fetchFromSupabase();
+
+    await downloadFiles(files, lessons, stagingDir);
     insertIntoSQLite(db, groups, lessons, files);
-    await downloadFiles(db, files, lessons);
+
+    const updateStmt = db.prepare(
+      "UPDATE files SET mime_type = ?, local_path = ? WHERE id = ?",
+    );
+
+    for (const file of files) {
+      if (!file.storage_path) continue;
+
+      const objectKey = storageUrlToKey(file.storage_path, BUCKET);
+      const stagedPath = path.join(stagingDir, objectKey);
+      const finalPath = path.join(LOCAL_DIR, objectKey);
+
+      if (fs.existsSync(stagedPath)) {
+        fs.mkdirSync(path.dirname(finalPath), { recursive: true });
+        fs.renameSync(stagedPath, finalPath);
+
+        const inferredMime =
+          mime.lookup(file.name || finalPath) || "application/octet-stream";
+
+        updateStmt.run(inferredMime, finalPath, file.id);
+      }
+    }
+
+    fs.rmSync(stagingDir, { recursive: true, force: true });
 
     finishedAt = new Date().toISOString();
 
@@ -258,6 +283,10 @@ export async function runSync() {
     };
   } catch (error) {
     console.error("Sync failed:", error);
+
+    if (stagingDir) {
+      fs.rmSync(stagingDir, { recursive: true, force: true });
+    }
 
     if (db && runId !== undefined) {
       finishedAt = new Date().toISOString();

@@ -1,5 +1,6 @@
 "use client";
 
+import type { FileTypeFilter } from "@/components/FileTypeDropdown";
 import { useContext, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import FilePreview from "@/components/FilePreview/";
@@ -11,6 +12,7 @@ import SearchBarComponent from "@/components/SearchBar";
 import { DataContext } from "@/context/DataContext";
 import { LocalFile } from "@/types/schema";
 import {
+  DescriptionText,
   HeaderRight,
   HeaderRow,
   PageContainer,
@@ -18,12 +20,22 @@ import {
   Title,
 } from "./style";
 
+function matchesFileType(fileName: string, filter: FileTypeFilter): boolean {
+  if (filter === "all") return true;
+  const ext = fileName.split(".").pop()?.toLowerCase() ?? "";
+  if (filter === "images") return ["jpg", "jpeg", "png"].includes(ext);
+  if (filter === "pdf") return ext === "pdf";
+  // "other": anything that's not an image or pdf
+  return !["jpg", "jpeg", "png", "pdf"].includes(ext);
+}
+
 export default function FilesPage() {
   const lessonId = Number(useParams().lessonId);
   const data = useContext(DataContext);
 
   const [selectedFile, setSelectedFile] = useState<LocalFile | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [fileTypeFilter, setFileTypeFilter] = useState<FileTypeFilter>("all");
 
   const lesson = useMemo(() => {
     if (!data) return null;
@@ -37,10 +49,12 @@ export default function FilesPage() {
 
   const filteredFiles = useMemo(
     () =>
-      files.filter(file =>
-        file.name.toLowerCase().includes(searchTerm.toLowerCase()),
+      files.filter(
+        file =>
+          file.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+          matchesFileType(file.name, fileTypeFilter),
       ),
-    [files, searchTerm],
+    [files, searchTerm, fileTypeFilter],
   );
 
   const tableFiles: FileRow[] = useMemo(
@@ -83,9 +97,16 @@ export default function FilesPage() {
             />
           </SearchBarWrapper>
 
-          <FileTypeDropdown />
+          <FileTypeDropdown
+            selectedType={fileTypeFilter}
+            onChange={setFileTypeFilter}
+          />
         </HeaderRight>
       </HeaderRow>
+
+      {lesson?.description && (
+        <DescriptionText>{lesson.description}</DescriptionText>
+      )}
 
       {tableFiles.length === 0 ? (
         <div>No files in this lesson yet.</div>

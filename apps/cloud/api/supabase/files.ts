@@ -7,35 +7,60 @@ export async function uploadFile(
 ): Promise<LocalFile> {
   const supabase = getSupabaseBrowserClient();
 
-  const objectPath = `lesson_${lessonId}/${file.name}`;
+  // check if file already exists
+  const { data: existingFile } = await supabase
+    .from("Files")
+    .select("*")
+    .eq("name", file.name)
+    .eq("size_bytes", file.size)
+    .maybeSingle();
+
+  if (existingFile) {
+    // just link the lesson to the file
+    const { error } = await supabase.from("LessonFiles").insert({
+      lesson_id: lessonId,
+      file_id: existingFile.id,
+    });
+
+    if (error) throw error;
+
+    return existingFile as LocalFile;
+  }
+
+  // upload new file
+  const objectPath = `teacher-1/${file.name}`;
 
   const { error: storageError } = await supabase.storage
-    .from("lesson-files")
+    .from("files")
     .upload(objectPath, file, { upsert: true });
 
   if (storageError) throw storageError;
 
-  const { data: pub } = supabase.storage
-    .from("lesson-files")
-    .getPublicUrl(objectPath);
+  const { data: pub } = supabase.storage.from("files").getPublicUrl(objectPath);
 
   const publicUrl = pub?.publicUrl;
-  if (!publicUrl) {
-    throw new Error("Failed to compute public URL for uploaded file.");
-  }
+  if (!publicUrl) throw new Error("Failed to compute public URL");
 
-  const { data, error: insertError } = await supabase
+  // create file row
+  const { data: fileRow, error: fileError } = await supabase
     .from("Files")
     .insert({
       name: file.name,
       size_bytes: file.size,
       storage_path: publicUrl,
-      lesson_id: lessonId,
     })
     .select()
     .single();
 
-  if (insertError) throw insertError;
+  if (fileError) throw fileError;
 
-  return data as LocalFile;
+  // link lesson + file
+  const { error: joinError } = await supabase.from("LessonFiles").insert({
+    lesson_id: lessonId,
+    file_id: fileRow.id,
+  });
+
+  if (joinError) throw joinError;
+
+  return fileRow as LocalFile;
 }

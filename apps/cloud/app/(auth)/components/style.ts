@@ -106,3 +106,8 @@ export const LogoWrap = styled.div`
   justify-content: center;
   margin-bottom: 0.5rem;
 `;
+
+export const Error = styled.p`
+  color: red;
+  margin-bottom: 1rem;
+`;

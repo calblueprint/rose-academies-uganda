@@ -1,6 +1,7 @@
 // app/(authed)/app/offline-library/page.tsx
 import { getSupabaseServerClientReadOnly } from "@/api/supabase/server-readonly";
 import CloudSyncButton from "@/components/CloudSyncButton";
+import StorageAndSync from "@/components/StorageAndSync";
 import InfoBoxes from "@/components/InfoBoxes";
 import LessonItem from "@/components/LessonItem";
 import {

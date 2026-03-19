@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import {
-  Card,
   Content,
   ProgressBar,
   ProgressFill,
@@ -10,6 +9,7 @@ import {
   StorageInfo,
   Title,
 } from "./styles";
+
 
 type StorageResponse = {
   disk: {
@@ -39,12 +39,10 @@ export default function PiStorageBar() {
 
   if (!storage) {
     return (
-      <Card>
-        <Content>
-          <Title>Raspberry Pi</Title>
-          <StatusText>Loading storage...</StatusText>
-        </Content>
-      </Card>
+      <Content>
+        <Title>Raspberry Pi</Title>
+        <StatusText>Loading storage...</StatusText>
+      </Content>
     );
   }
 
@@ -52,22 +50,29 @@ export default function PiStorageBar() {
   const usedGb = Math.round(storage.disk.usedKb / 1024 / 1024);
   const percent = storage.disk.usePercent;
 
+
+  // Placeholder test data incase storage function not working but still want to compile
+  // const totalGb = Math.round(10000000 / 1024 / 1024);
+  // const usedGb = Math.round(1000000 / 1024 / 1024);
+  // const percent = 10;
+
   return (
-    <Card>
-      <Content>
-        <Title>Raspberry Pi</Title>
 
-        <ProgressBar>
-          <ProgressFill percent={percent} />
-        </ProgressBar>
+    <Content>
+      <Title>Raspberry Pi</Title>
 
-        <StorageInfo>
-          <StatusText>
-            {usedGb} GB of {totalGb} GB Used
-          </StatusText>
-          <StatusText>{percent}% Used</StatusText>
-        </StorageInfo>
-      </Content>
-    </Card>
+      <ProgressBar>
+        <ProgressFill percent={percent} />
+      </ProgressBar>
+
+      <StorageInfo>
+        <StatusText>
+          {usedGb} GB of {totalGb} GB Used
+        </StatusText>
+        <StatusText>{percent}% Used</StatusText>
+      </StorageInfo>
+
+    </Content>
+
   );
 }

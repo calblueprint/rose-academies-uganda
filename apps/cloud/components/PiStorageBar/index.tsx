@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import supabase from "@/api/supabase/client";
 import {
   Content,
   ProgressBar,
@@ -24,13 +25,25 @@ export default function PiStorageBar() {
 
   useEffect(() => {
     async function loadStorage() {
-      try {
-        const res = await fetch("/api/system/storage");
-        const data = await res.json();
-        setStorage(data);
-      } catch (err) {
-        console.error("Failed to fetch storage:", err);
+      const { data, error } = await supabase
+        .from("devices")
+        .select("*")
+        .eq("id", "nathans-pi")
+        .single();
+
+      if (error) {
+        console.error("Failed to fetch storage:", error);
+        return;
       }
+
+      setStorage({
+        disk: {
+          totalKb: data.total_kb,
+          usedKb: data.used_kb,
+          availableKb: data.available_kb,
+          usePercent: data.use_percent,
+        },
+      });
     }
 
     loadStorage();

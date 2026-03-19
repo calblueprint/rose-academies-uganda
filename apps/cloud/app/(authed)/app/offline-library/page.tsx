@@ -3,6 +3,7 @@ import { getSupabaseServerClientReadOnly } from "@/api/supabase/server-readonly"
 import CloudSyncButton from "@/components/CloudSyncButton";
 import InfoBoxes from "@/components/InfoBoxes";
 import LessonItem from "@/components/LessonItem";
+// import StorageAndSync from "@/components/StorageAndSync"; Will probably have to import this later, leaving as comment
 import {
   Content,
   LessonsStack,

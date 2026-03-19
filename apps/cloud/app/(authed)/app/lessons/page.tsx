@@ -5,7 +5,7 @@ export default async function LessonsPage() {
   const supabase = await getSupabaseServerClientReadOnly();
 
   const { data: lessons, error } = await supabase
-    .from("Lessons_copy")
+    .from("Lessons")
     .select("id, name, description, image_path, group_id, is_archived")
     .order("id", { ascending: true })
     .eq("is_archived", false);

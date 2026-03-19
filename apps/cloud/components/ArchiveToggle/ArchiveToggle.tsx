@@ -17,7 +17,7 @@ export default function ArchiveToggle({
 
   async function handleToggle() {
     const { error } = await supabase
-      .from("Lessons_copy")
+      .from("Lessons")
       .update({ is_archived: !isArchived })
       .eq("id", lesson_Id);
 

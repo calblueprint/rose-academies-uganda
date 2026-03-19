@@ -10,7 +10,6 @@ import {
   Title,
 } from "./styles";
 
-
 type StorageResponse = {
   disk: {
     totalKb: number;
@@ -50,14 +49,12 @@ export default function PiStorageBar() {
   const usedGb = Math.round(storage.disk.usedKb / 1024 / 1024);
   const percent = storage.disk.usePercent;
 
-
   // Placeholder test data incase storage function not working but still want to compile
   // const totalGb = Math.round(10000000 / 1024 / 1024);
   // const usedGb = Math.round(1000000 / 1024 / 1024);
   // const percent = 10;
 
   return (
-
     <Content>
       <Title>Raspberry Pi</Title>
 
@@ -71,8 +68,6 @@ export default function PiStorageBar() {
         </StatusText>
         <StatusText>{percent}% Used</StatusText>
       </StorageInfo>
-
     </Content>
-
   );
 }

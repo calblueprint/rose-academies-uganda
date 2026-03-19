@@ -258,7 +258,8 @@ export async function runSync() {
 
       if (fs.existsSync(stagedPath)) {
         fs.mkdirSync(path.dirname(finalPath), { recursive: true });
-        fs.renameSync(stagedPath, finalPath);
+        fs.copyFileSync(stagedPath, finalPath);
+        fs.unlinkSync(stagedPath);
 
         const inferredMime =
           mime.lookup(file.name || finalPath) || "application/octet-stream";
@@ -273,7 +274,7 @@ export async function runSync() {
       const storage = await getStorageInfo();
 
       await supabase.from("devices").upsert({
-        id: "nathans-pi",
+        id: "nathans-pi", // Hardcoded
         total_kb: storage.disk.totalKb,
         used_kb: storage.disk.usedKb,
         available_kb: storage.disk.availableKb,

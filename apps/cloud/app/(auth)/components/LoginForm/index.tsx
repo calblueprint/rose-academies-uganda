@@ -2,7 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import { loginWithEmailPassword } from "@/actions/login";
-import * as style from "../components/style";
+import * as style from "./style";
 
 export default function LoginForm() {
   const [email, setEmail] = useState("");

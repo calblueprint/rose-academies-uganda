@@ -1,6 +1,36 @@
 import styled from "styled-components";
 import COLORS from "@/styles/colors";
 
+export const CardWrapper = styled.div`
+  position: relative;
+
+  &:hover button[aria-label="Edit lesson cover image"] {
+    opacity: 1;
+  }
+`;
+
+export const EditImageButton = styled.button`
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  opacity: 0;
+  transition: opacity 0.15s;
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 6px;
+  padding: 0.375rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: ${COLORS.veryDarkBlue};
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+
+  &:hover {
+    background: ${COLORS.white};
+  }
+`;
+
 export const PageContainer = styled.div`
   display: flex;
   flex-direction: column;

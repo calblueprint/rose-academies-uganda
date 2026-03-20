@@ -21,14 +21,20 @@ export interface SyncModalProps {
   variant: ModalVariant; // "success" or "error"
   onClose: () => void;
   onSyncAgain?: () => void;
+  bodyText?: string;
 }
 
 const SyncModal: React.FC<SyncModalProps> = ({
   variant,
   onClose,
   onSyncAgain,
+  bodyText,
 }) => {
   const isSuccess = variant === "success";
+
+  const defaultBodyText = isSuccess
+    ? "All changes have been successfully synced."
+    : "The sync could not be completed. Please try again later.";
 
   return (
     <Overlay>
@@ -43,11 +49,7 @@ const SyncModal: React.FC<SyncModalProps> = ({
           {isSuccess ? "Syncing Successful!" : "Error! Syncing Failed"}
         </Title>
 
-        <Body>
-          {isSuccess
-            ? "All changes have been successfully synced."
-            : "Explanation for syncing was not successful because lorem ipsum"}
-        </Body>
+        <Body>{bodyText ?? defaultBodyText}</Body>
 
         {isSuccess ? (
           <ActionsRow>

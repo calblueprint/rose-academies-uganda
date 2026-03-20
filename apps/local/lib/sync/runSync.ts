@@ -13,6 +13,7 @@ const LOCAL_DIR =
   process.env.LOCAL_FILES_DIR ?? path.join(os.homedir(), "rose-files");
 
 type DB = InstanceType<typeof Database>;
+type SyncRunStatus = "requested" | "in_progress" | "success" | "failed";
 
 type Group = { id: number; name: string; join_code: string | null };
 type Lesson = {
@@ -28,6 +29,10 @@ type FileRow = {
   size_bytes: number | null;
   storage_path: string | null;
   lesson_id: number | null;
+};
+
+type RunSyncOptions = {
+  syncRunId?: number;
 };
 
 function createSchema(db: DB) {
@@ -205,7 +210,26 @@ export function getIsSyncRunning() {
   return isSyncRunning;
 }
 
-export async function runSync() {
+async function updateCloudSyncRun(
+  syncRunId: number,
+  payload: {
+    status: SyncRunStatus;
+    started_at?: string;
+    completed_at?: string;
+    error_message?: string | null;
+  },
+) {
+  const { error } = await supabase
+    .from("sync_runs")
+    .update(payload)
+    .eq("id", syncRunId);
+
+  if (error) {
+    throw error;
+  }
+}
+
+export async function runSync({ syncRunId }: RunSyncOptions = {}) {
   if (isSyncRunning) {
     return {
       ok: false,
@@ -218,8 +242,9 @@ export async function runSync() {
   let stagingDir: string | null = null;
   let runId: number | bigint | undefined;
   let startedAt = "";
-  let finishedAt = "";
+  let completedAt = "";
   let db: DB | null = null;
+  let cloudSyncStartedAt = "";
 
   try {
     fs.mkdirSync(LOCAL_DIR, { recursive: true });
@@ -232,6 +257,15 @@ export async function runSync() {
     createSchema(db);
 
     startedAt = new Date().toISOString();
+
+    if (syncRunId !== undefined) {
+      cloudSyncStartedAt = new Date().toISOString();
+      await updateCloudSyncRun(syncRunId, {
+        status: "in_progress",
+        started_at: cloudSyncStartedAt,
+        error_message: null,
+      });
+    }
 
     const result = db
       .prepare("INSERT INTO sync_runs (started_at, status) VALUES (?, ?)")
@@ -268,18 +302,27 @@ export async function runSync() {
 
     fs.rmSync(stagingDir, { recursive: true, force: true });
 
-    finishedAt = new Date().toISOString();
+    completedAt = new Date().toISOString();
 
     db.prepare(
       "UPDATE sync_runs SET finished_at = ?, status = ? WHERE id = ?",
-    ).run(finishedAt, "success", runId);
+    ).run(completedAt, "success", runId);
+
+    if (syncRunId !== undefined) {
+      await updateCloudSyncRun(syncRunId, {
+        status: "success",
+        completed_at: completedAt,
+        error_message: null,
+      });
+    }
 
     return {
       ok: true,
       message: "Data synchronized successfully",
       runId,
       startedAt,
-      finishedAt,
+      completedAt,
+      syncRunId,
     };
   } catch (error) {
     console.error("Sync failed:", error);
@@ -289,11 +332,28 @@ export async function runSync() {
     }
 
     if (db && runId !== undefined) {
-      finishedAt = new Date().toISOString();
+      completedAt = new Date().toISOString();
 
       db.prepare(
         "UPDATE sync_runs SET finished_at = ?, status = ? WHERE id = ?",
-      ).run(finishedAt, "failed", runId);
+      ).run(completedAt, "failed", runId);
+    }
+
+    if (syncRunId !== undefined) {
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "The sync failed on the Raspberry Pi.";
+
+      try {
+        await updateCloudSyncRun(syncRunId, {
+          status: "failed",
+          completed_at: new Date().toISOString(),
+          error_message: errorMessage,
+        });
+      } catch (updateError) {
+        console.error("Failed to update cloud sync run:", updateError);
+      }
     }
 
     return {
@@ -301,7 +361,8 @@ export async function runSync() {
       message: "Error synchronizing data",
       runId,
       startedAt,
-      finishedAt,
+      completedAt,
+      syncRunId,
     };
   } finally {
     if (db) {

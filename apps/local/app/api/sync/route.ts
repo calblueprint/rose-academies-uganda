@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getIsSyncRunning, runSync } from "@/lib/sync/runSync";
 
-export async function GET(): Promise<NextResponse> {
+export async function GET(request: Request): Promise<NextResponse> {
   if (getIsSyncRunning()) {
     return new NextResponse(
       JSON.stringify({ message: "Sync already running" }),
@@ -9,9 +9,16 @@ export async function GET(): Promise<NextResponse> {
     );
   }
 
-  const result = await runSync();
+  const { searchParams } = new URL(request.url);
+  const syncRunIdParam = searchParams.get("syncRunId");
+  const syncRunId =
+    syncRunIdParam && Number.isFinite(Number(syncRunIdParam))
+      ? Number(syncRunIdParam)
+      : undefined;
 
-  return new NextResponse(JSON.stringify({ message: result.message }), {
+  const result = await runSync({ syncRunId });
+
+  return new NextResponse(JSON.stringify(result), {
     status: result.ok ? 200 : 500,
     headers: { "Content-Type": "application/json" },
   });

@@ -7,6 +7,12 @@ console.log("pollSync file loaded.");
 let intervalId: ReturnType<typeof setInterval> | null = null;
 let isTriggeringSync = false;
 
+type PendingSyncRun = {
+  id: string | number;
+  status: "requested";
+  requested_at: string;
+};
+
 export function startSyncPolling() {
   if (intervalId) {
     return () => {};
@@ -16,19 +22,24 @@ export function startSyncPolling() {
     console.log("Polling for sync...", new Date().toLocaleTimeString());
 
     const { data, error } = await supabase
-      .from("devices")
-      .select("sync_requested_at")
-      .eq("id", DEVICE_ID)
-      .single();
+      .from("sync_runs")
+      .select("id, status, requested_at")
+      .eq("device_id", DEVICE_ID)
+      .eq("status", "requested")
+      .order("requested_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
 
     if (error) {
       console.error("Poll error:", error);
       return;
     }
 
-    if (!data?.sync_requested_at) {
+    if (!data) {
       return;
     }
+
+    const pendingRun = data as PendingSyncRun;
 
     if (isTriggeringSync) {
       console.log("Sync trigger already in progress.");
@@ -38,21 +49,16 @@ export function startSyncPolling() {
     isTriggeringSync = true;
 
     try {
-      console.log("SYNC REQUEST DETECTED");
+      console.log(`SYNC REQUEST DETECTED: ${pendingRun.id}`);
 
-      const response = await fetch("/api/sync");
+      const response = await fetch(`/api/sync?syncRunId=${pendingRun.id}`);
 
       if (!response.ok) {
         console.error("Local sync route failed:", response.status);
         return;
       }
 
-      console.log("SYNC FINISHED");
-
-      await supabase
-        .from("devices")
-        .update({ sync_requested_at: null })
-        .eq("id", DEVICE_ID);
+      console.log(`SYNC FINISHED: ${pendingRun.id}`);
     } catch (err) {
       console.error("Error triggering local sync:", err);
     } finally {

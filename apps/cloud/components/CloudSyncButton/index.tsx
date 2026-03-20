@@ -8,8 +8,8 @@ import { IconSvgs } from "@/lib/icons";
 import { ButtonWrapper, IconWrapper } from "./styles";
 
 const DEVICE_ID = "nathans-pi"; // hardcoded for now
-const POLL_INTERVAL_MS = 3000;
-const POLL_TIMEOUT_MS = 60 * 1000;
+const POLL_INTERVAL_MS = 3000; // polls every 3 seconds
+const POLL_TIMEOUT_MS = 60 * 1000; // This is one minute, can increase if we want
 
 type SyncRunRow = {
   id: number;

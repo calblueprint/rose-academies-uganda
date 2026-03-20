@@ -31,8 +31,10 @@ type FileRow = {
   lesson_id: number | null;
 };
 
+type CloudSyncRunId = string | number;
+
 type RunSyncOptions = {
-  syncRunId?: number;
+  syncRunId?: CloudSyncRunId;
 };
 
 function createSchema(db: DB) {
@@ -211,7 +213,7 @@ export function getIsSyncRunning() {
 }
 
 async function updateCloudSyncRun(
-  syncRunId: number,
+  syncRunId: CloudSyncRunId,
   payload: {
     status: SyncRunStatus;
     started_at?: string;
@@ -291,7 +293,8 @@ export async function runSync({ syncRunId }: RunSyncOptions = {}) {
 
       if (fs.existsSync(stagedPath)) {
         fs.mkdirSync(path.dirname(finalPath), { recursive: true });
-        fs.renameSync(stagedPath, finalPath);
+        fs.copyFileSync(stagedPath, finalPath);
+        fs.unlinkSync(stagedPath);
 
         const inferredMime =
           mime.lookup(file.name || finalPath) || "application/octet-stream";

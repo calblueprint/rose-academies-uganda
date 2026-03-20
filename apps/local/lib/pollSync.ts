@@ -8,7 +8,7 @@ let intervalId: ReturnType<typeof setInterval> | null = null;
 let isTriggeringSync = false;
 
 type PendingSyncRun = {
-  id: number;
+  id: string | number;
   status: "requested";
   requested_at: string;
 };

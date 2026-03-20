@@ -11,10 +11,7 @@ export async function GET(request: Request): Promise<NextResponse> {
 
   const { searchParams } = new URL(request.url);
   const syncRunIdParam = searchParams.get("syncRunId");
-  const syncRunId =
-    syncRunIdParam && Number.isFinite(Number(syncRunIdParam))
-      ? Number(syncRunIdParam)
-      : undefined;
+  const syncRunId = syncRunIdParam || undefined;
 
   const result = await runSync({ syncRunId });
 

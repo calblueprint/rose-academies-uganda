@@ -244,7 +244,7 @@ export async function runSync({ syncRunId }: RunSyncOptions = {}) {
   let stagingDir: string | null = null;
   let runId: number | bigint | undefined;
   let startedAt = "";
-  let completedAt = "";
+  let finishedAt = "";
   let db: DB | null = null;
   let cloudSyncStartedAt = "";
 
@@ -305,16 +305,16 @@ export async function runSync({ syncRunId }: RunSyncOptions = {}) {
 
     fs.rmSync(stagingDir, { recursive: true, force: true });
 
-    completedAt = new Date().toISOString();
+    finishedAt = new Date().toISOString();
 
     db.prepare(
       "UPDATE sync_runs SET finished_at = ?, status = ? WHERE id = ?",
-    ).run(completedAt, "success", runId);
+    ).run(finishedAt, "success", runId);
 
     if (syncRunId !== undefined) {
       await updateCloudSyncRun(syncRunId, {
         status: "success",
-        completed_at: completedAt,
+        completed_at: finishedAt,
         error_message: null,
       });
     }
@@ -324,7 +324,7 @@ export async function runSync({ syncRunId }: RunSyncOptions = {}) {
       message: "Data synchronized successfully",
       runId,
       startedAt,
-      completedAt,
+      finishedAt,
       syncRunId,
     };
   } catch (error) {
@@ -335,11 +335,11 @@ export async function runSync({ syncRunId }: RunSyncOptions = {}) {
     }
 
     if (db && runId !== undefined) {
-      completedAt = new Date().toISOString();
+      finishedAt = new Date().toISOString();
 
       db.prepare(
         "UPDATE sync_runs SET finished_at = ?, status = ? WHERE id = ?",
-      ).run(completedAt, "failed", runId);
+      ).run(finishedAt, "failed", runId);
     }
 
     if (syncRunId !== undefined) {
@@ -364,7 +364,7 @@ export async function runSync({ syncRunId }: RunSyncOptions = {}) {
       message: "Error synchronizing data",
       runId,
       startedAt,
-      completedAt,
+      finishedAt,
       syncRunId,
     };
   } finally {

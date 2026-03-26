@@ -109,5 +109,8 @@ export const LogoWrap = styled.div`
 
 export const Error = styled.p`
   color: red;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
+  min-height: 1.25rem;
+  margin: 0;
+  font-size: 0.9rem;
 `;

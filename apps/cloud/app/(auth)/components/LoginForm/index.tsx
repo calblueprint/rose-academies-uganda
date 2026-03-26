@@ -61,7 +61,7 @@ export default function LoginForm() {
               }}
             />
           </style.Label>
-          {errorMessage && <style.Error>{errorMessage}</style.Error>}
+          {<style.Error>{errorMessage}</style.Error>}
           <style.Button
             type="submit"
             disabled={isSubmitting}

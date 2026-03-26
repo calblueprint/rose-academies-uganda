@@ -14,7 +14,6 @@ export const Card = styled.div`
   flex-direction: column;
   align-items: center;
   gap: 1.75rem;
-
   padding: 3.25rem 2.25rem;
   border-radius: 0.9375rem;
   background: #ffffff;
@@ -28,7 +27,6 @@ export const Card = styled.div`
 export const H1 = styled.h1`
   margin: 0;
   text-align: center;
-
   font-family: "Google Sans", system-ui;
   font-size: 2rem;
   font-weight: 400;
@@ -49,7 +47,6 @@ export const Label = styled.label`
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
-
   font-size: 0.875rem;
   color: #808582;
 `;
@@ -57,11 +54,10 @@ export const Label = styled.label`
 export const Input = styled.input`
   height: 3.25rem;
   padding: 0.625rem 1rem;
-
+  font-size: 1.125rem;
   border-radius: 0.5rem;
   border: 1px solid #d9d9d9;
   background: #f4f5f7;
-
   &::placeholder {
     color: #6b7280;
     font-size: 1.125rem;
@@ -84,6 +80,7 @@ export const Button = styled.button`
 
   font-size: 1.125rem;
   font-family: "Google Sans", system-ui;
+  cursor: pointer;
 `;
 
 export const Paragraph = styled.p`

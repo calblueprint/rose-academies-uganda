@@ -19,7 +19,7 @@ export function startSyncPolling() {
   }
 
   async function poll() {
-    console.log("Polling for sync...", new Date().toLocaleTimeString());
+    console.log("[PI] Polling for sync...", new Date().toLocaleTimeString());
 
     const { data, error } = await supabase
       .from("sync_runs")
@@ -36,10 +36,12 @@ export function startSyncPolling() {
     }
 
     if (!data) {
+      console.log("[PI] No pending sync");
       return;
     }
 
     const pendingRun = data as PendingSyncRun;
+    console.log("[PI] Found requested sync:", pendingRun.id);
 
     if (isTriggeringSync) {
       console.log("Sync trigger already in progress.");
@@ -49,9 +51,10 @@ export function startSyncPolling() {
     isTriggeringSync = true;
 
     try {
-      console.log(`SYNC REQUEST DETECTED: ${pendingRun.id}`);
+      console.log("[PI] Triggering local sync route:", pendingRun.id);
 
       const response = await fetch(`/api/sync?syncRunId=${pendingRun.id}`);
+      console.log("[PI] Local sync route response:", response.status);
 
       if (!response.ok) {
         console.error("Local sync route failed:", response.status);
@@ -60,7 +63,7 @@ export function startSyncPolling() {
 
       console.log(`SYNC FINISHED: ${pendingRun.id}`);
     } catch (err) {
-      console.error("Error triggering local sync:", err);
+      console.error("[PI] Error triggering local sync:", err);
     } finally {
       isTriggeringSync = false;
     }

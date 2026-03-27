@@ -9,7 +9,7 @@ import { ButtonWrapper, IconWrapper } from "./styles";
 
 const DEVICE_ID = "nathans-pi"; // hardcoded for now
 const POLL_INTERVAL_MS = 3000; // polls every 3 seconds
-const POLL_TIMEOUT_MS = 60 * 1000; // This is one minute, can increase if we want
+const POLL_TIMEOUT_MS = 120 * 1000; // This is one minute, can increase if we want
 
 type SyncRunRow = {
   id: number;
@@ -30,6 +30,7 @@ export default function CloudSyncButton() {
     const startedAt = Date.now();
 
     while (Date.now() - startedAt < POLL_TIMEOUT_MS) {
+      console.log("[CLOUD] Polling sync run:", syncRunId);
       const { data, error } = await supabase
         .from("sync_runs")
         .select("id, status, error_message")
@@ -43,6 +44,7 @@ export default function CloudSyncButton() {
       const syncRun = data as SyncRunRow;
 
       if (syncRun.status === "success" || syncRun.status === "failed") {
+        console.log("[CLOUD] Final status:", syncRun.status);
         return syncRun;
       }
 
@@ -53,6 +55,7 @@ export default function CloudSyncButton() {
   };
 
   const handleSync = async () => {
+    console.log("[CLOUD] Sync button clicked");
     setIsSyncing(true);
     setModalVariant(null);
     setModalBodyText(undefined);
@@ -70,12 +73,15 @@ export default function CloudSyncButton() {
         .single();
 
       if (error || !data) {
+        console.error("[CLOUD] Failed to create sync run:", error);
         throw error ?? new Error("Unable to create sync run.");
       }
+      console.log("[CLOUD] Sync run created:", data.id);
 
       const completedRun = await waitForSyncRunCompletion(
         (data as { id: number }).id,
       );
+      console.log("[CLOUD] Sync completed:", completedRun);
 
       await minLoadingTime;
 

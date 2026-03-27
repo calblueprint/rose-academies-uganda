@@ -8,35 +8,98 @@ import { IconSvgs } from "@/lib/icons";
 import { ButtonWrapper, IconWrapper } from "./styles";
 
 const DEVICE_ID = "nathans-pi"; // hardcoded for now
+const POLL_INTERVAL_MS = 3000; // polls every 3 seconds
+const POLL_TIMEOUT_MS = 120 * 1000; // This is one minute, can increase if we want
+
+type SyncRunRow = {
+  id: number;
+  status: "requested" | "in_progress" | "success" | "failed";
+  error_message: string | null;
+};
+
+function delay(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 export default function CloudSyncButton() {
   const [isSyncing, setIsSyncing] = useState(false);
   const [modalVariant, setModalVariant] = useState<ModalVariant | null>(null);
+  const [modalBodyText, setModalBodyText] = useState<string | undefined>();
+
+  const waitForSyncRunCompletion = async (syncRunId: number) => {
+    const startedAt = Date.now();
+
+    while (Date.now() - startedAt < POLL_TIMEOUT_MS) {
+      console.log("[CLOUD] Polling sync run:", syncRunId);
+      const { data, error } = await supabase
+        .from("sync_runs")
+        .select("id, status, error_message")
+        .eq("id", syncRunId)
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      const syncRun = data as SyncRunRow;
+
+      if (syncRun.status === "success" || syncRun.status === "failed") {
+        console.log("[CLOUD] Final status:", syncRun.status);
+        return syncRun;
+      }
+
+      await delay(POLL_INTERVAL_MS);
+    }
+
+    throw new Error("Timed out waiting for the sync to finish.");
+  };
 
   const handleSync = async () => {
+    console.log("[CLOUD] Sync button clicked");
     setIsSyncing(true);
     setModalVariant(null);
+    setModalBodyText(undefined);
 
     const minLoadingTime = new Promise(resolve => setTimeout(resolve, 1000));
 
     try {
-      const { error } = await supabase
-        .from("devices")
-        .update({ sync_requested_at: new Date().toISOString() })
-        .eq("id", DEVICE_ID);
+      const { data, error } = await supabase
+        .from("sync_runs")
+        .insert({
+          device_id: DEVICE_ID,
+          status: "requested",
+        })
+        .select("id")
+        .single();
+
+      if (error || !data) {
+        console.error("[CLOUD] Failed to create sync run:", error);
+        throw error ?? new Error("Unable to create sync run.");
+      }
+      console.log("[CLOUD] Sync run created:", data.id);
+
+      const completedRun = await waitForSyncRunCompletion(
+        (data as { id: number }).id,
+      );
+      console.log("[CLOUD] Sync completed:", completedRun);
 
       await minLoadingTime;
 
-      if (error) {
-        console.error("Failed to request sync:", error);
-        setModalVariant("error");
-      } else {
-        console.log("Sync requested successfully");
+      if (completedRun.status === "success") {
+        console.log("Sync completed successfully");
         setModalVariant("success");
+      } else {
+        console.error("Sync failed:", completedRun.error_message);
+        setModalBodyText(
+          completedRun.error_message ??
+            "The sync could not be completed. Please try again later.",
+        );
+        setModalVariant("error");
       }
     } catch (syncError) {
       console.error("Error requesting sync:", syncError);
       await minLoadingTime;
+      setModalBodyText("The sync request could not be completed.");
       setModalVariant("error");
     } finally {
       setIsSyncing(false);
@@ -57,6 +120,7 @@ export default function CloudSyncButton() {
       {modalVariant && (
         <SyncModal
           variant={modalVariant}
+          bodyText={modalBodyText}
           onClose={() => setModalVariant(null)}
           onSyncAgain={handleSync}
         />

@@ -13,6 +13,7 @@ const LOCAL_DIR =
   process.env.LOCAL_FILES_DIR ?? path.join(os.homedir(), "rose-files");
 
 type DB = InstanceType<typeof Database>;
+type SyncRunStatus = "requested" | "in_progress" | "success" | "failed";
 
 type Group = { id: number; name: string; join_code: string | null };
 type Lesson = {
@@ -28,6 +29,12 @@ type FileRow = {
   size_bytes: number | null;
   storage_path: string | null;
   lesson_id: number | null;
+};
+
+type CloudSyncRunId = string | number;
+
+type RunSyncOptions = {
+  syncRunId?: CloudSyncRunId;
 };
 
 function createSchema(db: DB) {
@@ -83,6 +90,7 @@ async function fetchFromSupabase(): Promise<{
   lessons: Lesson[];
   files: FileRow[];
 }> {
+  console.log("[SYNC] Fetching groups, lessons, and files from Supabase");
   const { data: groups, error: groupError } = await supabase
     .from("Groups")
     .select("*");
@@ -96,7 +104,11 @@ async function fetchFromSupabase(): Promise<{
   if (groupError || lessonError || fileError) {
     throw new Error("Error fetching data from Supabase");
   }
-
+  console.log("[SYNC] Supabase fetch complete:", {
+    groups: groups?.length ?? 0,
+    lessons: lessons?.length ?? 0,
+    files: files?.length ?? 0,
+  });
   return {
     groups: groups ?? [],
     lessons: lessons ?? [],
@@ -154,6 +166,10 @@ async function downloadFiles(
   lessons: Lesson[],
   stagingDir: string,
 ) {
+  console.log("[SYNC] Starting downloadFiles", {
+    fileCount: files.length,
+    stagingDir,
+  });
   const lessonMap = new Map<number, string>();
   for (const lesson of lessons) {
     lessonMap.set(lesson.id, lesson.name);
@@ -197,6 +213,7 @@ async function downloadFiles(
       throw new Error(`Streaming failed for ${file.storage_path}, ${err}`);
     }
   }
+  console.log("[SYNC] downloadFiles complete");
 }
 
 let isSyncRunning = false;
@@ -205,7 +222,30 @@ export function getIsSyncRunning() {
   return isSyncRunning;
 }
 
-export async function runSync() {
+async function updateCloudSyncRun(
+  syncRunId: CloudSyncRunId,
+  payload: {
+    status: SyncRunStatus;
+    started_at?: string;
+    completed_at?: string;
+    error_message?: string | null;
+  },
+) {
+  console.log("[SYNC] Updating cloud sync run:", { syncRunId, payload });
+
+  const { error } = await supabase
+    .from("sync_runs")
+    .update(payload)
+    .eq("id", syncRunId);
+
+  if (error) {
+    console.error("[SYNC] Failed updating cloud sync run:", error);
+    throw error;
+  }
+}
+
+export async function runSync({ syncRunId }: RunSyncOptions = {}) {
+  console.log("[SYNC] Starting runSync", { syncRunId });
   if (isSyncRunning) {
     return {
       ok: false,
@@ -214,35 +254,60 @@ export async function runSync() {
   }
 
   isSyncRunning = true;
+  console.log("[SYNC] Marked sync as running");
 
   let stagingDir: string | null = null;
   let runId: number | bigint | undefined;
   let startedAt = "";
   let finishedAt = "";
   let db: DB | null = null;
+  let cloudSyncStartedAt = "";
 
   try {
     fs.mkdirSync(LOCAL_DIR, { recursive: true });
     stagingDir = fs.mkdtempSync(path.join(os.tmpdir(), "rose-sync-"));
 
+    console.log("[SYNC] Prepared directories:", {
+      LOCAL_DIR,
+      stagingDir,
+    });
+
     const DB_PATH = path.join(process.cwd(), "rose-academies-uganda.db");
 
     db = new Database(DB_PATH);
 
+    console.log("[SYNC] Opened SQLite DB:", DB_PATH);
     createSchema(db);
-
+    console.log("[SYNC] SQLite schema ensured");
     startedAt = new Date().toISOString();
+
+    if (syncRunId !== undefined) {
+      console.log("[SYNC] Marking sync run in_progress:", syncRunId);
+      cloudSyncStartedAt = new Date().toISOString();
+      await updateCloudSyncRun(syncRunId, {
+        status: "in_progress",
+        started_at: cloudSyncStartedAt,
+        error_message: null,
+      });
+    }
 
     const result = db
       .prepare("INSERT INTO sync_runs (started_at, status) VALUES (?, ?)")
       .run(startedAt, "running");
 
     runId = result.lastInsertRowid;
+    console.log("[SYNC] Inserted local sync_runs row:", { runId, startedAt });
 
     const { groups, lessons, files } = await fetchFromSupabase();
+    console.log("[SYNC] Received fetched data in runSync:", {
+      groups: groups.length,
+      lessons: lessons.length,
+      files: files.length,
+    });
 
     await downloadFiles(files, lessons, stagingDir);
     insertIntoSQLite(db, groups, lessons, files);
+    console.log("[SYNC] Inserted groups, lessons, and files into SQLite");
 
     const updateStmt = db.prepare(
       "UPDATE files SET mime_type = ?, local_path = ? WHERE id = ?",
@@ -257,7 +322,8 @@ export async function runSync() {
 
       if (fs.existsSync(stagedPath)) {
         fs.mkdirSync(path.dirname(finalPath), { recursive: true });
-        fs.renameSync(stagedPath, finalPath);
+        fs.copyFileSync(stagedPath, finalPath);
+        fs.unlinkSync(stagedPath);
 
         const inferredMime =
           mime.lookup(file.name || finalPath) || "application/octet-stream";
@@ -267,12 +333,26 @@ export async function runSync() {
     }
 
     fs.rmSync(stagingDir, { recursive: true, force: true });
+    console.log("[SYNC] Removed staging directory:", stagingDir);
 
     finishedAt = new Date().toISOString();
 
     db.prepare(
       "UPDATE sync_runs SET finished_at = ?, status = ? WHERE id = ?",
     ).run(finishedAt, "success", runId);
+    console.log("[SYNC] Marked local sync_runs row success:", {
+      runId,
+      finishedAt,
+    });
+
+    if (syncRunId !== undefined) {
+      await updateCloudSyncRun(syncRunId, {
+        status: "success",
+        completed_at: finishedAt,
+        error_message: null,
+      });
+    }
+    console.log("[SYNC] runSync completed successfully");
 
     return {
       ok: true,
@@ -280,12 +360,17 @@ export async function runSync() {
       runId,
       startedAt,
       finishedAt,
+      syncRunId,
     };
   } catch (error) {
-    console.error("Sync failed:", error);
+    console.error("[SYNC] runSync failed:", error);
 
     if (stagingDir) {
       fs.rmSync(stagingDir, { recursive: true, force: true });
+      console.log(
+        "[SYNC] Removed staging directory after failure:",
+        stagingDir,
+      );
     }
 
     if (db && runId !== undefined) {
@@ -295,6 +380,27 @@ export async function runSync() {
         "UPDATE sync_runs SET finished_at = ?, status = ? WHERE id = ?",
       ).run(finishedAt, "failed", runId);
     }
+    console.log("[SYNC] Marked local sync_runs row failed:", {
+      runId,
+      finishedAt,
+    });
+
+    if (syncRunId !== undefined) {
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "The sync failed on the Raspberry Pi.";
+
+      try {
+        await updateCloudSyncRun(syncRunId, {
+          status: "failed",
+          completed_at: new Date().toISOString(),
+          error_message: errorMessage,
+        });
+      } catch (updateError) {
+        console.error("[SYNC] Failed to update cloud sync run:", updateError);
+      }
+    }
 
     return {
       ok: false,
@@ -302,10 +408,12 @@ export async function runSync() {
       runId,
       startedAt,
       finishedAt,
+      syncRunId,
     };
   } finally {
     if (db) {
       db.close();
+      console.log("[SYNC] Closed SQLite DB");
     }
     isSyncRunning = false;
   }

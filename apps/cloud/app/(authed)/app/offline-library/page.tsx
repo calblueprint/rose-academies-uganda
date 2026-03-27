@@ -3,6 +3,7 @@ import { getSupabaseServerClientReadOnly } from "@/api/supabase/server-readonly"
 import CloudSyncButton from "@/components/CloudSyncButton";
 import InfoBoxes from "@/components/InfoBoxes";
 import LessonItem from "@/components/LessonItem";
+import StorageAndSync from "@/components/StorageAndSync";
 import {
   Content,
   LessonsStack,
@@ -71,10 +72,10 @@ export default async function OfflineLibraryPage() {
         <PageSubtitle>
           Lessons in this library will be available offline after you run sync
         </PageSubtitle>
-        <SyncButtonWrapper>
+        {/* <SyncButtonWrapper>
           <CloudSyncButton />
-        </SyncButtonWrapper>
-
+        </SyncButtonWrapper> */}
+        <StorageAndSync />
         <InfoBoxes
           availableOfflineCount={availableOfflineCount}
           pendingDownloadCount={pendingDownloadCount}

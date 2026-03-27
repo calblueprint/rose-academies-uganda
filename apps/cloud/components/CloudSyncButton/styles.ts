@@ -14,7 +14,7 @@ export const ButtonWrapper = styled.button`
   display: flex;
   font-family: var(--font-gilroy);
 
-  width: 450px;
+  width: 550px;
   height: 50px;
   padding: 12px 20px;
   flex-direction: row;

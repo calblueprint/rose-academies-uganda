@@ -20,19 +20,20 @@ type StorageResponse = {
   };
 };
 
-export default function PiStorageBar() {
+export default function PiStorageBar({ userId }: { userId: string }) {
   const [storage, setStorage] = useState<StorageResponse | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadStorage() {
       const { data, error } = await supabase
         .from("devices")
-        .select("*")
-        .eq("id", "nathans-pi")
+        .select("total_kb, used_kb, available_kb, use_percent")
+        .eq("user_id", userId)
         .single();
 
-      if (error) {
-        console.error("Failed to fetch storage:", error);
+      if (error || !data) {
+        setErrorMessage(error?.message ?? "No device found for this user");
         return;
       }
 
@@ -47,7 +48,16 @@ export default function PiStorageBar() {
     }
 
     loadStorage();
-  }, []);
+  }, [userId]);
+
+  if (errorMessage) {
+    return (
+      <Content>
+        <Title>Raspberry Pi</Title>
+        <StatusText>{errorMessage}</StatusText>
+      </Content>
+    );
+  }
 
   if (!storage) {
     return (
@@ -61,11 +71,6 @@ export default function PiStorageBar() {
   const totalGb = Math.round(storage.disk.totalKb / 1024 / 1024);
   const usedGb = Math.round(storage.disk.usedKb / 1024 / 1024);
   const percent = storage.disk.usePercent;
-
-  // Placeholder test data incase storage function not working but still want to compile
-  // const totalGb = Math.round(10000000 / 1024 / 1024);
-  // const usedGb = Math.round(1000000 / 1024 / 1024);
-  // const percent = 10;
 
   return (
     <Content>

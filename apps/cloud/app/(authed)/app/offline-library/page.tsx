@@ -1,6 +1,4 @@
-// app/(authed)/app/offline-library/page.tsx
 import { getSupabaseServerClientReadOnly } from "@/api/supabase/server-readonly";
-import CloudSyncButton from "@/components/CloudSyncButton";
 import InfoBoxes from "@/components/InfoBoxes";
 import LessonItem from "@/components/LessonItem";
 import StorageAndSync from "@/components/StorageAndSync";
@@ -11,7 +9,6 @@ import {
   PageTitle,
   PageWrapper,
   SectionTitle,
-  SyncButtonWrapper,
 } from "./styles";
 
 type OfflineLibraryLessonRow = {
@@ -29,9 +26,29 @@ type OfflineLibraryRow = {
 export default async function OfflineLibraryPage() {
   const supabase = await getSupabaseServerClientReadOnly();
 
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    return (
+      <PageWrapper>
+        <PageTitle>Offline Library</PageTitle>
+        <PageSubtitle>Could not load offline library.</PageSubtitle>
+        <pre
+          style={{ marginTop: 12, whiteSpace: "pre-wrap", color: "crimson" }}
+        >
+          {userError?.message ?? "User not authenticated."}
+        </pre>
+      </PageWrapper>
+    );
+  }
+
   const { data, error } = await supabase
     .from("OfflineLibrary")
     .select("lesson_id, Lessons(id, name, image_path, group_id)")
+    .eq("Lessons.user_id", user.id)
     .order("lesson_id", { ascending: false });
 
   if (error) {
@@ -59,8 +76,6 @@ export default async function OfflineLibraryPage() {
       .filter((lesson): lesson is OfflineLibraryLessonRow => lesson !== null) ??
     [];
 
-  // Placeholder stats for now (per sprint requirement)
-  // Later: compute from DataContext or from a real "sync status" source.
   const availableOfflineCount = 3;
   const pendingDownloadCount = 1;
   const lastSyncedLabel = "Mar 2, 12:00 pm";
@@ -75,7 +90,7 @@ export default async function OfflineLibraryPage() {
         {/* <SyncButtonWrapper>
           <CloudSyncButton />
         </SyncButtonWrapper> */}
-        <StorageAndSync />
+        <StorageAndSync userId={user.id} />
         <InfoBoxes
           availableOfflineCount={availableOfflineCount}
           pendingDownloadCount={pendingDownloadCount}

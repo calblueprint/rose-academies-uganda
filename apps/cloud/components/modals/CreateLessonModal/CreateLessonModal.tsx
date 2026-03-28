@@ -6,6 +6,7 @@ import { uploadFile } from "@/api/supabase/files";
 import FileTypeBadge from "@/components/FileTypeBadge";
 import { DataContext } from "@/context/DataContext";
 import { getCurrentUserOrThrow } from "@/lib/getCurrentUser";
+import { getCurrentDeviceId } from "@/lib/getCurrentUserDevice";
 import {
   ActionRow,
   BrowseButton,
@@ -123,6 +124,7 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
 
     try {
       const user = await getCurrentUserOrThrow();
+      const deviceId = getCurrentDeviceId();
 
       const { data: lesson, error: lessonError } = await supabase
         .from("Lessons")
@@ -157,16 +159,18 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
       }
 
       if (sendToOffline) {
-        const { error: offlineError } = await supabase
-          .from("OfflineLibrary")
+        const { error: deviceLessonError } = await supabase
+          .from("DeviceLessons")
           .upsert(
             {
+              device_id: deviceId,
               lesson_id: lesson.id,
+              status: "pending",
             },
-            { onConflict: "lesson_id" },
+            { onConflict: "device_id,lesson_id" },
           );
 
-        if (offlineError) throw offlineError;
+        if (deviceLessonError) throw deviceLessonError;
       }
 
       await data.refresh();

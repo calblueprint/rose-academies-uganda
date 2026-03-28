@@ -7,8 +7,10 @@ import FileTypeBadge from "@/components/FileTypeBadge";
 import { DataContext } from "@/context/DataContext";
 import {
   ActionRow,
+  AssignedVillageRow,
   BrowseButton,
   CancelButton,
+  Checkmark,
   CloseButton,
   CreateButton,
   DeleteFileButton,
@@ -38,6 +40,13 @@ import {
   ToggleThumb,
   ToggleTrack,
   ToggleWrapper,
+  VillageBox,
+  VillageDropdownMenu,
+  VillageDropdownWrapper,
+  VillageOption,
+  VillageOptionText,
+  VillageSelectTrigger,
+  VillageSelectTriggerText,
 } from "./styles";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -80,6 +89,7 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [groups, setGroups] = useState<Group[]>([]);
   const [selectedGroupIds, setSelectedGroupIds] = useState<number[]>([]);
+  const [isVillageDropdownOpen, setIsVillageDropdownOpen] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const data = useContext(DataContext);
@@ -152,6 +162,7 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
     setSendToOffline(false);
     setError(null);
     setSelectedGroupIds([]);
+    setIsVillageDropdownOpen(false);
   }
 
   function handleClose() {
@@ -293,6 +304,81 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
         </FieldSection>
 
         <FieldSection>
+          <AssignedVillageRow>
+            <FieldLabel style={{ marginBottom: 0 }}>
+              Assigned Village
+            </FieldLabel>
+
+            <VillageDropdownWrapper>
+              <VillageSelectTrigger
+                type="button"
+                onClick={() => setIsVillageDropdownOpen(prev => !prev)}
+                disabled={isSubmitting}
+              >
+                <VillageSelectTriggerText>Select</VillageSelectTriggerText>
+
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="12"
+                  height="8"
+                  viewBox="0 0 12 8"
+                  fill="none"
+                  style={{
+                    transform: isVillageDropdownOpen
+                      ? "rotate(180deg)"
+                      : "rotate(0deg)",
+                    transition: "transform 0.2s ease",
+                  }}
+                >
+                  <path
+                    d="M1 1.5L6 6.5L11 1.5"
+                    stroke="#808582"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </VillageSelectTrigger>
+
+              {isVillageDropdownOpen && (
+                <VillageDropdownMenu>
+                  {groups.map(group => {
+                    const isChecked = selectedGroupIds.includes(group.id);
+
+                    return (
+                      <VillageOption key={group.id}>
+                        <HiddenCheckbox
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={() => handleToggleGroup(group.id)}
+                          disabled={isSubmitting}
+                        />
+
+                        <VillageBox $checked={isChecked}>
+                          {isChecked && (
+                            <Checkmark viewBox="0 0 12 10" fill="none">
+                              <path
+                                d="M1 5L4.5 8.5L11 1"
+                                stroke="#FFF"
+                                strokeWidth="1.5"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                            </Checkmark>
+                          )}
+                        </VillageBox>
+
+                        <VillageOptionText>{group.name}</VillageOptionText>
+                      </VillageOption>
+                    );
+                  })}
+                </VillageDropdownMenu>
+              )}
+            </VillageDropdownWrapper>
+          </AssignedVillageRow>
+        </FieldSection>
+
+        <FieldSection>
           <FieldLabel htmlFor="lesson-description">Description</FieldLabel>
           <TextArea
             id="lesson-description"
@@ -302,31 +388,6 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
             disabled={isSubmitting}
             rows={4}
           />
-        </FieldSection>
-
-        <FieldSection>
-          <FieldLabel>Groups</FieldLabel>
-          <div>
-            {groups.map(group => (
-              <label
-                key={group.id}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  marginBottom: "8px",
-                }}
-              >
-                <input
-                  type="checkbox"
-                  checked={selectedGroupIds.includes(group.id)}
-                  onChange={() => handleToggleGroup(group.id)}
-                  disabled={isSubmitting}
-                />
-                <span>{group.name}</span>
-              </label>
-            ))}
-          </div>
         </FieldSection>
 
         <FieldSection>

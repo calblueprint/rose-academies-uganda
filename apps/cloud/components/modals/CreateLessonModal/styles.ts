@@ -77,6 +77,106 @@ export const FieldLabel = styled.label`
   color: ${COLORS.veryDarkBlue};
 `;
 
+export const AssignedVillageRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+`;
+
+export const VillageDropdownWrapper = styled.div`
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+`;
+
+export const VillageSelectTrigger = styled.button`
+  display: flex;
+  width: 108px;
+  height: 44px;
+  padding: 10px 16px;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+
+  border-radius: 8px;
+  border: 1px solid ${COLORS.gray40};
+  background: #fff;
+
+  cursor: pointer;
+`;
+
+export const VillageSelectTriggerText = styled.span`
+  font-family: "Google Sans", sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  color: ${COLORS.gray40};
+  line-height: normal;
+`;
+
+export const VillageDropdownMenu = styled.div`
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  z-index: 20;
+
+  display: flex;
+  width: 182px;
+  padding: 16px 48px 18px 18px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 15px;
+  box-sizing: border-box;
+
+  border-radius: 8px;
+  background: #fff;
+  box-shadow:
+    0 29px 8px 0 rgba(0, 0, 0, 0),
+    0 19px 7px 0 rgba(0, 0, 0, 0.01),
+    0 10px 6px 0 rgba(0, 0, 0, 0.05),
+    0 5px 5px 0 rgba(0, 0, 0, 0.09),
+    0 1px 3px 0 rgba(0, 0, 0, 0.1);
+`;
+
+export const VillageOption = styled.label`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  width: 100%;
+`;
+
+export const VillageBox = styled.div<{ $checked: boolean }>`
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid ${COLORS.lightGrey};
+  background: ${({ $checked }) => ($checked ? "#808582" : "transparent")};
+
+  transition: all 0.15s ease;
+`;
+
+export const Checkmark = styled.svg`
+  width: 10px;
+  height: 10px;
+`;
+
+export const VillageOptionText = styled.span`
+  font-family: "Google Sans", sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  color: ${COLORS.lightGrey};
+  line-height: normal;
+`;
+
 export const TextInput = styled.input`
   width: 100%;
   padding: 0.6875rem 1rem;

@@ -31,39 +31,21 @@ export function DataContextProvider({
 
   type LessonFileRow = {
     lesson_id: number;
-    Files: LocalFile;
+    Files: LocalFile | null;
   };
 
   const fetchData = useCallback(async () => {
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-
-    if (!session) {
-      setGroups([]);
-      setLessons([]);
-      setFiles([]);
-      return;
-    }
-
-    const user = session.user;
-
     const [
       { data: groupsData, error: groupsError },
       { data: lessonsData, error: lessonsError },
       { data: lessonFilesData, error: lessonFilesError },
     ] = await Promise.all([
-      supabase.from("Groups").select("*").eq("user_id", user.id),
-      supabase.from("Lessons").select("*").eq("user_id", user.id),
-      supabase
-        .from("LessonFiles")
-        .select(
-          `
-          lesson_id,
-          Files (*)
-        `,
-        )
-        .eq("Files.user_id", user.id),
+      supabase.from("Groups").select("*"),
+      supabase.from("Lessons").select("*"),
+      supabase.from("LessonFiles").select(`
+        lesson_id,
+        Files (*)
+      `),
     ]);
 
     if (groupsError) throw groupsError;
@@ -71,10 +53,15 @@ export function DataContextProvider({
     if (lessonFilesError) throw lessonFilesError;
 
     const flattenedFiles: LocalFile[] =
-      (lessonFilesData as unknown as LessonFileRow[])?.map(row => ({
-        ...row.Files,
-        lesson_id: row.lesson_id,
-      })) ?? [];
+      (lessonFilesData as unknown as LessonFileRow[])
+        ?.filter(
+          (row): row is LessonFileRow & { Files: LocalFile } =>
+            row.Files !== null,
+        )
+        .map(row => ({
+          ...row.Files,
+          lesson_id: row.lesson_id,
+        })) ?? [];
 
     setGroups(groupsData ?? []);
     setLessons(lessonsData ?? []);
@@ -86,7 +73,6 @@ export function DataContextProvider({
 
     (async () => {
       try {
-        if (!isMounted) return;
         await fetchData();
       } catch (error) {
         console.error("Error fetching Supabase data:", error);

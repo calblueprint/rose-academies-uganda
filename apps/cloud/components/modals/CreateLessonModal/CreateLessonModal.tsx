@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useContext, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { getSupabaseBrowserClient } from "@/api/supabase/browser";
 import { uploadFile } from "@/api/supabase/files";
 import FileTypeBadge from "@/components/FileTypeBadge";
@@ -50,6 +50,11 @@ interface FileEntry {
   status: FileStatus;
 }
 
+interface Group {
+  id: number;
+  name: string;
+}
+
 interface Props {
   isOpen: boolean;
   onClose: () => void;
@@ -73,11 +78,42 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
   const [sendToOffline, setSendToOffline] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [groups, setGroups] = useState<Group[]>([]);
+  const [selectedGroupIds, setSelectedGroupIds] = useState<number[]>([]);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const data = useContext(DataContext);
+  const supabase = getSupabaseBrowserClient();
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const fetchGroups = async () => {
+      const { data: groupsData, error: groupsError } = await supabase
+        .from("Groups")
+        .select("id, name")
+        .order("name", { ascending: true });
+
+      if (groupsError) {
+        console.error("Failed to fetch groups:", groupsError);
+        return;
+      }
+
+      setGroups((groupsData as Group[]) || []);
+    };
+
+    fetchGroups();
+  }, [isOpen, supabase]);
 
   if (!isOpen) return null;
+
+  function handleToggleGroup(groupId: number) {
+    setSelectedGroupIds(prev =>
+      prev.includes(groupId)
+        ? prev.filter(id => id !== groupId)
+        : [...prev, groupId],
+    );
+  }
 
   function removeFile(id: string) {
     setFiles(prev => prev.filter(entry => entry.id !== id));
@@ -109,13 +145,18 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
     addFiles(e.dataTransfer.files);
   }
 
-  function handleClose() {
-    if (isSubmitting) return;
+  function resetForm() {
     setTitle("");
     setDescription("");
     setFiles([]);
     setSendToOffline(false);
     setError(null);
+    setSelectedGroupIds([]);
+  }
+
+  function handleClose() {
+    if (isSubmitting) return;
+    resetForm();
     onClose();
   }
 
@@ -124,21 +165,41 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
     setIsSubmitting(true);
     setError(null);
 
-    const supabase = getSupabaseBrowserClient();
-
     try {
+      const fallbackGroupId = selectedGroupIds[0] ?? 1;
+
       const { data: lesson, error: lessonError } = await supabase
         .from("Lessons")
         .insert({
           name: title.trim(),
           description: description.trim() || null,
-          group_id: 1,
+          group_id: fallbackGroupId,
           image_path: null,
         })
         .select()
         .single();
 
       if (lessonError) throw lessonError;
+
+      console.log("lesson id", lesson.id);
+      console.log("selectedGroupIds", selectedGroupIds);
+
+      if (selectedGroupIds.length > 0) {
+        const lessonGroupRows = selectedGroupIds.map(groupId => ({
+          lesson_id: lesson.id,
+          group_id: groupId,
+        }));
+
+        console.log("lessonGroupRows", lessonGroupRows);
+
+        const { error: lessonGroupsError } = await supabase
+          .from("LessonGroups")
+          .insert(lessonGroupRows);
+
+        console.log("lessonGroupsError", lessonGroupsError);
+
+        if (lessonGroupsError) throw lessonGroupsError;
+      }
 
       const snapshot = files;
 
@@ -175,10 +236,7 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
 
       await new Promise(resolve => setTimeout(resolve, 1000));
 
-      setTitle("");
-      setDescription("");
-      setFiles([]);
-      setSendToOffline(false);
+      resetForm();
       setIsSubmitting(false);
       onClose();
     } catch (err) {
@@ -244,6 +302,31 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
             disabled={isSubmitting}
             rows={4}
           />
+        </FieldSection>
+
+        <FieldSection>
+          <FieldLabel>Groups</FieldLabel>
+          <div>
+            {groups.map(group => (
+              <label
+                key={group.id}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  marginBottom: "8px",
+                }}
+              >
+                <input
+                  type="checkbox"
+                  checked={selectedGroupIds.includes(group.id)}
+                  onChange={() => handleToggleGroup(group.id)}
+                  disabled={isSubmitting}
+                />
+                <span>{group.name}</span>
+              </label>
+            ))}
+          </div>
         </FieldSection>
 
         <FieldSection>

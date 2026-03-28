@@ -2,6 +2,7 @@ import { getSupabaseServerClientReadOnly } from "@/api/supabase/server-readonly"
 import InfoBoxes from "@/components/InfoBoxes";
 import LessonItem from "@/components/LessonItem";
 import StorageAndSync from "@/components/StorageAndSync";
+import { getCurrentDeviceId } from "@/lib/getCurrentUserDevice";
 import {
   Content,
   LessonsStack,
@@ -11,16 +12,17 @@ import {
   SectionTitle,
 } from "./styles";
 
-type OfflineLibraryLessonRow = {
+type DeviceLessonLessonRow = {
   id: number;
   name: string;
   image_path: string | null;
   group_id: number | null;
 };
 
-type OfflineLibraryRow = {
+type DeviceLessonRow = {
   lesson_id: number;
-  Lessons: OfflineLibraryLessonRow | OfflineLibraryLessonRow[] | null;
+  status: "pending" | "available" | "failed";
+  Lessons: DeviceLessonLessonRow | DeviceLessonLessonRow[] | null;
 };
 
 export default async function OfflineLibraryPage() {
@@ -45,11 +47,13 @@ export default async function OfflineLibraryPage() {
     );
   }
 
+  const deviceId = getCurrentDeviceId();
+
   const { data, error } = await supabase
-    .from("OfflineLibrary")
-    .select("lesson_id, Lessons(id, name, image_path, group_id)")
-    .eq("Lessons.user_id", user.id)
-    .order("lesson_id", { ascending: false });
+    .from("DeviceLessons")
+    .select("lesson_id, status, Lessons(id, name, image_path, group_id)")
+    .eq("device_id", deviceId)
+    .order("created_at", { ascending: false });
 
   if (error) {
     return (
@@ -65,15 +69,15 @@ export default async function OfflineLibraryPage() {
     );
   }
 
-  const lessons: OfflineLibraryLessonRow[] =
-    (data as OfflineLibraryRow[] | null)
+  const lessons: DeviceLessonLessonRow[] =
+    (data as DeviceLessonRow[] | null)
       ?.map(row => {
         const lesson = Array.isArray(row.Lessons)
           ? row.Lessons[0]
           : row.Lessons;
         return lesson ?? null;
       })
-      .filter((lesson): lesson is OfflineLibraryLessonRow => lesson !== null) ??
+      .filter((lesson): lesson is DeviceLessonLessonRow => lesson !== null) ??
     [];
 
   const availableOfflineCount = 3;
@@ -87,9 +91,6 @@ export default async function OfflineLibraryPage() {
         <PageSubtitle>
           Lessons in this library will be available offline after you run sync
         </PageSubtitle>
-        {/* <SyncButtonWrapper>
-          <CloudSyncButton />
-        </SyncButtonWrapper> */}
         <StorageAndSync userId={user.id} />
         <InfoBoxes
           availableOfflineCount={availableOfflineCount}

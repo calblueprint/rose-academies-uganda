@@ -1,3 +1,4 @@
+import { getCurrentUserOrThrow } from "@/lib/getCurrentUser";
 import { getSupabaseBrowserClient } from "./browser";
 
 export async function uploadLessonImage(
@@ -5,9 +6,10 @@ export async function uploadLessonImage(
   file: File,
 ): Promise<string> {
   const supabase = getSupabaseBrowserClient();
+  const user = await getCurrentUserOrThrow();
 
   const ext = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
-  const path = `lessons/${lessonId}/cover.${ext}`;
+  const path = `${user.id}/lessons/${lessonId}/cover.${ext}`;
 
   const { error: uploadError } = await supabase.storage
     .from("lesson-images")
@@ -22,7 +24,8 @@ export async function uploadLessonImage(
   const { error: updateError } = await supabase
     .from("Lessons")
     .update({ image_path: publicUrl })
-    .eq("id", lessonId);
+    .eq("id", lessonId)
+    .eq("user_id", user.id);
 
   if (updateError) throw updateError;
 

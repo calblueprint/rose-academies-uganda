@@ -35,17 +35,35 @@ export function DataContextProvider({
   };
 
   const fetchData = useCallback(async () => {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (!session) {
+      setGroups([]);
+      setLessons([]);
+      setFiles([]);
+      return;
+    }
+
+    const user = session.user;
+
     const [
       { data: groupsData, error: groupsError },
       { data: lessonsData, error: lessonsError },
       { data: lessonFilesData, error: lessonFilesError },
     ] = await Promise.all([
-      supabase.from("Groups").select("*"),
-      supabase.from("Lessons").select("*"),
-      supabase.from("LessonFiles").select(`
-        lesson_id,
-        Files (*)
-      `),
+      supabase.from("Groups").select("*").eq("user_id", user.id),
+      supabase.from("Lessons").select("*").eq("user_id", user.id),
+      supabase
+        .from("LessonFiles")
+        .select(
+          `
+          lesson_id,
+          Files (*)
+        `,
+        )
+        .eq("Files.user_id", user.id),
     ]);
 
     if (groupsError) throw groupsError;
@@ -68,6 +86,7 @@ export function DataContextProvider({
 
     (async () => {
       try {
+        if (!isMounted) return;
         await fetchData();
       } catch (error) {
         console.error("Error fetching Supabase data:", error);

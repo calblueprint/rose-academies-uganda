@@ -5,6 +5,7 @@ import { getSupabaseBrowserClient } from "@/api/supabase/browser";
 import { uploadFile } from "@/api/supabase/files";
 import FileTypeBadge from "@/components/FileTypeBadge";
 import { DataContext } from "@/context/DataContext";
+import { getCurrentUserOrThrow } from "@/lib/getCurrentUser";
 import {
   ActionRow,
   BrowseButton,
@@ -40,8 +41,6 @@ import {
   ToggleWrapper,
 } from "./styles";
 
-// ─── Types ───────────────────────────────────────────────────────────────────
-
 type FileStatus = "queued" | "uploading" | "done" | "error";
 
 interface FileEntry {
@@ -55,15 +54,11 @@ interface Props {
   onClose: () => void;
 }
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
 function formatBytes(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
-
-// ─── Component ───────────────────────────────────────────────────────────────
 
 export default function CreateLessonModal({ isOpen, onClose }: Props) {
   const [title, setTitle] = useState("");
@@ -127,6 +122,8 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
     const supabase = getSupabaseBrowserClient();
 
     try {
+      const user = await getCurrentUserOrThrow();
+
       const { data: lesson, error: lessonError } = await supabase
         .from("Lessons")
         .insert({
@@ -134,6 +131,7 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
           description: description.trim() || null,
           group_id: 1,
           image_path: null,
+          user_id: user.id,
         })
         .select()
         .single();

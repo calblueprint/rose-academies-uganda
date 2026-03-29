@@ -42,11 +42,17 @@ function OfflineToggle({
     setIsUpdating(false);
   };
 
-  return (
-    <button onClick={handleToggle}>
-      {isOffline ? "Remove from Sync" : "Send to Sync"}
-    </button>
-  );
+  const syncLabel = {
+    offline_updating: "Syncing...",
+    offline_idle: "Send to Sync",
+    online_updating: "Removing...",
+    online_idle: "Remove from Sync",
+  } as const;
+
+  const syncButtonKey =
+    `${isOffline ? "online" : "offline"}_${isUpdating ? "updating" : "idle"}` as const;
+
+  return <button onClick={handleToggle}>{syncLabel[syncButtonKey]}</button>;
 }
 
 export default OfflineToggle;

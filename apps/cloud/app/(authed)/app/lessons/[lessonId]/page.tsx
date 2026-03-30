@@ -6,10 +6,14 @@
 
 "use client";
 
+import { use, useEffect, useState } from "react";
 import Link from "next/link";
+import supabase from "@/api/supabase/client";
+import OfflineToggle from "@/components/OfflineToggle";
+import * as style from "./style";
 
 type PageProps = {
-  params: { lessonId: string };
+  params: Promise<{ lessonId: string }>;
 };
 
 const MOCK_FILES_BY_LESSON: Record<string, { id: string; name: string }[]> = {
@@ -21,13 +25,40 @@ const MOCK_FILES_BY_LESSON: Record<string, { id: string; name: string }[]> = {
   "lesson-003": [{ id: "f1", name: "Short Story.pdf" }],
 };
 
+async function checkIfIsOffline(lessonId: string): Promise<boolean> {
+  const { data, error } = await supabase
+    .from("OfflineLibrary")
+    .select("lesson_id")
+    .eq("lesson_id", lessonId);
+
+  if (error) {
+    console.error("Error checking offline status:", error.message);
+    throw error;
+  }
+
+  const isOffline = data && data.length > 0;
+  return isOffline;
+}
+
 export default function LessonDetailPage({ params }: PageProps) {
-  const { lessonId } = params;
+  const { lessonId } = use(params);
   const files = MOCK_FILES_BY_LESSON[lessonId] ?? [];
+  const [isOffline, setIsOffline] = useState(false);
+
+  useEffect(() => {
+    checkIfIsOffline(lessonId).then(setIsOffline);
+  }, [lessonId]);
 
   return (
     <main>
-      <h1>Lesson: {lessonId}</h1>
+      <style.HeaderBox>
+        <h1>Lesson: {lessonId}</h1>
+        <OfflineToggle
+          lessonId={lessonId}
+          isOffline={isOffline}
+          setIsOffline={setIsOffline}
+        />
+      </style.HeaderBox>
 
       <p>
         <button

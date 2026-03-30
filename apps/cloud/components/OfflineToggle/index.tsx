@@ -7,9 +7,11 @@ import { SyncButton } from "./styles";
 function OfflineToggle({
   lessonId,
   isOffline,
+  setIsOffline,
 }: {
-  lessonId: number;
+  lessonId: string;
   isOffline: boolean;
+  setIsOffline: (isOffline: boolean) => void;
 }) {
   const [isUpdating, setIsUpdating] = useState(false);
 
@@ -21,6 +23,7 @@ function OfflineToggle({
         .from("OfflineLibrary")
         .delete()
         .eq("lesson_id", lessonId);
+      setIsOffline(false);
       if (error) {
         console.error(
           `An error occurred trying to remove lesson ${lessonId}: ${error.message}`,
@@ -31,6 +34,7 @@ function OfflineToggle({
         .from("OfflineLibrary")
         .insert({ lesson_id: lessonId })
         .select();
+      setIsOffline(true);
       if (error) {
         console.error(
           `An error occurred trying to add lesson ${lessonId}: ${error.message}`,

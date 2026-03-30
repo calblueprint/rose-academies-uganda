@@ -1,8 +1,8 @@
 "use client";
 
-// import styles from "./styles";
 import { useState } from "react";
 import supabase from "@/api/supabase/client";
+import { SyncButton } from "./styles";
 
 function OfflineToggle({
   lessonId,
@@ -52,7 +52,11 @@ function OfflineToggle({
   const syncButtonKey =
     `${isOffline ? "online" : "offline"}_${isUpdating ? "updating" : "idle"}` as const;
 
-  return <button onClick={handleToggle}>{syncLabel[syncButtonKey]}</button>;
+  return (
+    <SyncButton onClick={handleToggle} disabled={isUpdating}>
+      {syncLabel[syncButtonKey]}
+    </SyncButton>
+  );
 }
 
 export default OfflineToggle;

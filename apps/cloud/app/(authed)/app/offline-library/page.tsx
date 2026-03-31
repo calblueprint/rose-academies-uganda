@@ -2,6 +2,7 @@ import { getSupabaseServerClientReadOnly } from "@/api/supabase/server-readonly"
 import InfoBoxes from "@/components/InfoBoxes";
 import LessonItem from "@/components/LessonItem";
 import StorageAndSync from "@/components/StorageAndSync";
+import SyncSummaryCard from "@/components/SyncSummaryCard";
 import { getCurrentDeviceId } from "@/lib/getCurrentUserDevice";
 import {
   Content,
@@ -24,6 +25,22 @@ type DeviceLessonRow = {
   status: "pending" | "available" | "failed";
   Lessons: DeviceLessonLessonRow | DeviceLessonLessonRow[] | null;
 };
+
+function formatLastSynced(lastSyncedAt: string | null) {
+  if (!lastSyncedAt) {
+    return "Not synced yet";
+  }
+
+  const date = new Date(lastSyncedAt);
+
+  return date.toLocaleString("en-US", {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+}
 
 export default async function OfflineLibraryPage() {
   const supabase = await getSupabaseServerClientReadOnly();
@@ -55,6 +72,12 @@ export default async function OfflineLibraryPage() {
     .eq("device_id", deviceId)
     .order("created_at", { ascending: false });
 
+  const { data: deviceData, error: deviceError } = await supabase
+    .from("devices")
+    .select("last_synced_at")
+    .eq("id", deviceId)
+    .single();
+
   if (error) {
     return (
       <PageWrapper>
@@ -64,6 +87,20 @@ export default async function OfflineLibraryPage() {
           style={{ marginTop: 12, whiteSpace: "pre-wrap", color: "crimson" }}
         >
           {error.message}
+        </pre>
+      </PageWrapper>
+    );
+  }
+
+  if (deviceError) {
+    return (
+      <PageWrapper>
+        <PageTitle>Offline Library</PageTitle>
+        <PageSubtitle>Could not load offline library.</PageSubtitle>
+        <pre
+          style={{ marginTop: 12, whiteSpace: "pre-wrap", color: "crimson" }}
+        >
+          {deviceError.message}
         </pre>
       </PageWrapper>
     );
@@ -82,7 +119,7 @@ export default async function OfflineLibraryPage() {
 
   const availableOfflineCount = 3;
   const pendingDownloadCount = 1;
-  const lastSyncedLabel = "Mar 2, 12:00 pm";
+  const lastSyncedLabel = formatLastSynced(deviceData?.last_synced_at ?? null);
 
   return (
     <PageWrapper>
@@ -91,7 +128,10 @@ export default async function OfflineLibraryPage() {
         <PageSubtitle>
           Lessons in this library will be available offline after you run sync
         </PageSubtitle>
+
         <StorageAndSync userId={user.id} />
+        <SyncSummaryCard lastSynced={lastSyncedLabel} />
+
         <InfoBoxes
           availableOfflineCount={availableOfflineCount}
           pendingDownloadCount={pendingDownloadCount}

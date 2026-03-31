@@ -5,45 +5,60 @@ import supabase from "@/api/supabase/client";
 import { SyncButton } from "./styles";
 
 function OfflineToggle({
+  deviceId,
   lessonId,
   isOffline,
   setIsOffline,
 }: {
-  lessonId: string;
+  deviceId: string | null;
+  lessonId: number;
   isOffline: boolean;
   setIsOffline: (isOffline: boolean) => void;
 }) {
   const [isUpdating, setIsUpdating] = useState(false);
 
   const handleToggle = async () => {
-    setIsUpdating(true);
-
-    if (isOffline) {
-      const { error } = await supabase
-        .from("OfflineLibrary")
-        .delete()
-        .eq("lesson_id", lessonId);
-      setIsOffline(false);
-      if (error) {
-        console.error(
-          `An error occurred trying to remove lesson ${lessonId}: ${error.message}`,
-        );
-      }
-    } else {
-      const { data, error } = await supabase
-        .from("OfflineLibrary")
-        .insert({ lesson_id: lessonId })
-        .select();
-      setIsOffline(true);
-      if (error) {
-        console.error(
-          `An error occurred trying to add lesson ${lessonId}: ${error.message}`,
-        );
-      }
-      console.log("inserted lesson " + data);
+    if (isUpdating || !deviceId || Number.isNaN(lessonId)) {
+      return;
     }
 
-    setIsUpdating(false);
+    setIsUpdating(true);
+
+    try {
+      if (isOffline) {
+        const { error } = await supabase
+          .from("DeviceLessons")
+          .delete()
+          .eq("device_id", deviceId)
+          .eq("lesson_id", lessonId);
+
+        if (error) {
+          console.error(
+            `An error occurred trying to remove lesson ${lessonId}: ${error.message}`,
+          );
+          return;
+        }
+
+        setIsOffline(false);
+      } else {
+        const { error } = await supabase.from("DeviceLessons").insert({
+          device_id: deviceId,
+          lesson_id: lessonId,
+          status: "pending",
+        });
+
+        if (error) {
+          console.error(
+            `An error occurred trying to add lesson ${lessonId}: ${error.message}`,
+          );
+          return;
+        }
+
+        setIsOffline(true);
+      }
+    } finally {
+      setIsUpdating(false);
+    }
   };
 
   const syncLabel = {
@@ -57,7 +72,10 @@ function OfflineToggle({
     `${isOffline ? "online" : "offline"}_${isUpdating ? "updating" : "idle"}` as const;
 
   return (
-    <SyncButton onClick={handleToggle} disabled={isUpdating}>
+    <SyncButton
+      onClick={handleToggle}
+      disabled={isUpdating || !deviceId || Number.isNaN(lessonId)}
+    >
       {syncLabel[syncButtonKey]}
     </SyncButton>
   );

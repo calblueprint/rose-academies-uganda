@@ -10,6 +10,7 @@ import { use, useEffect, useState } from "react";
 import Link from "next/link";
 import supabase from "@/api/supabase/client";
 import OfflineToggle from "@/components/OfflineToggle";
+import { getCurrentDeviceId } from "@/lib/getCurrentUserDevice";
 import * as style from "./style";
 
 type PageProps = {
@@ -25,10 +26,14 @@ const MOCK_FILES_BY_LESSON: Record<string, { id: string; name: string }[]> = {
   "lesson-003": [{ id: "f1", name: "Short Story.pdf" }],
 };
 
-async function checkIfIsOffline(lessonId: string): Promise<boolean> {
+async function checkIfIsOffline(
+  deviceId: string,
+  lessonId: number,
+): Promise<boolean> {
   const { data, error } = await supabase
-    .from("OfflineLibrary")
+    .from("DeviceLessons")
     .select("lesson_id")
+    .eq("device_id", deviceId)
     .eq("lesson_id", lessonId);
 
   if (error) {
@@ -36,25 +41,48 @@ async function checkIfIsOffline(lessonId: string): Promise<boolean> {
     throw error;
   }
 
-  const isOffline = data && data.length > 0;
-  return isOffline;
+  return !!data && data.length > 0;
 }
 
 export default function LessonDetailPage({ params }: PageProps) {
   const { lessonId } = use(params);
+  const numericLessonId = Number(lessonId);
   const files = MOCK_FILES_BY_LESSON[lessonId] ?? [];
+
+  const [deviceId, setDeviceId] = useState<string | null>(null);
   const [isOffline, setIsOffline] = useState(false);
 
   useEffect(() => {
-    checkIfIsOffline(lessonId).then(setIsOffline);
-  }, [lessonId]);
+    const loadOfflineStatus = async () => {
+      if (Number.isNaN(numericLessonId)) {
+        console.error(`Invalid lessonId for DeviceLessons: ${lessonId}`);
+        return;
+      }
+
+      try {
+        const currentDeviceId = await getCurrentDeviceId();
+        setDeviceId(currentDeviceId);
+
+        const offlineStatus = await checkIfIsOffline(
+          currentDeviceId,
+          numericLessonId,
+        );
+        setIsOffline(offlineStatus);
+      } catch (error) {
+        console.error("Failed to load offline status:", error);
+      }
+    };
+
+    void loadOfflineStatus();
+  }, [lessonId, numericLessonId]);
 
   return (
     <main>
       <style.HeaderBox>
         <h1>Lesson: {lessonId}</h1>
         <OfflineToggle
-          lessonId={lessonId}
+          deviceId={deviceId}
+          lessonId={numericLessonId}
           isOffline={isOffline}
           setIsOffline={setIsOffline}
         />

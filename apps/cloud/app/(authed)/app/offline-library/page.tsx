@@ -95,6 +95,7 @@ export default async function OfflineLibraryPage() {
         <SyncButtonWrapper>
           <CloudSyncButton />
         </SyncButtonWrapper>
+        <SyncSummaryCard lastSynced={lastSyncedLabel} />
 
         <InfoBoxes
           availableOfflineCount={availableOfflineCount}

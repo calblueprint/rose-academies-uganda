@@ -336,6 +336,8 @@ export async function runSync({ syncRunId }: RunSyncOptions = {}) {
     fs.rmSync(stagingDir, { recursive: true, force: true });
     console.log("[SYNC] Removed staging directory:", stagingDir);
 
+    finishedAt = new Date().toISOString();
+
     try {
       const storage = await getStorageInfo();
 
@@ -348,12 +350,11 @@ export async function runSync({ syncRunId }: RunSyncOptions = {}) {
         rose_files_kb: storage.directories.roseFilesKb,
         repo_kb: storage.directories.repoKb,
         sync_requested_at: new Date().toISOString(),
+        last_synced_at: finishedAt,
       });
     } catch (err) {
       console.error("Failed to upload storage info:", err);
     }
-
-    finishedAt = new Date().toISOString();
 
     db.prepare(
       "UPDATE sync_runs SET finished_at = ?, status = ? WHERE id = ?",

@@ -7,12 +7,11 @@ import SyncModal from "@/components/SyncModal";
 import { IconSvgs } from "@/lib/icons";
 import { ButtonWrapper, IconWrapper } from "./styles";
 
-const DEVICE_ID = "nathans-pi"; // hardcoded for now
-const POLL_INTERVAL_MS = 3000; // polls every 3 seconds
-const POLL_TIMEOUT_MS = 120 * 1000; // This is one minute, can increase if we want
+const POLL_INTERVAL_MS = 3000;
+const POLL_TIMEOUT_MS = 120 * 1000;
 
 type SyncRunRow = {
-  id: number;
+  id: string;
   status: "requested" | "in_progress" | "success" | "failed";
   error_message: string | null;
 };
@@ -21,16 +20,17 @@ function delay(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-export default function CloudSyncButton() {
+export default function CloudSyncButton({ userId }: { userId: string }) {
   const [isSyncing, setIsSyncing] = useState(false);
   const [modalVariant, setModalVariant] = useState<ModalVariant | null>(null);
   const [modalBodyText, setModalBodyText] = useState<string | undefined>();
 
-  const waitForSyncRunCompletion = async (syncRunId: number) => {
+  const waitForSyncRunCompletion = async (syncRunId: string) => {
     const startedAt = Date.now();
 
     while (Date.now() - startedAt < POLL_TIMEOUT_MS) {
       console.log("[CLOUD] Polling sync run:", syncRunId);
+
       const { data, error } = await supabase
         .from("sync_runs")
         .select("id, status, error_message")
@@ -63,10 +63,21 @@ export default function CloudSyncButton() {
     const minLoadingTime = new Promise(resolve => setTimeout(resolve, 1000));
 
     try {
+      const { data: device, error: deviceError } = await supabase
+        .from("devices")
+        .select("id")
+        .eq("user_id", userId)
+        .single();
+
+      if (deviceError || !device) {
+        console.error("[CLOUD] Failed to fetch device:", deviceError);
+        throw deviceError ?? new Error("Unable to find device.");
+      }
+
       const { data, error } = await supabase
         .from("sync_runs")
         .insert({
-          device_id: DEVICE_ID,
+          device_id: device.id,
           status: "requested",
         })
         .select("id")
@@ -76,10 +87,11 @@ export default function CloudSyncButton() {
         console.error("[CLOUD] Failed to create sync run:", error);
         throw error ?? new Error("Unable to create sync run.");
       }
+
       console.log("[CLOUD] Sync run created:", data.id);
 
       const completedRun = await waitForSyncRunCompletion(
-        (data as { id: number }).id,
+        (data as { id: string }).id,
       );
       console.log("[CLOUD] Sync completed:", completedRun);
 

@@ -1,5 +1,6 @@
 import type { LocalFile } from "@/types/schema";
-import { getSupabaseBrowserClient } from "./browser";
+import { getSupabaseBrowserClient } from "@/api/supabase/browser";
+import { getCurrentUserOrThrow } from "@/lib/getCurrentUser";
 
 async function hashFile(file: File): Promise<string> {
   const buffer = await file.arrayBuffer();
@@ -14,17 +15,18 @@ export async function uploadFile(
 ): Promise<LocalFile> {
   const supabase = getSupabaseBrowserClient();
 
+  const user = await getCurrentUserOrThrow();
+
   const hash = await hashFile(file);
 
-  // check if a file with this hash already exists
   const { data: existingFile } = await supabase
     .from("Files")
     .select("*")
     .eq("hash", hash)
+    .eq("user_id", user.id)
     .maybeSingle();
 
   if (existingFile) {
-    // reuse the existing file — just link the lesson to it
     const { error } = await supabase.from("LessonFiles").insert({
       lesson_id: lessonId,
       file_id: existingFile.id,
@@ -35,8 +37,7 @@ export async function uploadFile(
     return existingFile as LocalFile;
   }
 
-  // truly new file — upload to storage
-  const objectPath = `teacher-1/${file.name}`;
+  const objectPath = `${user.id}/${file.name}`;
 
   const { error: storageError } = await supabase.storage
     .from("files")
@@ -49,7 +50,6 @@ export async function uploadFile(
   const publicUrl = pub?.publicUrl;
   if (!publicUrl) throw new Error("Failed to compute public URL");
 
-  // create Files row with hash
   const { data: fileRow, error: fileError } = await supabase
     .from("Files")
     .insert({
@@ -57,13 +57,13 @@ export async function uploadFile(
       size_bytes: file.size,
       storage_path: publicUrl,
       hash,
+      user_id: user.id,
     })
     .select()
     .single();
 
   if (fileError) throw fileError;
 
-  // link lesson to file
   const { error: joinError } = await supabase.from("LessonFiles").insert({
     lesson_id: lessonId,
     file_id: fileRow.id,

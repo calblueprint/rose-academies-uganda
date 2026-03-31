@@ -5,6 +5,8 @@ import { getSupabaseBrowserClient } from "@/api/supabase/browser";
 import { uploadFile } from "@/api/supabase/files";
 import FileTypeBadge from "@/components/FileTypeBadge";
 import { DataContext } from "@/context/DataContext";
+import { getCurrentUserOrThrow } from "@/lib/getCurrentUser";
+import { getCurrentDeviceId } from "@/lib/getCurrentUserDevice";
 import {
   ActionRow,
   AssignedVillageRow,
@@ -49,8 +51,6 @@ import {
   VillageSelectTriggerText,
 } from "./styles";
 
-// ─── Types ───────────────────────────────────────────────────────────────────
-
 type FileStatus = "queued" | "uploading" | "done" | "error";
 
 interface FileEntry {
@@ -69,15 +69,11 @@ interface Props {
   onClose: () => void;
 }
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
 function formatBytes(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
-
-// ─── Component ───────────────────────────────────────────────────────────────
 
 export default function CreateLessonModal({ isOpen, onClose }: Props) {
   const [title, setTitle] = useState("");
@@ -177,6 +173,8 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
     setError(null);
 
     try {
+      const user = await getCurrentUserOrThrow();
+      const deviceId = getCurrentDeviceId();
       const fallbackGroupId = selectedGroupIds[0] ?? 1;
 
       const { data: lesson, error: lessonError } = await supabase
@@ -186,14 +184,12 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
           description: description.trim() || null,
           group_id: fallbackGroupId,
           image_path: null,
+          user_id: user.id,
         })
         .select()
         .single();
 
       if (lessonError) throw lessonError;
-
-      console.log("lesson id", lesson.id);
-      console.log("selectedGroupIds", selectedGroupIds);
 
       if (selectedGroupIds.length > 0) {
         const lessonGroupRows = selectedGroupIds.map(groupId => ({
@@ -201,13 +197,9 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
           group_id: groupId,
         }));
 
-        console.log("lessonGroupRows", lessonGroupRows);
-
         const { error: lessonGroupsError } = await supabase
           .from("LessonGroups")
           .insert(lessonGroupRows);
-
-        console.log("lessonGroupsError", lessonGroupsError);
 
         if (lessonGroupsError) throw lessonGroupsError;
       }
@@ -231,16 +223,18 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
       }
 
       if (sendToOffline) {
-        const { error: offlineError } = await supabase
-          .from("OfflineLibrary")
+        const { error: deviceLessonError } = await supabase
+          .from("DeviceLessons")
           .upsert(
             {
+              device_id: deviceId,
               lesson_id: lesson.id,
+              status: "pending",
             },
-            { onConflict: "lesson_id" },
+            { onConflict: "device_id,lesson_id" },
           );
 
-        if (offlineError) throw offlineError;
+        if (deviceLessonError) throw deviceLessonError;
       }
 
       await data.refresh();

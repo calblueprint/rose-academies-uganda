@@ -1,7 +1,7 @@
 import { getSupabaseServerClientReadOnly } from "@/api/supabase/server-readonly";
-import LessonsClient from "./LessonsClient";
+import LessonsClient from "../lessons/LessonsClient";
 
-export default async function LessonsPage() {
+export default async function ArchivedLessonsPage() {
   const supabase = await getSupabaseServerClientReadOnly();
   const {
     data: { user },
@@ -13,7 +13,7 @@ export default async function LessonsPage() {
     .from("Lessons")
     .select("id, name, description, image_path, group_id, is_archived")
     .order("id", { ascending: true })
-    .eq("is_archived", false)
+    .eq("is_archived", true)
     .eq("user_id", user.id);
 
   if (error) {

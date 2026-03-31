@@ -64,15 +64,6 @@ export const FileLeft = styled.div`
   gap: 0.75rem;
 `;
 
-export const FileIcon = styled.div`
-  border-radius: 5px;
-  display: flex;
-  padding: 8px;
-  align-items: center;
-  gap: 10px;
-  background: #60bbfb;
-`;
-
 export const FileName = styled.span`
   font-family: var(--font-gilroy);
   color: var(--gray-80, #4b4a49);

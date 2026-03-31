@@ -29,24 +29,43 @@ export function DataContextProvider({
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [files, setFiles] = useState<LocalFile[]>([]);
 
+  type LessonFileRow = {
+    lesson_id: number;
+    Files: LocalFile | null;
+  };
+
   const fetchData = useCallback(async () => {
     const [
       { data: groupsData, error: groupsError },
       { data: lessonsData, error: lessonsError },
-      { data: filesData, error: filesError },
+      { data: lessonFilesData, error: lessonFilesError },
     ] = await Promise.all([
       supabase.from("Groups").select("*"),
       supabase.from("Lessons").select("*"),
-      supabase.from("Files").select("*"),
+      supabase.from("LessonFiles").select(`
+        lesson_id,
+        Files (*)
+      `),
     ]);
 
     if (groupsError) throw groupsError;
     if (lessonsError) throw lessonsError;
-    if (filesError) throw filesError;
+    if (lessonFilesError) throw lessonFilesError;
+
+    const flattenedFiles: LocalFile[] =
+      (lessonFilesData as unknown as LessonFileRow[])
+        ?.filter(
+          (row): row is LessonFileRow & { Files: LocalFile } =>
+            row.Files !== null,
+        )
+        .map(row => ({
+          ...row.Files,
+          lesson_id: row.lesson_id,
+        })) ?? [];
 
     setGroups(groupsData ?? []);
     setLessons(lessonsData ?? []);
-    setFiles(filesData ?? []);
+    setFiles(flattenedFiles);
   }, []);
 
   useEffect(() => {

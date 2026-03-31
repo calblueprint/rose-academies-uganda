@@ -1,12 +1,12 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
+import FileTypeBadge from "@/components/FileTypeBadge";
 import { IconSvgs } from "@/lib/icons";
 import {
   BodyCell,
   BodyRow,
   DownloadIcon,
-  FileIconFrame,
   FileName,
   FileNameContainer,
   HeadCell,
@@ -152,7 +152,7 @@ export function FilesTable({ files, onRowClick }: FilesTableProps) {
             <BodyRow key={file.id} onClick={() => handleRowClick(file)}>
               <BodyCell>
                 <FileNameContainer>
-                  <FileIconFrame>{IconSvgs.fileTile}</FileIconFrame>
+                  <FileTypeBadge fileName={file.name} />
                   <FileName title={file.name}>{file.name}</FileName>
                 </FileNameContainer>
               </BodyCell>

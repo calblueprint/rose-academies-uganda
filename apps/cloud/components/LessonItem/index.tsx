@@ -2,11 +2,11 @@
 
 import { useContext, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import FileTypeBadge from "@/components/FileTypeBadge";
 import { DataContext } from "@/context/DataContext";
 import { IconSvgs } from "@/lib/icons";
 import StatusPill from "../StatusPill";
 import {
-  FileIcon,
   FileLeft,
   FileMeta,
   FileName,
@@ -67,7 +67,7 @@ export default function LessonItem({
               onClick={() => router.push(`/lessons/${lessonId}/files`)}
             >
               <FileLeft>
-                <FileIcon>{IconSvgs.textSnippet}</FileIcon>
+                <FileTypeBadge fileName={file.name} />
 
                 <FileMeta>
                   <FileName>{file.name}</FileName>

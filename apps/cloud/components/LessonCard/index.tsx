@@ -18,7 +18,7 @@ export default function LessonCard({
   lessonId = 1;
 
   return (
-    <Card onClick={() => router.push(`/lessons/${lessonId}`)}>
+    <Card onClick={() => router.push(`/app/lessons/${lessonId}`)}>
       {lessonImage ? (
         <Image
           src={lessonImage}

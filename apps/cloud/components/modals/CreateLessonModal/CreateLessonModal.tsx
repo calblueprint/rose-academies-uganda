@@ -1,14 +1,18 @@
 "use client";
 
-import React, { useContext, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { getSupabaseBrowserClient } from "@/api/supabase/browser";
 import { uploadFile } from "@/api/supabase/files";
 import FileTypeBadge from "@/components/FileTypeBadge";
 import { DataContext } from "@/context/DataContext";
+import { getCurrentUserOrThrow } from "@/lib/getCurrentUser";
+import { getCurrentDeviceId } from "@/lib/getCurrentUserDevice";
 import {
   ActionRow,
+  AssignedVillageRow,
   BrowseButton,
   CancelButton,
+  Checkmark,
   CloseButton,
   CreateButton,
   DeleteFileButton,
@@ -38,9 +42,14 @@ import {
   ToggleThumb,
   ToggleTrack,
   ToggleWrapper,
+  VillageBox,
+  VillageDropdownMenu,
+  VillageDropdownWrapper,
+  VillageOption,
+  VillageOptionText,
+  VillageSelectTrigger,
+  VillageSelectTriggerText,
 } from "./styles";
-
-// ─── Types ───────────────────────────────────────────────────────────────────
 
 type FileStatus = "queued" | "uploading" | "done" | "error";
 
@@ -50,20 +59,21 @@ interface FileEntry {
   status: FileStatus;
 }
 
+interface Group {
+  id: number;
+  name: string;
+}
+
 interface Props {
   isOpen: boolean;
   onClose: () => void;
 }
-
-// ─── Helpers ─────────────────────────────────────────────────────────────────
 
 function formatBytes(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
-
-// ─── Component ───────────────────────────────────────────────────────────────
 
 export default function CreateLessonModal({ isOpen, onClose }: Props) {
   const [title, setTitle] = useState("");
@@ -73,11 +83,43 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
   const [sendToOffline, setSendToOffline] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [groups, setGroups] = useState<Group[]>([]);
+  const [selectedGroupIds, setSelectedGroupIds] = useState<number[]>([]);
+  const [isVillageDropdownOpen, setIsVillageDropdownOpen] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const data = useContext(DataContext);
+  const supabase = getSupabaseBrowserClient();
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const fetchGroups = async () => {
+      const { data: groupsData, error: groupsError } = await supabase
+        .from("Groups")
+        .select("id, name")
+        .order("name", { ascending: true });
+
+      if (groupsError) {
+        console.error("Failed to fetch groups:", groupsError);
+        return;
+      }
+
+      setGroups((groupsData as Group[]) || []);
+    };
+
+    fetchGroups();
+  }, [isOpen, supabase]);
 
   if (!isOpen) return null;
+
+  function handleToggleGroup(groupId: number) {
+    setSelectedGroupIds(prev =>
+      prev.includes(groupId)
+        ? prev.filter(id => id !== groupId)
+        : [...prev, groupId],
+    );
+  }
 
   function removeFile(id: string) {
     setFiles(prev => prev.filter(entry => entry.id !== id));
@@ -109,13 +151,19 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
     addFiles(e.dataTransfer.files);
   }
 
-  function handleClose() {
-    if (isSubmitting) return;
+  function resetForm() {
     setTitle("");
     setDescription("");
     setFiles([]);
     setSendToOffline(false);
     setError(null);
+    setSelectedGroupIds([]);
+    setIsVillageDropdownOpen(false);
+  }
+
+  function handleClose() {
+    if (isSubmitting) return;
+    resetForm();
     onClose();
   }
 
@@ -124,21 +172,37 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
     setIsSubmitting(true);
     setError(null);
 
-    const supabase = getSupabaseBrowserClient();
-
     try {
+      const user = await getCurrentUserOrThrow();
+      const deviceId = getCurrentDeviceId();
+      const fallbackGroupId = selectedGroupIds[0] ?? 1;
+
       const { data: lesson, error: lessonError } = await supabase
         .from("Lessons")
         .insert({
           name: title.trim(),
           description: description.trim() || null,
-          group_id: 1,
+          group_id: fallbackGroupId,
           image_path: null,
+          user_id: user.id,
         })
         .select()
         .single();
 
       if (lessonError) throw lessonError;
+
+      if (selectedGroupIds.length > 0) {
+        const lessonGroupRows = selectedGroupIds.map(groupId => ({
+          lesson_id: lesson.id,
+          group_id: groupId,
+        }));
+
+        const { error: lessonGroupsError } = await supabase
+          .from("LessonGroups")
+          .insert(lessonGroupRows);
+
+        if (lessonGroupsError) throw lessonGroupsError;
+      }
 
       const snapshot = files;
 
@@ -159,26 +223,25 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
       }
 
       if (sendToOffline) {
-        const { error: offlineError } = await supabase
-          .from("OfflineLibrary")
+        const { error: deviceLessonError } = await supabase
+          .from("DeviceLessons")
           .upsert(
             {
+              device_id: deviceId,
               lesson_id: lesson.id,
+              status: "pending",
             },
-            { onConflict: "lesson_id" },
+            { onConflict: "device_id,lesson_id" },
           );
 
-        if (offlineError) throw offlineError;
+        if (deviceLessonError) throw deviceLessonError;
       }
 
       await data.refresh();
 
       await new Promise(resolve => setTimeout(resolve, 1000));
 
-      setTitle("");
-      setDescription("");
-      setFiles([]);
-      setSendToOffline(false);
+      resetForm();
       setIsSubmitting(false);
       onClose();
     } catch (err) {
@@ -232,6 +295,81 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
             onChange={e => setTitle(e.target.value)}
             disabled={isSubmitting}
           />
+        </FieldSection>
+
+        <FieldSection>
+          <AssignedVillageRow>
+            <FieldLabel style={{ marginBottom: 0 }}>
+              Assigned Village
+            </FieldLabel>
+
+            <VillageDropdownWrapper>
+              <VillageSelectTrigger
+                type="button"
+                onClick={() => setIsVillageDropdownOpen(prev => !prev)}
+                disabled={isSubmitting}
+              >
+                <VillageSelectTriggerText>Select</VillageSelectTriggerText>
+
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="12"
+                  height="8"
+                  viewBox="0 0 12 8"
+                  fill="none"
+                  style={{
+                    transform: isVillageDropdownOpen
+                      ? "rotate(180deg)"
+                      : "rotate(0deg)",
+                    transition: "transform 0.2s ease",
+                  }}
+                >
+                  <path
+                    d="M1 1.5L6 6.5L11 1.5"
+                    stroke="#808582"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </VillageSelectTrigger>
+
+              {isVillageDropdownOpen && (
+                <VillageDropdownMenu>
+                  {groups.map(group => {
+                    const isChecked = selectedGroupIds.includes(group.id);
+
+                    return (
+                      <VillageOption key={group.id}>
+                        <HiddenCheckbox
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={() => handleToggleGroup(group.id)}
+                          disabled={isSubmitting}
+                        />
+
+                        <VillageBox $checked={isChecked}>
+                          {isChecked && (
+                            <Checkmark viewBox="0 0 12 10" fill="none">
+                              <path
+                                d="M1 5L4.5 8.5L11 1"
+                                stroke="#FFF"
+                                strokeWidth="1.5"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                            </Checkmark>
+                          )}
+                        </VillageBox>
+
+                        <VillageOptionText>{group.name}</VillageOptionText>
+                      </VillageOption>
+                    );
+                  })}
+                </VillageDropdownMenu>
+              )}
+            </VillageDropdownWrapper>
+          </AssignedVillageRow>
         </FieldSection>
 
         <FieldSection>

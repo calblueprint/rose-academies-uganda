@@ -45,6 +45,7 @@ export type Lesson = {
   description: string | null;
   image_path: string | null;
   group_id: number;
+  is_archived: boolean;
 };
 
 /**
@@ -67,5 +68,6 @@ export type LocalFile = {
   name: string;
   size_bytes: number;
   storage_path: string;
+  hash: string;
   lesson_id: number | null;
 };

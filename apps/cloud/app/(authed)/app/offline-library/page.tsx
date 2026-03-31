@@ -3,6 +3,7 @@ import { getSupabaseServerClientReadOnly } from "@/api/supabase/server-readonly"
 import CloudSyncButton from "@/components/CloudSyncButton";
 import InfoBoxes from "@/components/InfoBoxes";
 import LessonItem from "@/components/LessonItem";
+import SyncSummaryCard from "@/components/SyncSummaryCard";
 import {
   Content,
   LessonsStack,
@@ -24,6 +25,21 @@ type OfflineLibraryRow = {
   lesson_id: number;
   Lessons: OfflineLibraryLessonRow | OfflineLibraryLessonRow[] | null;
 };
+function formatLastSynced(lastSyncedAt: string | null) {
+  if (!lastSyncedAt) {
+    return "Not synced yet";
+  }
+
+  const date = new Date(lastSyncedAt);
+
+  return date.toLocaleString("en-US", {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+}
 
 export default async function OfflineLibraryPage() {
   const supabase = await getSupabaseServerClientReadOnly();
@@ -32,6 +48,11 @@ export default async function OfflineLibraryPage() {
     .from("OfflineLibrary")
     .select("lesson_id, Lessons(id, name, image_path, group_id)")
     .order("lesson_id", { ascending: false });
+  const { data: deviceData, error: deviceError } = await supabase
+    .from("devices")
+    .select("last_synced_at")
+    .eq("id", "nathans-pi")
+    .single();
 
   if (error) {
     return (
@@ -62,7 +83,7 @@ export default async function OfflineLibraryPage() {
   // Later: compute from DataContext or from a real "sync status" source.
   const availableOfflineCount = 3;
   const pendingDownloadCount = 1;
-  const lastSyncedLabel = "Mar 2, 12:00 pm";
+  const lastSyncedLabel = formatLastSynced(deviceData?.last_synced_at ?? null);
 
   return (
     <PageWrapper>

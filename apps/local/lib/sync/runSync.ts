@@ -249,6 +249,11 @@ export async function runSync() {
       "UPDATE sync_runs SET finished_at = ?, status = ? WHERE id = ?",
     ).run(finishedAt, "success", runId);
 
+    await supabase
+      .from("devices")
+      .update({ last_synced_at: finishedAt })
+      .eq("id", "nathans-pi");
+
     return {
       ok: true,
       message: "Data synchronized successfully",

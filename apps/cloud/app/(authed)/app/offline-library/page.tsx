@@ -22,7 +22,7 @@ type DeviceLessonLessonRow = {
 
 type DeviceLessonRow = {
   lesson_id: number;
-  status: "pending" | "available" | "failed";
+  status: "pending" | "available";
   Lessons: DeviceLessonLessonRow | DeviceLessonLessonRow[] | null;
 };
 

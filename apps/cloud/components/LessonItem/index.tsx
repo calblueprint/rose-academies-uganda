@@ -23,20 +23,15 @@ import {
 export default function LessonItem({
   lessonId,
   lessonName,
+  status,
 }: {
   lessonId: number;
   lessonName: string;
+  status?: "available" | "pending";
 }) {
   const [opened, setOpened] = useState(false);
   const data = useContext(DataContext);
   const router = useRouter();
-
-  // some random set data for determing which lessons have which tags
-  const AVAILABLE_LESSONS = new Set([1, 3, 5]);
-
-  const status: "available" | "pending" = AVAILABLE_LESSONS.has(lessonId)
-    ? "available"
-    : "pending";
 
   const files = useMemo(() => {
     if (!data) return [];
@@ -49,12 +44,10 @@ export default function LessonItem({
         <LessonLeft>
           <LessonIcon />
           <LessonName>{lessonName}</LessonName>
+          {status ? <StatusPill status={status} /> : null}
         </LessonLeft>
 
         <LessonRight>
-          <StatusPill
-            status={status} // can change to "pending" as well, just temp placeholder
-          />
           {opened ? IconSvgs.upArrow : IconSvgs.downArrow}
         </LessonRight>
       </LessonHeader>

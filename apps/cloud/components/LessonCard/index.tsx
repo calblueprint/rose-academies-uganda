@@ -3,16 +3,19 @@
 import React from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import StatusPill from "../StatusPill";
 import { Card, ImagePlaceholder, Title, Titleholder } from "./styles";
 
 export default function LessonCard({
   lessonId,
   lessonName,
   lessonImage,
+  status,
 }: {
   lessonId: number;
   lessonName: string;
   lessonImage: string | null;
+  status?: "available" | "pending";
 }) {
   const router = useRouter();
   lessonId = 1;
@@ -32,6 +35,7 @@ export default function LessonCard({
       )}
       <Titleholder>
         <Title>{lessonName}</Title>
+        {status ? <StatusPill status={status} /> : null}
       </Titleholder>
     </Card>
   );

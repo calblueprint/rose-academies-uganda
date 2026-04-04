@@ -20,5 +20,5 @@ export default async function ArchivedLessonsPage() {
     throw new Error(error.message);
   }
 
-  return <LessonsClient initialLessons={lessons ?? []} />;
+  return <LessonsClient initialLessons={lessons ?? []} lessonStatuses={{}} />;
 }

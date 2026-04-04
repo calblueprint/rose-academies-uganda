@@ -16,9 +16,15 @@ import {
 
 interface SyncSummaryCardProps {
   lastSynced: string;
+  availableCount: number;
+  pendingCount: number;
 }
 
-export default function SyncSummaryCard({ lastSynced }: SyncSummaryCardProps) {
+export default function SyncSummaryCard({
+  lastSynced,
+  availableCount,
+  pendingCount,
+}: SyncSummaryCardProps) {
   return (
     <Card>
       <Content>
@@ -30,7 +36,7 @@ export default function SyncSummaryCard({ lastSynced }: SyncSummaryCardProps) {
               <Dot $color={COLORS.lightLightGreen} />
               <Label>Available</Label>
             </LeftGroup>
-            <Value>2</Value>
+            <Value>{availableCount}</Value>
           </Row>
 
           <Row>
@@ -38,7 +44,7 @@ export default function SyncSummaryCard({ lastSynced }: SyncSummaryCardProps) {
               <Dot $color={COLORS.orange} />
               <Label>Pending Sync</Label>
             </LeftGroup>
-            <Value>2</Value>
+            <Value>{pendingCount}</Value>
           </Row>
         </TopSection>
 

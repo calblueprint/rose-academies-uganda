@@ -27,8 +27,10 @@ import {
 
 export default function LessonsClient({
   initialLessons,
+  lessonStatuses,
 }: {
   initialLessons: Lesson[];
+  lessonStatuses: Partial<Record<number, "available" | "pending">>;
 }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [view, setView] = useState<"grid" | "list">("grid");
@@ -91,6 +93,7 @@ export default function LessonsClient({
                     lessonId={lesson.id}
                     lessonName={lesson.name}
                     lessonImage={lesson.image_path}
+                    status={lessonStatuses[lesson.id]}
                   />
                   <EditImageButton
                     type="button"
@@ -135,6 +138,7 @@ export default function LessonsClient({
                 key={lesson.id}
                 lessonId={lesson.id}
                 lessonName={lesson.name}
+                status={lessonStatuses[lesson.id]}
               />
             ))
           ) : (

@@ -3,13 +3,13 @@ import COLORS from "@/styles/colors";
 
 export const Card = styled.div`
   display: flex;
-  width: 28.875rem;
+  width: 100%;
   padding: 1.5rem;
   flex-direction: column;
   justify-content: center;
   align-items: flex-start;
   gap: 1.75rem;
-  flex-shrink: 0;
+  min-width: 0;
   border-radius: 1rem;
   background: ${COLORS.white};
   box-shadow:
@@ -22,12 +22,12 @@ export const Card = styled.div`
 
 export const Content = styled.div`
   display: flex;
-  width: 25.875rem;
+  width: 100%;
   flex-direction: column;
   justify-content: center;
   align-items: flex-start;
   gap: 1.25rem;
-  flex-shrink: 0;
+  min-width: 0;
 `;
 
 export const TopSection = styled.div`
@@ -87,7 +87,7 @@ export const Value = styled.div`
 `;
 
 export const Divider = styled.div`
-  width: 25.25rem;
+  width: 100%;
   height: 0.0625rem;
   background: ${COLORS.gray40};
 `;

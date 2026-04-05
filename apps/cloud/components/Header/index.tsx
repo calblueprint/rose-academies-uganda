@@ -48,8 +48,9 @@ export default function Header({ displayName }: { displayName: string }) {
   const initials =
     displayName
       .trim()
-      .match(/\p{L}+/gu)
-      ?.map(word => word[0])
+      .match(/[\p{L}''\-]+/gu)
+      ?.filter((_, i, arr) => i === 0 || i === arr.length - 1)
+      .map(word => word[0])
       .join("")
       .toUpperCase() ?? "";
 

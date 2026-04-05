@@ -12,9 +12,11 @@ import SearchBar from "@/components/SearchBar";
 import { IconSvgs } from "@/lib/icons";
 import {
   CardWrapper,
+  Description,
   EditImageButton,
   GridToggle,
   Header,
+  HeaderText,
   LessonsGrid,
   LessonsList,
   PageContainer,
@@ -25,13 +27,27 @@ import {
   ViewToggleButton,
 } from "./style";
 
+interface LessonsClientProps {
+  initialLessons: Lesson[];
+  title?: string;
+  description?: string;
+  showCreateButton?: boolean;
+  showSearchBar?: boolean;
+  showViewToggle?: boolean;
+  defaultView?: "grid" | "list";
+}
+
 export default function LessonsClient({
   initialLessons,
-}: {
-  initialLessons: Lesson[];
-}) {
+  title = "Lessons Dashboard",
+  description,
+  showCreateButton = true,
+  showSearchBar = true,
+  showViewToggle = true,
+  defaultView = "grid",
+}: LessonsClientProps) {
   const [searchTerm, setSearchTerm] = useState("");
-  const [view, setView] = useState<"grid" | "list">("grid");
+  const [view, setView] = useState<"grid" | "list">(defaultView);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [imageModalLessonId, setImageModalLessonId] = useState<number | null>(
     null,
@@ -48,14 +64,21 @@ export default function LessonsClient({
   return (
     <PageContainer>
       <Header>
-        <Title>Lessons Dashboard</Title>
-        <CreateButton onClick={() => setIsCreateOpen(true)} />
+        <HeaderText>
+          <Title>{title}</Title>
+          {description && <Description>{description}</Description>}
+        </HeaderText>
+        {showCreateButton && (
+          <CreateButton onClick={() => setIsCreateOpen(true)} />
+        )}
       </Header>
 
-      <CreateLessonModal
-        isOpen={isCreateOpen}
-        onClose={() => setIsCreateOpen(false)}
-      />
+      {showCreateButton && (
+        <CreateLessonModal
+          isOpen={isCreateOpen}
+          onClose={() => setIsCreateOpen(false)}
+        />
+      )}
 
       <UploadLessonImageModal
         isOpen={imageModalLessonId !== null}
@@ -63,23 +86,34 @@ export default function LessonsClient({
         lessonId={imageModalLessonId ?? 0}
       />
 
-      <SearchBarRow>
-        <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+      {(showSearchBar || showViewToggle) && (
+        <SearchBarRow>
+          {showSearchBar && (
+            <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+          )}
+          {showViewToggle && (
+            <ViewToggleButton>
+              <GridToggle
+                $active={view === "grid"}
+                onClick={() => setView("grid")}
+              >
+                {view === "grid" ? IconSvgs.gridActive : IconSvgs.gridInactive}
+                <ToggleText>Card</ToggleText>
+              </GridToggle>
 
-        <ViewToggleButton>
-          <GridToggle $active={view === "grid"} onClick={() => setView("grid")}>
-            {view === "grid" ? IconSvgs.gridActive : IconSvgs.gridInactive}
-            <ToggleText>Card</ToggleText>
-          </GridToggle>
+              <ToggleDivider />
 
-          <ToggleDivider />
-
-          <GridToggle $active={view === "list"} onClick={() => setView("list")}>
-            {view === "list" ? IconSvgs.listActive : IconSvgs.listInactive}
-            <ToggleText>List</ToggleText>
-          </GridToggle>
-        </ViewToggleButton>
-      </SearchBarRow>
+              <GridToggle
+                $active={view === "list"}
+                onClick={() => setView("list")}
+              >
+                {view === "list" ? IconSvgs.listActive : IconSvgs.listInactive}
+                <ToggleText>List</ToggleText>
+              </GridToggle>
+            </ViewToggleButton>
+          )}
+        </SearchBarRow>
+      )}
 
       {view === "grid" ? (
         <LessonsGrid>

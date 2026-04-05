@@ -24,7 +24,7 @@ import {
   UserName,
 } from "./styles";
 
-export default function Header() {
+export default function Header({ displayName }: { displayName: string }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -44,6 +44,14 @@ export default function Header() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  const initials =
+    displayName
+      .trim()
+      .match(/\p{L}+/gu)
+      ?.map(word => word[0])
+      .join("")
+      .toUpperCase() ?? "";
 
   return (
     <HeaderBar>
@@ -77,8 +85,8 @@ export default function Header() {
       <HeaderRight>
         <DropdownWrapper ref={dropdownRef}>
           <ProfileButton onClick={() => setDropdownOpen(prev => !prev)}>
-            <UserImg>NH</UserImg>
-            <UserName>Neha Hussain</UserName>
+            <UserImg>{initials}</UserImg>
+            <UserName>{displayName}</UserName>
           </ProfileButton>
 
           {dropdownOpen && (

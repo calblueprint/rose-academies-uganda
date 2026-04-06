@@ -399,6 +399,30 @@ export const IconSvgs = {
       />
     </svg>
   ),
+  upload: (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="18"
+      height="18"
+      viewBox="0 0 18 18"
+      fill="none"
+    >
+      <path
+        d="M4.5 14.999H13.5"
+        stroke="#808582"
+        stroke-width="1.125"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+      <path
+        d="M9.00024 12.001V3.00098M9.00024 3.00098L11.6252 5.62598M9.00024 3.00098L6.37524 5.62598"
+        stroke="#808582"
+        stroke-width="1.125"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+    </svg>
+  ),
 };
 
 export type IconType = keyof typeof IconSvgs;

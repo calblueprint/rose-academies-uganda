@@ -10,6 +10,7 @@ import { use, useEffect, useState } from "react";
 import Link from "next/link";
 import supabase from "@/api/supabase/client";
 import OfflineToggle from "@/components/OfflineToggle";
+import UploadFilesButton from "@/components/UploadFilesButton";
 import { getCurrentDeviceId } from "@/lib/getCurrentUserDevice";
 import * as style from "./style";
 
@@ -101,6 +102,29 @@ export default function LessonDetailPage({ params }: PageProps) {
       </p>
 
       <h2>Files</h2>
+      <p>
+        <UploadFilesButton lessonId={numericLessonId} />
+      </p>
+
+      {files.length === 0 ? (
+        <p>No files (mock data).</p>
+      ) : (
+        <ul>
+          {files.map(f => (
+            <li key={f.id}>
+              {f.name}{" "}
+              <button
+                type="button"
+                onClick={() => {
+                  alert("Mark for Offline (placeholder)");
+                }}
+              >
+                Mark for Offline (placeholder)
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
 
       {files.length === 0 ? (
         <p>No files (mock data).</p>

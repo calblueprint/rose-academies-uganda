@@ -1,20 +1,22 @@
-// Lesson detail page.
-// Purpose:
-// - Shows a single lesson and its files.
-// - Files belong to exactly one lesson (no global file library for MVP).
-// - Later: upload files here, mark files for offline, etc.
-
 "use client";
 
 import { use, useEffect, useState } from "react";
 import Link from "next/link";
 import supabase from "@/api/supabase/client";
+import EditLessonButton from "@/components/EditLessonButton";
 import OfflineToggle from "@/components/OfflineToggle";
 import { getCurrentDeviceId } from "@/lib/getCurrentUserDevice";
 import * as style from "./style";
 
 type PageProps = {
   params: Promise<{ lessonId: string }>;
+};
+
+type Lesson = {
+  id: number;
+  name: string;
+  description: string | null;
+  group_id: number | null;
 };
 
 const MOCK_FILES_BY_LESSON: Record<string, { id: string; name: string }[]> = {
@@ -49,18 +51,34 @@ export default function LessonDetailPage({ params }: PageProps) {
   const numericLessonId = Number(lessonId);
   const files = MOCK_FILES_BY_LESSON[lessonId] ?? [];
 
+  const [lesson, setLesson] = useState<Lesson | null>(null);
   const [deviceId, setDeviceId] = useState<string | null>(null);
   const [isOffline, setIsOffline] = useState(false);
 
   useEffect(() => {
-    const loadOfflineStatus = async () => {
+    const loadPageData = async () => {
       if (Number.isNaN(numericLessonId)) {
-        console.error(`Invalid lessonId for DeviceLessons: ${lessonId}`);
+        console.error(`Invalid lessonId: ${lessonId}`);
         return;
       }
 
       try {
-        const currentDeviceId = await getCurrentDeviceId();
+        const [{ data: lessonData, error: lessonError }, currentDeviceId] =
+          await Promise.all([
+            supabase
+              .from("Lessons")
+              .select("id, name, description, group_id")
+              .eq("id", numericLessonId)
+              .single(),
+            getCurrentDeviceId(),
+          ]);
+
+        if (lessonError) {
+          console.error("Failed to load lesson:", lessonError.message);
+          return;
+        }
+
+        setLesson(lessonData);
         setDeviceId(currentDeviceId);
 
         const offlineStatus = await checkIfIsOffline(
@@ -69,36 +87,37 @@ export default function LessonDetailPage({ params }: PageProps) {
         );
         setIsOffline(offlineStatus);
       } catch (error) {
-        console.error("Failed to load offline status:", error);
+        console.error("Failed to load lesson detail page:", error);
       }
     };
 
-    void loadOfflineStatus();
+    void loadPageData();
   }, [lessonId, numericLessonId]);
+
+  if (Number.isNaN(numericLessonId)) {
+    return <main>Invalid lesson ID.</main>;
+  }
+
+  if (!lesson) {
+    return <main>Loading lesson...</main>;
+  }
 
   return (
     <main>
       <style.HeaderBox>
-        <h1>Lesson: {lessonId}</h1>
+        <h1>Lesson: {lesson.name}</h1>
+
         <OfflineToggle
           deviceId={deviceId}
           lessonId={numericLessonId}
           isOffline={isOffline}
           setIsOffline={setIsOffline}
         />
+
+        <EditLessonButton lesson={lesson} />
       </style.HeaderBox>
 
-      <p>
-        <button
-          type="button"
-          onClick={() => {
-            // Placeholder for future modal open
-            alert("Edit Lesson (modal later)");
-          }}
-        >
-          Edit Lesson (placeholder)
-        </button>
-      </p>
+      {lesson.description && <p>{lesson.description}</p>}
 
       <h2>Files</h2>
 
@@ -112,7 +131,6 @@ export default function LessonDetailPage({ params }: PageProps) {
               <button
                 type="button"
                 onClick={() => {
-                  // Placeholder for later "mark for offline" behavior
                   alert("Mark for Offline (placeholder)");
                 }}
               >

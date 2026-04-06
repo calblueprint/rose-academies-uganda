@@ -23,8 +23,8 @@ export default async function ArchivedLessonsPage() {
   return (
     <LessonsClient
       initialLessons={lessons ?? []}
-      title="Lesson Archive"
-      description='Archived lessons are removed from the lesson dashboard and sync lessons pages. Use "Restore" to bring a lesson back'
+      title="Archive Lessons"
+      description='Archived lessons are removed from the lesson dashboard and sync lessons pages. Use "Restore" to bring a lesson back.'
       showCreateButton={false}
       showSearchBar={false}
       showViewToggle={false}

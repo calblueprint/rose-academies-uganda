@@ -61,6 +61,7 @@ export default function Header() {
         {[
           { label: "Lessons", href: "/app/lessons" },
           { label: "Sync", href: "/app/offline-library" },
+          { label: "Archive", href: "/app/archived" },
         ].map(tab => (
           <NavTab
             key={tab.label}

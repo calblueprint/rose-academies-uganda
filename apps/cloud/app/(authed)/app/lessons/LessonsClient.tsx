@@ -27,18 +27,20 @@ import {
   ViewToggleButton,
 } from "./style";
 
-interface LessonsClientProps {
+type LessonsClientProps = {
   initialLessons: Lesson[];
+  lessonStatuses: Partial<Record<number, "available" | "pending">>;
   title?: string;
   description?: string;
   showCreateButton?: boolean;
   showSearchBar?: boolean;
   showViewToggle?: boolean;
   defaultView?: "grid" | "list";
-}
+};
 
 export default function LessonsClient({
   initialLessons,
+  lessonStatuses,
   title = "Lessons Dashboard",
   description,
   showCreateButton = true,
@@ -125,6 +127,7 @@ export default function LessonsClient({
                     lessonId={lesson.id}
                     lessonName={lesson.name}
                     lessonImage={lesson.image_path}
+                    status={lessonStatuses[lesson.id]}
                   />
                   <EditImageButton
                     type="button"
@@ -169,6 +172,7 @@ export default function LessonsClient({
                 key={lesson.id}
                 lessonId={lesson.id}
                 lessonName={lesson.name}
+                status={lessonStatuses[lesson.id]}
               />
             ))
           ) : (

@@ -1,5 +1,6 @@
 "use client";
 
+// commented out this component, we can decide if we want to keep this later
 import { IconSvgs } from "@/lib/icons";
 import {
   BoxesRow,

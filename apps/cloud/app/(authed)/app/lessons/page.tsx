@@ -1,4 +1,5 @@
 import { getSupabaseServerClientReadOnly } from "@/api/supabase/server-readonly";
+import { getCurrentDeviceId } from "@/lib/getCurrentUserDevice";
 import LessonsClient from "./LessonsClient";
 
 export default async function LessonsPage() {
@@ -20,5 +21,27 @@ export default async function LessonsPage() {
     throw new Error(error.message);
   }
 
-  return <LessonsClient initialLessons={lessons ?? []} />;
+  const deviceId = getCurrentDeviceId();
+
+  const { data: deviceLessons, error: deviceLessonsError } = await supabase
+    .from("DeviceLessons")
+    .select("lesson_id, status")
+    .eq("device_id", deviceId);
+
+  if (deviceLessonsError) {
+    throw new Error(deviceLessonsError.message);
+  }
+
+  const lessonStatuses = Object.fromEntries(
+    (deviceLessons ?? [])
+      .filter(row => row.status === "available" || row.status === "pending")
+      .map(row => [row.lesson_id, row.status]),
+  ) as Partial<Record<number, "available" | "pending">>;
+
+  return (
+    <LessonsClient
+      initialLessons={lessons ?? []}
+      lessonStatuses={lessonStatuses}
+    />
+  );
 }

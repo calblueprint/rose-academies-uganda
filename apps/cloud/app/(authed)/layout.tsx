@@ -28,7 +28,7 @@ export default async function AuthedLayout({
     console.log("error: ", error);
   }
 
-  const displayName = data?.display_name;
+  const displayName = data?.display_name ?? "User";
 
   return (
     <DataContextProvider>

@@ -6,7 +6,6 @@ import { uploadFile } from "@/api/supabase/files";
 import FileTypeBadge from "@/components/FileTypeBadge";
 import { DataContext } from "@/context/DataContext";
 import { getCurrentUserOrThrow } from "@/lib/getCurrentUser";
-import { getCurrentDeviceId } from "@/lib/getCurrentUserDevice";
 import {
   ActionRow,
   AssignedVillageRow,
@@ -174,7 +173,17 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
 
     try {
       const user = await getCurrentUserOrThrow();
-      const deviceId = await getCurrentDeviceId();
+      const { data: device, error: deviceError } = await supabase
+        .from("devices")
+        .select("id")
+        .eq("user_id", user.id)
+        .single();
+
+      if (deviceError || !device?.id) {
+        throw deviceError ?? new Error("Unable to find device for user.");
+      }
+
+      const deviceId = device.id as string;
       const fallbackGroupId = selectedGroupIds[0] ?? 1;
 
       const { data: lesson, error: lessonError } = await supabase

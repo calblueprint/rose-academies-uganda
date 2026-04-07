@@ -5,7 +5,6 @@ import Link from "next/link";
 import supabase from "@/api/supabase/client";
 import EditLessonButton from "@/components/EditLessonButton";
 import OfflineToggle from "@/components/OfflineToggle";
-import { getCurrentDeviceId } from "@/lib/getCurrentUserDevice";
 import * as style from "./style";
 
 type PageProps = {
@@ -63,20 +62,46 @@ export default function LessonDetailPage({ params }: PageProps) {
       }
 
       try {
-        const [{ data: lessonData, error: lessonError }, currentDeviceId] =
-          await Promise.all([
-            supabase
-              .from("Lessons")
-              .select("id, name, description, group_id")
-              .eq("id", numericLessonId)
-              .single(),
-            getCurrentDeviceId(),
-          ]);
+        const [
+          { data: lessonData, error: lessonError },
+          {
+            data: { user },
+            error: userError,
+          },
+        ] = await Promise.all([
+          supabase
+            .from("Lessons")
+            .select("id, name, description, group_id")
+            .eq("id", numericLessonId)
+            .single(),
+          supabase.auth.getUser(),
+        ]);
 
         if (lessonError) {
           console.error("Failed to load lesson:", lessonError.message);
           return;
         }
+
+        if (userError || !user) {
+          console.error("Failed to load current user:", userError?.message);
+          return;
+        }
+
+        const { data: device, error: deviceError } = await supabase
+          .from("devices")
+          .select("id")
+          .eq("user_id", user.id)
+          .single();
+
+        if (deviceError || !device?.id) {
+          console.error(
+            "Failed to load device:",
+            deviceError?.message ?? "No device found.",
+          );
+          return;
+        }
+
+        const currentDeviceId = device.id as string;
 
         setLesson(lessonData);
         setDeviceId(currentDeviceId);

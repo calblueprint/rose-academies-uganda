@@ -1,6 +1,7 @@
 import supabase from "@/api/supabase/client";
+import { getDeviceId } from "@/lib/getDeviceId";
 
-const DEVICE_ID = "nathans-pi"; // hardcoded for now
+const DEVICE_ID = getDeviceId();
 
 console.log("pollSync file loaded.");
 

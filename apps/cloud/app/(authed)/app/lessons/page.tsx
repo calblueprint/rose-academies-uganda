@@ -21,7 +21,7 @@ export default async function LessonsPage() {
     throw new Error(error.message);
   }
 
-  const deviceId = getCurrentDeviceId();
+  const deviceId = await getCurrentDeviceId({ userId: user.id });
 
   const { data: deviceLessons, error: deviceLessonsError } = await supabase
     .from("DeviceLessons")

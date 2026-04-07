@@ -68,7 +68,7 @@ export default async function OfflineLibraryPage() {
     );
   }
 
-  const deviceId = getCurrentDeviceId();
+  const deviceId = await getCurrentDeviceId({ userId: user.id });
 
   const { data, error } = await supabase
     .from("DeviceLessons")

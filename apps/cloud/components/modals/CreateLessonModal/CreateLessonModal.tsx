@@ -174,7 +174,7 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
 
     try {
       const user = await getCurrentUserOrThrow();
-      const deviceId = getCurrentDeviceId();
+      const deviceId = await getCurrentDeviceId();
       const fallbackGroupId = selectedGroupIds[0] ?? 1;
 
       const { data: lesson, error: lessonError } = await supabase

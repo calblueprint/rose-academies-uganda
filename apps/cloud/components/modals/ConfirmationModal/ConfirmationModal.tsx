@@ -63,7 +63,7 @@ export default function ConfirmationModal({
 
             right now, it only logs to the console.
             */
-            onClick={onConfirm}
+            onClick={onCancel}
             disabled={isLoading}
             type="button"
           >
@@ -88,7 +88,7 @@ export default function ConfirmationModal({
 
               right now, it always shows confirmText.
 
-              
+
               */}
             {isLoading ? "Loading..." : confirmText}
           </ConfirmButton>

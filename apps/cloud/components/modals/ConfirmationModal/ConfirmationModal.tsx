@@ -43,7 +43,7 @@ export default function ConfirmationModal({
     */
     <Overlay
       onClick={() => {
-        console.log("overlay clicked");
+        if (!isLoading) onCancel();
       }}
     >
       <ModalCard
@@ -63,9 +63,7 @@ export default function ConfirmationModal({
 
             right now, it only logs to the console.
             */
-            onClick={() => {
-              console.log("cancel clicked");
-            }}
+            onClick={onConfirm}
             disabled={isLoading}
             type="button"
           >
@@ -79,9 +77,7 @@ export default function ConfirmationModal({
 
             right now, it only logs to the console.
             */
-            onClick={() => {
-              console.log("confirm clicked");
-            }}
+            onClick={onConfirm}
             disabled={isLoading}
             type="button"
           >
@@ -91,8 +87,10 @@ export default function ConfirmationModal({
               otherwise it should show confirmText.
 
               right now, it always shows confirmText.
+
+              
               */}
-            {confirmText}
+            {isLoading ? "Loading..." : confirmText}
           </ConfirmButton>
         </ActionRow>
       </ModalCard>

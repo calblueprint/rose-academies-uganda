@@ -21,7 +21,7 @@ export default function TestConfirmationPage() {
       replace this with the correct behavior.
       */
         onClick={() => {
-          console.log("button clicked");
+          setIsOpen(true);
         }}
       >
         Click to Test Modal

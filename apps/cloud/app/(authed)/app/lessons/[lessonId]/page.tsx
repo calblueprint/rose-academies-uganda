@@ -9,14 +9,18 @@
 import { use, useEffect, useState } from "react";
 import Link from "next/link";
 import supabase from "@/api/supabase/client";
+import LessonHeader from "@/components/LessonHeader";
 import OfflineToggle from "@/components/OfflineToggle";
 import { getCurrentDeviceId } from "@/lib/getCurrentUserDevice";
-import * as style from "./style";
 
 type PageProps = {
   params: Promise<{ lessonId: string }>;
 };
-
+type Lesson = {
+  id: number;
+  name: string;
+  image_path: string | null;
+};
 const MOCK_FILES_BY_LESSON: Record<string, { id: string; name: string }[]> = {
   "lesson-001": [
     { id: "f1", name: "Fractions Worksheet.pdf" },
@@ -51,6 +55,7 @@ export default function LessonDetailPage({ params }: PageProps) {
 
   const [deviceId, setDeviceId] = useState<string | null>(null);
   const [isOffline, setIsOffline] = useState(false);
+  const [lesson, setLesson] = useState<Lesson | null>(null);
 
   useEffect(() => {
     const loadOfflineStatus = async () => {
@@ -68,6 +73,19 @@ export default function LessonDetailPage({ params }: PageProps) {
           numericLessonId,
         );
         setIsOffline(offlineStatus);
+        const { data: lessonData, error: lessonError } = await supabase
+          .from("Lessons")
+          .select("id, name, image_path")
+          .eq("id", numericLessonId)
+          .single();
+
+        if (lessonError) {
+          console.error("Error fetching lesson data:", lessonError.message);
+          return;
+        }
+
+        // store fetched lesson so the header can display actual lesson data
+        setLesson(lessonData ?? null);
       } catch (error) {
         console.error("Failed to load offline status:", error);
       }
@@ -78,15 +96,18 @@ export default function LessonDetailPage({ params }: PageProps) {
 
   return (
     <main>
-      <style.HeaderBox>
-        <h1>Lesson: {lessonId}</h1>
-        <OfflineToggle
-          deviceId={deviceId}
-          lessonId={numericLessonId}
-          isOffline={isOffline}
-          setIsOffline={setIsOffline}
-        />
-      </style.HeaderBox>
+      <LessonHeader
+        lessonId={numericLessonId}
+        lessonName={lesson?.name ?? `Lesson ${lessonId}`}
+        imagePath={lesson?.image_path ?? null}
+      />
+
+      <OfflineToggle
+        deviceId={deviceId}
+        lessonId={numericLessonId}
+        isOffline={isOffline}
+        setIsOffline={setIsOffline}
+      />
 
       <p>
         <button

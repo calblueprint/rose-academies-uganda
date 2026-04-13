@@ -62,46 +62,19 @@ export default function LessonDetailPage({ params }: PageProps) {
       }
 
       try {
-        const [
-          { data: lessonData, error: lessonError },
-          {
-            data: { user },
-            error: userError,
-          },
-        ] = await Promise.all([
-          supabase
-            .from("Lessons")
-            .select("id, name, description, group_id")
-            .eq("id", numericLessonId)
-            .single(),
-          supabase.auth.getUser(),
-        ]);
+        const { data: lessonData, error: lessonError } = await supabase
+          .from("Lessons")
+          .select("id, name, description, group_id")
+          .eq("id", numericLessonId)
+          .single();
 
         if (lessonError) {
           console.error("Failed to load lesson:", lessonError.message);
           return;
         }
 
-        if (userError || !user) {
-          console.error("Failed to load current user:", userError?.message);
-          return;
-        }
-
-        const { data: device, error: deviceError } = await supabase
-          .from("devices")
-          .select("id")
-          .eq("user_id", user.id)
-          .single();
-
-        if (deviceError || !device?.id) {
-          console.error(
-            "Failed to load device:",
-            deviceError?.message ?? "No device found.",
-          );
-          return;
-        }
-
-        const currentDeviceId = device.id as string;
+        // TEMP FIX: hardcoded device id (remove later)
+        const currentDeviceId = "nathans-pi";
 
         setLesson(lessonData);
         setDeviceId(currentDeviceId);

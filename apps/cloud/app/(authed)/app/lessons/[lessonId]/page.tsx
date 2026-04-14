@@ -5,6 +5,7 @@ import Link from "next/link";
 import supabase from "@/api/supabase/client";
 import EditLessonButton from "@/components/EditLessonButton";
 import OfflineToggle from "@/components/OfflineToggle";
+import VillageTags from "@/components/VillageTags";
 import * as style from "./style";
 
 type PageProps = {
@@ -45,6 +46,35 @@ async function checkIfIsOffline(
   return !!data && data.length > 0;
 }
 
+async function getVillageIds(lessonId: string): Promise<string[]> {
+  const { data, error } = await supabase
+    .from("LessonGroups")
+    .select("group_id")
+    .eq("lesson_id", lessonId);
+  if (error) {
+    console.error("Error getting village IDs:", error.message);
+    throw error;
+  }
+
+  return data.map(row => row.group_id);
+}
+
+async function getVillageNames(lessonId: string): Promise<string[]> {
+  const villageIds = await getVillageIds(lessonId);
+
+  const { data, error } = await supabase
+    .from("Groups")
+    .select("name")
+    .in("id", villageIds);
+
+  if (error) {
+    console.error("Error getting village names:", error.message);
+    throw error;
+  }
+
+  return data.map(row => row.name);
+}
+
 export default function LessonDetailPage({ params }: PageProps) {
   const { lessonId } = use(params);
   const numericLessonId = Number(lessonId);
@@ -53,6 +83,7 @@ export default function LessonDetailPage({ params }: PageProps) {
   const [lesson, setLesson] = useState<Lesson | null>(null);
   const [deviceId, setDeviceId] = useState<string | null>(null);
   const [isOffline, setIsOffline] = useState(false);
+  const [villages, setVillages] = useState<string[]>([]);
 
   useEffect(() => {
     const loadPageData = async () => {
@@ -83,6 +114,10 @@ export default function LessonDetailPage({ params }: PageProps) {
           currentDeviceId,
           numericLessonId,
         );
+
+        const getVillageResult = await getVillageNames(lessonId);
+        setVillages(getVillageResult);
+
         setIsOffline(offlineStatus);
       } catch (error) {
         console.error("Failed to load lesson detail page:", error);
@@ -116,6 +151,8 @@ export default function LessonDetailPage({ params }: PageProps) {
       </style.HeaderBox>
 
       {lesson.description && <p>{lesson.description}</p>}
+
+      <VillageTags villages={villages}></VillageTags>
 
       <h2>Files</h2>
 

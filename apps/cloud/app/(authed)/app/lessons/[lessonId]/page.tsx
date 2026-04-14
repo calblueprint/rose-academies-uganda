@@ -3,6 +3,7 @@
 import { use, useEffect, useState } from "react";
 import Link from "next/link";
 import supabase from "@/api/supabase/client";
+import ArchiveToggle from "@/components/ArchiveToggle/ArchiveToggle";
 import EditLessonButton from "@/components/EditLessonButton";
 import OfflineToggle from "@/components/OfflineToggle";
 import * as style from "./style";
@@ -16,6 +17,7 @@ type Lesson = {
   name: string;
   description: string | null;
   group_id: number | null;
+  is_archived: boolean;
 };
 
 const MOCK_FILES_BY_LESSON: Record<string, { id: string; name: string }[]> = {
@@ -64,7 +66,7 @@ export default function LessonDetailPage({ params }: PageProps) {
       try {
         const { data: lessonData, error: lessonError } = await supabase
           .from("Lessons")
-          .select("id, name, description, group_id")
+          .select("id, name, description, group_id, is_archived")
           .eq("id", numericLessonId)
           .single();
 
@@ -114,6 +116,8 @@ export default function LessonDetailPage({ params }: PageProps) {
 
         <EditLessonButton lesson={lesson} />
       </style.HeaderBox>
+
+      <ArchiveToggle lesson_Id={lesson.id} isArchived={lesson.is_archived} />
 
       {lesson.description && <p>{lesson.description}</p>}
 

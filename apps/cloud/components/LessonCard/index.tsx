@@ -18,7 +18,7 @@ export default function LessonCard({
   status?: "available" | "pending";
 }) {
   const router = useRouter();
-  lessonId = 1;
+  //lessonId = 1;
 
   return (
     <Card onClick={() => router.push(`/app/lessons/${lessonId}`)}>

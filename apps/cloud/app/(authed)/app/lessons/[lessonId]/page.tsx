@@ -11,6 +11,7 @@ type Lesson = {
   name: string;
   description: string | null;
   group_id: number | null;
+  image_path: string | null;
 };
 
 const MOCK_FILES_BY_LESSON: Record<string, { id: string; name: string }[]> = {
@@ -43,7 +44,7 @@ export default async function LessonDetailPage({ params }: PageProps) {
 
   const { data: lesson, error: lessonError } = await supabase
     .from("Lessons")
-    .select("id, name, description, group_id")
+    .select("id, name, description, group_id, image_path")
     .eq("id", numericLessonId)
     .single<Lesson>();
 

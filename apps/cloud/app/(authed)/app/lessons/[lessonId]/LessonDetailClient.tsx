@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import EditLessonButton from "@/components/EditLessonButton";
+import LessonHeader from "@/components/LessonHeader";
 import OfflineToggle from "@/components/OfflineToggle";
 import * as style from "./style";
 
@@ -11,6 +12,7 @@ type Lesson = {
   name: string;
   description: string | null;
   group_id: number | null;
+  image_path: string | null;
 };
 
 type LessonFile = {
@@ -35,9 +37,13 @@ export default function LessonDetailClient({
 
   return (
     <main>
-      <style.HeaderBox>
-        <h1>Lesson: {lesson.name}</h1>
+      <LessonHeader
+        lessonId={lesson.id}
+        lessonName={lesson.name}
+        imagePath={lesson.image_path}
+      />
 
+      <style.HeaderBox>
         <OfflineToggle
           deviceId={deviceId}
           lessonId={lesson.id}

@@ -43,6 +43,10 @@ function OfflineToggle({
 
         setIsOffline(false);
       } else {
+        if (!hasFiles) {
+          console.error("Cannot send lesson to offline without files.");
+          return;
+        }
         const { error } = await supabase.from("DeviceLessons").insert({
           device_id: deviceId,
           lesson_id: lessonId,

@@ -239,6 +239,11 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
       }
 
       if (sendToOffline) {
+        if (snapshot.length === 0) {
+          throw new Error(
+            "Cannot send lesson to offline library without files.",
+          );
+        }
         const { error: deviceLessonError } = await supabase
           .from("DeviceLessons")
           .upsert(

@@ -5,6 +5,7 @@ import Link from "next/link";
 import EditLessonButton from "@/components/EditLessonButton";
 import LessonHeader from "@/components/LessonHeader";
 import OfflineToggle from "@/components/OfflineToggle";
+import UploadFilesButton from "@/components/UploadFilesButton";
 import * as style from "./style";
 
 type Lesson = {
@@ -57,6 +58,10 @@ export default function LessonDetailClient({
       {lesson.description && <p>{lesson.description}</p>}
 
       <h2>Files</h2>
+
+      <div>
+        <UploadFilesButton lessonId={lesson.id} />
+      </div>
 
       {files.length === 0 ? (
         <p>No files (mock data).</p>

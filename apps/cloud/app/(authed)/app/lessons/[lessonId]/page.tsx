@@ -15,12 +15,12 @@ type Lesson = {
 };
 
 const MOCK_FILES_BY_LESSON: Record<string, { id: string; name: string }[]> = {
-  "lesson-001": [
+  "1": [
     { id: "f1", name: "Fractions Worksheet.pdf" },
     { id: "f2", name: "Fractions Slides.pptx" },
   ],
-  "lesson-002": [{ id: "f1", name: "Plant Diagram.png" }],
-  "lesson-003": [{ id: "f1", name: "Short Story.pdf" }],
+  "2": [{ id: "f1", name: "Plant Diagram.png" }],
+  "3": [{ id: "f1", name: "Short Story.pdf" }],
 };
 
 export default async function LessonDetailPage({ params }: PageProps) {
@@ -65,7 +65,8 @@ export default async function LessonDetailPage({ params }: PageProps) {
   }
 
   const isOffline = !!offlineRows && offlineRows.length > 0;
-  const files = MOCK_FILES_BY_LESSON[lessonId] ?? [];
+
+  const files = MOCK_FILES_BY_LESSON[String(lesson.id)] ?? [];
 
   return (
     <LessonDetailClient

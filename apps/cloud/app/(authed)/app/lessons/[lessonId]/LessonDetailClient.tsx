@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import ArchiveToggle from "@/components/ArchiveToggle/ArchiveToggle";
 import EditLessonButton from "@/components/EditLessonButton";
 import LessonHeader from "@/components/LessonHeader";
 import OfflineToggle from "@/components/OfflineToggle";
@@ -15,6 +16,7 @@ type Lesson = {
   description: string | null;
   group_id: number | null;
   image_path: string | null;
+  is_archived: boolean;
 };
 
 type LessonFile = {
@@ -57,6 +59,8 @@ export default function LessonDetailClient({
 
         <EditLessonButton lesson={lesson} />
       </style.HeaderBox>
+
+      <ArchiveToggle lesson_Id={lesson.id} isArchived={lesson.is_archived} />
 
       {lesson.description && <p>{lesson.description}</p>}
 

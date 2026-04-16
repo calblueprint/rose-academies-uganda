@@ -2,7 +2,6 @@
 
 import type { Lesson } from "@/types/schema";
 import { useMemo, useState } from "react";
-import ArchiveToggle from "@/components/ArchiveToggle/ArchiveToggle";
 import CreateButton from "@/components/CreateLessonButton";
 import LessonCard from "@/components/LessonCard";
 import LessonItem from "@/components/LessonItem";
@@ -154,10 +153,6 @@ export default function LessonsClient({
                     </svg>
                   </EditImageButton>
                 </CardWrapper>
-                <ArchiveToggle
-                  lesson_Id={lesson.id}
-                  isArchived={lesson.is_archived}
-                />
               </div>
             ))
           ) : (

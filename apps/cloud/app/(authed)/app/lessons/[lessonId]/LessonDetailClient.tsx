@@ -59,9 +59,9 @@ export default function LessonDetailClient({
 
       <h2>Files</h2>
 
-      <p>
+      <div>
         <UploadFilesButton lessonId={lesson.id} />
-      </p>
+      </div>
 
       {files.length === 0 ? (
         <p>No files (mock data).</p>

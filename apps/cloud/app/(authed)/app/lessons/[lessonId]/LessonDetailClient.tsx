@@ -6,6 +6,7 @@ import EditLessonButton from "@/components/EditLessonButton";
 import LessonHeader from "@/components/LessonHeader";
 import OfflineToggle from "@/components/OfflineToggle";
 import UploadFilesButton from "@/components/UploadFilesButton";
+import VillageTags from "@/components/VillageTags";
 import * as style from "./style";
 
 type Lesson = {
@@ -26,6 +27,7 @@ type LessonDetailClientProps = {
   deviceId: string;
   initialIsOffline: boolean;
   files: LessonFile[];
+  villages: string[];
 };
 
 export default function LessonDetailClient({
@@ -33,6 +35,7 @@ export default function LessonDetailClient({
   deviceId,
   initialIsOffline,
   files,
+  villages,
 }: LessonDetailClientProps) {
   const [isOffline, setIsOffline] = useState(initialIsOffline);
 
@@ -56,6 +59,8 @@ export default function LessonDetailClient({
       </style.HeaderBox>
 
       {lesson.description && <p>{lesson.description}</p>}
+
+      <VillageTags villages={villages} />
 
       <h2>Files</h2>
 

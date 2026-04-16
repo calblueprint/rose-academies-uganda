@@ -64,8 +64,33 @@ export default async function LessonDetailPage({ params }: PageProps) {
     throw new Error(offlineError.message);
   }
 
-  const isOffline = !!offlineRows && offlineRows.length > 0;
+  const { data: lessonGroupRows, error: lessonGroupsError } = await supabase
+    .from("LessonGroups")
+    .select("group_id")
+    .eq("lesson_id", numericLessonId);
 
+  if (lessonGroupsError) {
+    throw new Error(lessonGroupsError.message);
+  }
+
+  const groupIds = lessonGroupRows.map(row => row.group_id);
+
+  let villages: string[] = [];
+
+  if (groupIds.length > 0) {
+    const { data: groupRows, error: groupsError } = await supabase
+      .from("Groups")
+      .select("name")
+      .in("id", groupIds);
+
+    if (groupsError) {
+      throw new Error(groupsError.message);
+    }
+
+    villages = groupRows.map(row => row.name);
+  }
+
+  const isOffline = !!offlineRows && offlineRows.length > 0;
   const files = MOCK_FILES_BY_LESSON[String(lesson.id)] ?? [];
 
   return (
@@ -74,6 +99,7 @@ export default async function LessonDetailPage({ params }: PageProps) {
       deviceId={deviceId}
       initialIsOffline={isOffline}
       files={files}
+      villages={villages}
     />
   );
 }

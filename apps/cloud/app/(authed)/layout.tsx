@@ -18,9 +18,21 @@ export default async function AuthedLayout({
     redirect("/login");
   }
 
+  const { data, error } = await supabase
+    .from("Profiles")
+    .select("display_name")
+    .eq("id", user.id)
+    .single();
+
+  if (error) {
+    console.log("error: ", error);
+  }
+
+  const displayName = data?.display_name ?? "User";
+
   return (
     <DataContextProvider>
-      <Header />
+      <Header displayName={displayName} />
       {children}
     </DataContextProvider>
   );

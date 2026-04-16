@@ -25,6 +25,7 @@ export const ImagePlaceholder = styled.div`
 
 export const Titleholder = styled.div`
   display: flex;
+  flex-direction: column;
   width: 100%;
   height: 5.94656rem;
   padding: 0.97rem 1.26rem;
@@ -36,6 +37,7 @@ export const Titleholder = styled.div`
 `;
 
 export const Title = styled.h3`
+  margin: 0;
   color: ${COLORS.black};
   font-family: var(--font-gilroy);
   font-size: 1.14356rem;

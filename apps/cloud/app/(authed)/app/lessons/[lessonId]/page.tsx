@@ -1,158 +1,79 @@
-// Lesson detail page.
-// Purpose:
-// - Shows a single lesson and its files.
-// - Files belong to exactly one lesson (no global file library for MVP).
-// - Later: upload files here, mark files for offline, etc.
-
-"use client";
-
-import { use, useEffect, useState } from "react";
-import Link from "next/link";
-import supabase from "@/api/supabase/client";
-import OfflineToggle from "@/components/OfflineToggle";
-import UploadFilesButton from "@/components/UploadFilesButton";
+import { getSupabaseServerClientReadOnly } from "@/api/supabase/server-readonly";
 import { getCurrentDeviceId } from "@/lib/getCurrentUserDevice";
-import * as style from "./style";
+import LessonDetailClient from "./LessonDetailClient";
 
 type PageProps = {
   params: Promise<{ lessonId: string }>;
 };
 
+type Lesson = {
+  id: number;
+  name: string;
+  description: string | null;
+  group_id: number | null;
+  image_path: string | null;
+};
+
 const MOCK_FILES_BY_LESSON: Record<string, { id: string; name: string }[]> = {
-  "lesson-001": [
+  "1": [
     { id: "f1", name: "Fractions Worksheet.pdf" },
     { id: "f2", name: "Fractions Slides.pptx" },
   ],
-  "lesson-002": [{ id: "f1", name: "Plant Diagram.png" }],
-  "lesson-003": [{ id: "f1", name: "Short Story.pdf" }],
+  "2": [{ id: "f1", name: "Plant Diagram.png" }],
+  "3": [{ id: "f1", name: "Short Story.pdf" }],
 };
 
-async function checkIfIsOffline(
-  deviceId: string,
-  lessonId: number,
-): Promise<boolean> {
-  const { data, error } = await supabase
+export default async function LessonDetailPage({ params }: PageProps) {
+  const { lessonId } = await params;
+  const numericLessonId = Number(lessonId);
+
+  if (Number.isNaN(numericLessonId)) {
+    return <main>Invalid lesson ID.</main>;
+  }
+
+  const supabase = await getSupabaseServerClientReadOnly();
+
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    throw new Error(userError?.message ?? "User not authenticated");
+  }
+
+  const { data: lesson, error: lessonError } = await supabase
+    .from("Lessons")
+    .select("id, name, description, group_id, image_path")
+    .eq("id", numericLessonId)
+    .single<Lesson>();
+
+  if (lessonError || !lesson) {
+    throw new Error(lessonError?.message ?? "Failed to load lesson");
+  }
+
+  const deviceId = await getCurrentDeviceId({ userId: user.id });
+
+  const { data: offlineRows, error: offlineError } = await supabase
     .from("DeviceLessons")
     .select("lesson_id")
     .eq("device_id", deviceId)
-    .eq("lesson_id", lessonId);
+    .eq("lesson_id", numericLessonId);
 
-  if (error) {
-    console.error("Error checking offline status:", error.message);
-    throw error;
+  if (offlineError) {
+    throw new Error(offlineError.message);
   }
 
-  return !!data && data.length > 0;
-}
+  const isOffline = !!offlineRows && offlineRows.length > 0;
 
-export default function LessonDetailPage({ params }: PageProps) {
-  const { lessonId } = use(params);
-  const numericLessonId = Number(lessonId);
-  const files = MOCK_FILES_BY_LESSON[lessonId] ?? [];
-
-  const [deviceId, setDeviceId] = useState<string | null>(null);
-  const [isOffline, setIsOffline] = useState(false);
-
-  useEffect(() => {
-    const loadOfflineStatus = async () => {
-      if (Number.isNaN(numericLessonId)) {
-        console.error(`Invalid lessonId for DeviceLessons: ${lessonId}`);
-        return;
-      }
-
-      try {
-        const currentDeviceId = await getCurrentDeviceId();
-        setDeviceId(currentDeviceId);
-
-        const offlineStatus = await checkIfIsOffline(
-          currentDeviceId,
-          numericLessonId,
-        );
-        setIsOffline(offlineStatus);
-      } catch (error) {
-        console.error("Failed to load offline status:", error);
-      }
-    };
-
-    void loadOfflineStatus();
-  }, [lessonId, numericLessonId]);
+  const files = MOCK_FILES_BY_LESSON[String(lesson.id)] ?? [];
 
   return (
-    <main>
-      <style.HeaderBox>
-        <h1>Lesson: {lessonId}</h1>
-        <OfflineToggle
-          deviceId={deviceId}
-          lessonId={numericLessonId}
-          isOffline={isOffline}
-          setIsOffline={setIsOffline}
-        />
-      </style.HeaderBox>
-
-      <p>
-        <button
-          type="button"
-          onClick={() => {
-            // Placeholder for future modal open
-            alert("Edit Lesson (modal later)");
-          }}
-        >
-          Edit Lesson (placeholder)
-        </button>
-      </p>
-
-      <h2>Files</h2>
-      <p>
-        <UploadFilesButton lessonId={numericLessonId} />
-      </p>
-
-      {files.length === 0 ? (
-        <p>No files (mock data).</p>
-      ) : (
-        <ul>
-          {files.map(f => (
-            <li key={f.id}>
-              {f.name}{" "}
-              <button
-                type="button"
-                onClick={() => {
-                  alert("Mark for Offline (placeholder)");
-                }}
-              >
-                Mark for Offline (placeholder)
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
-
-      {files.length === 0 ? (
-        <p>No files (mock data).</p>
-      ) : (
-        <ul>
-          {files.map(f => (
-            <li key={f.id}>
-              {f.name}{" "}
-              <button
-                type="button"
-                onClick={() => {
-                  // Placeholder for later "mark for offline" behavior
-                  alert("Mark for Offline (placeholder)");
-                }}
-              >
-                Mark for Offline (placeholder)
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
-
-      <p>
-        <Link href="/app/lessons">Back to Lessons</Link>
-      </p>
-      <p>
-        <Link href="/app/offline-library">Go to Offline Library</Link>
-      </p>
-    </main>
+    <LessonDetailClient
+      lesson={lesson}
+      deviceId={deviceId}
+      initialIsOffline={isOffline}
+      files={files}
+    />
   );
 }

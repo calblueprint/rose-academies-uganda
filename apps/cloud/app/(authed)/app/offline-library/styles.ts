@@ -43,18 +43,30 @@ export const PageSubtitle = styled.p`
 `;
 
 export const SectionTitle = styled.h2`
-  margin: 0.8rem 0 0.75rem;
+  margin: 1.25rem 0 1rem;
   font-family: var(--font-gilroy);
   font-size: 20px;
   font-style: normal;
   font-weight: 400;
-  padding: 1.25rem 0rem 0.5rem 0rem;
+  padding: 0;
 `;
 
 export const LessonsStack = styled.div`
   display: flex;
   flex-direction: column;
   gap: 0.9rem;
+`;
+
+export const SyncCardsRow = styled.div`
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  gap: 2rem;
+  align-items: flex-start;
+  width: 100%;
+
+  @media (max-width: 1080px) {
+    grid-template-columns: 1fr;
+  }
 `;
 
 export const SyncButtonWrapper = styled.div`

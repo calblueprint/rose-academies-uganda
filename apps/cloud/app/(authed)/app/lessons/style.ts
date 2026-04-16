@@ -42,6 +42,7 @@ export const PageContainer = styled.div`
 `;
 
 export const Title = styled.h1`
+  margin: 0
   font-family: var(--font-gilroy);
   font-size: 2.25rem;
   font-style: normal;
@@ -53,6 +54,15 @@ export const Header = styled.div`
   display: flex;
   flex-direction: row;
   justify-content: space-between;
+`;
+
+export const HeaderText = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  min-width: 0;
+  flex: 1;
 `;
 
 export const LessonsGrid = styled.div`
@@ -120,4 +130,19 @@ export const GridToggle = styled.div<ToggleProps>`
         ? "var(--evergreen-100, #1E4240)"
         : "var(--gray-40, var(--gray, #D9D9D9))"};
   }
+`;
+
+export const Description = styled.p`
+  margin: 0
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+  overflow: hidden;
+  color: var(--gray-60, #808582);
+  text-overflow: ellipsis;
+  font-family: var(--font-gilroy);
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
 `;

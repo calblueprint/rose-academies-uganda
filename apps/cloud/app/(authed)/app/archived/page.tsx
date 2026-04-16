@@ -20,5 +20,16 @@ export default async function ArchivedLessonsPage() {
     throw new Error(error.message);
   }
 
-  return <LessonsClient initialLessons={lessons ?? []} />;
+  return (
+    <LessonsClient
+      initialLessons={lessons ?? []}
+      lessonStatuses={{}}
+      title="Archive Lessons"
+      description='Archived lessons are removed from the lesson dashboard and sync lessons pages. Use "Restore" to bring a lesson back.'
+      showCreateButton={false}
+      showSearchBar={false}
+      showViewToggle={false}
+      defaultView="list"
+    />
+  );
 }

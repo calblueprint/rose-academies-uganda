@@ -6,9 +6,23 @@ import ArchiveToggle from "@/components/ArchiveToggle/ArchiveToggle";
 import EditLessonButton from "@/components/EditLessonButton";
 import LessonHeader from "@/components/LessonHeader";
 import OfflineToggle from "@/components/OfflineToggle";
+import SearchBar from "@/components/SearchBar";
 import UploadFilesButton from "@/components/UploadFilesButton";
 import VillageTags from "@/components/VillageTags";
-import * as style from "./style";
+import {
+  HeaderBox,
+  HeaderButtons,
+  LessonDescription,
+  LessonInformation,
+  LessonTitle,
+  PageContainer,
+  SearchBarRow,
+} from "./style";
+
+type LessonFile = {
+  id: string;
+  name: string;
+};
 
 type Lesson = {
   id: number;
@@ -17,11 +31,6 @@ type Lesson = {
   group_id: number | null;
   image_path: string | null;
   is_archived: boolean;
-};
-
-type LessonFile = {
-  id: string;
-  name: string;
 };
 
 type LessonDetailClientProps = {
@@ -40,64 +49,44 @@ export default function LessonDetailClient({
   villages,
 }: LessonDetailClientProps) {
   const [isOffline, setIsOffline] = useState(initialIsOffline);
+  const [searchTerm, setSearchTerm] = useState("");
 
   return (
-    <main>
-      <LessonHeader
-        lessonId={lesson.id}
-        lessonName={lesson.name}
-        imagePath={lesson.image_path}
-      />
-
-      <style.HeaderBox>
-        <OfflineToggle
-          deviceId={deviceId}
+    <PageContainer>
+      <LessonInformation>
+        <LessonHeader
           lessonId={lesson.id}
-          isOffline={isOffline}
-          setIsOffline={setIsOffline}
+          lessonName={lesson.name}
+          imagePath={lesson.image_path}
         />
 
-        <EditLessonButton lesson={lesson} />
-      </style.HeaderBox>
+        <HeaderBox>
+          <LessonTitle>{lesson.name}</LessonTitle>
+          <HeaderButtons>
+            <ArchiveToggle
+              lesson_Id={lesson.id}
+              isArchived={lesson.is_archived}
+            />
+            <OfflineToggle
+              deviceId={deviceId}
+              lessonId={lesson.id}
+              isOffline={isOffline}
+              setIsOffline={setIsOffline}
+            />
 
-      <ArchiveToggle lesson_Id={lesson.id} isArchived={lesson.is_archived} />
+            <EditLessonButton lesson={lesson} />
+          </HeaderButtons>
+        </HeaderBox>
 
-      {lesson.description && <p>{lesson.description}</p>}
+        <LessonDescription>{lesson.description}</LessonDescription>
 
-      <VillageTags villages={villages} />
+        <VillageTags villages={villages} />
+        <SearchBarRow>
+          <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
 
-      <h2>Files</h2>
-
-      <div>
-        <UploadFilesButton lessonId={lesson.id} />
-      </div>
-
-      {files.length === 0 ? (
-        <p>No files (mock data).</p>
-      ) : (
-        <ul>
-          {files.map(f => (
-            <li key={f.id}>
-              {f.name}{" "}
-              <button
-                type="button"
-                onClick={() => {
-                  alert("Mark for Offline (placeholder)");
-                }}
-              >
-                Mark for Offline (placeholder)
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
-
-      <p>
-        <Link href="/app/lessons">Back to Lessons</Link>
-      </p>
-      <p>
-        <Link href="/app/offline-library">Go to Offline Library</Link>
-      </p>
-    </main>
+          <UploadFilesButton lessonId={lesson.id} />
+        </SearchBarRow>
+      </LessonInformation>
+    </PageContainer>
   );
 }

@@ -1,4 +1,3 @@
-import { getCurrentUserOrThrow } from "@/lib/getCurrentUser";
 import { getSupabaseServerClient } from "../api/supabase/server";
 
 export async function getLessonSizeBytes(lessonId: number): Promise<number> {

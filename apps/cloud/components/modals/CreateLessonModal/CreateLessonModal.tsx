@@ -253,6 +253,7 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
       resetForm();
       setIsSubmitting(false);
       onClose();
+      window.location.reload();
     } catch (err) {
       console.error("Failed to create lesson:", err);
 

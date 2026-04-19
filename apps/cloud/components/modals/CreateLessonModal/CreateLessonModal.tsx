@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useContext, useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { getSupabaseBrowserClient } from "@/api/supabase/browser";
 import { uploadFile } from "@/api/supabase/files";
 import FileTypeBadge from "@/components/FileTypeBadge";
@@ -89,6 +90,7 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const data = useContext(DataContext);
   const supabase = getSupabaseBrowserClient();
+  const router = useRouter();
   const hasFiles = files.length > 0;
 
   useEffect(() => {
@@ -265,6 +267,7 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
       resetForm();
       setIsSubmitting(false);
       onClose();
+      router.refresh();
     } catch (err) {
       console.error("Failed to create lesson:", err);
 

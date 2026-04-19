@@ -1,0 +1,15 @@
+[Unit]
+Description=Rose Academies local Next.js app
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+User={{USERNAME}}
+WorkingDirectory=/home/{{USERNAME}}/rose-academies-uganda
+Environment=LOCAL_FILES_DIR=/home/{{USERNAME}}/rose-files
+ExecStart=/usr/bin/bash -lc '/home/{{USERNAME}}/.local/share/pnpm/pnpm start:local'
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

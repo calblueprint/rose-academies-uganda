@@ -6,6 +6,5 @@ export async function register() {
     return;
   }
 
-  const { startSyncPolling } = await import("@/lib/sync/pollSync");
-  startSyncPolling();
+  await import("./instrumentation-node");
 }

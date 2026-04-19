@@ -45,3 +45,11 @@ export const Title = styled.h3`
   font-weight: 500;
   line-height: normal;
 `;
+export const TagRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: nowrap;
+  width: 100%;
+  overflow-x: auto;
+`;

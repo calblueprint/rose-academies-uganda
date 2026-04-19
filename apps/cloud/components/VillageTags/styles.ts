@@ -10,6 +10,7 @@ export const VillageTag = styled.span`
   padding: 6px 16px;
   font-size: 14px;
   color: ${COLORS.evergreen};
+  white-space: nowrap;
 `;
 
 export const TagGroup = styled.div`

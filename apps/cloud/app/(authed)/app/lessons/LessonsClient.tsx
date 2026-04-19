@@ -27,7 +27,7 @@ import {
 } from "./style";
 
 type LessonsClientProps = {
-  initialLessons: Lesson[];
+  initialLessons: (Lesson & { villages?: string[] })[];
   lessonStatuses: Partial<Record<number, "available" | "pending">>;
   title?: string;
   description?: string;
@@ -127,6 +127,7 @@ export default function LessonsClient({
                     lessonName={lesson.name}
                     lessonImage={lesson.image_path}
                     status={lessonStatuses[lesson.id]}
+                    villages={lesson.villages}
                   />
                   <EditImageButton
                     type="button"

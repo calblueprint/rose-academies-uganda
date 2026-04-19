@@ -20,7 +20,52 @@ export default async function LessonsPage() {
   if (error) {
     throw new Error(error.message);
   }
+  const lessonIds = (lessons ?? []).map(lesson => lesson.id);
 
+  const { data: lessonGroupRows, error: lessonGroupsError } = await supabase
+    .from("LessonGroups")
+    .select("lesson_id, group_id")
+    .in("lesson_id", lessonIds);
+
+  if (lessonGroupsError) {
+    throw new Error(lessonGroupsError.message);
+  }
+
+  const groupIds = [
+    ...new Set((lessonGroupRows ?? []).map(row => row.group_id)),
+  ];
+
+  const { data: groupRows, error: groupsError } = await supabase
+    .from("Groups")
+    .select("id, name")
+    .in("id", groupIds);
+
+  if (groupsError) {
+    throw new Error(groupsError.message);
+  }
+
+  const groupNamesById = Object.fromEntries(
+    (groupRows ?? []).map(group => [group.id, group.name]),
+  );
+
+  const villagesByLessonId: Record<number, string[]> = {};
+
+  for (const row of lessonGroupRows ?? []) {
+    const villageName = groupNamesById[row.group_id];
+
+    if (!villageName) continue;
+
+    if (!villagesByLessonId[row.lesson_id]) {
+      villagesByLessonId[row.lesson_id] = [];
+    }
+
+    villagesByLessonId[row.lesson_id].push(villageName);
+  }
+
+  const lessonsWithVillages = (lessons ?? []).map(lesson => ({
+    ...lesson,
+    villages: villagesByLessonId[lesson.id] ?? [],
+  }));
   const deviceId = await getCurrentDeviceId({ userId: user.id });
 
   const { data: deviceLessons, error: deviceLessonsError } = await supabase
@@ -40,7 +85,7 @@ export default async function LessonsPage() {
 
   return (
     <LessonsClient
-      initialLessons={lessons ?? []}
+      initialLessons={lessonsWithVillages}
       lessonStatuses={lessonStatuses}
     />
   );

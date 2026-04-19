@@ -9,16 +9,18 @@ function OfflineToggle({
   lessonId,
   isOffline,
   setIsOffline,
+  hasFiles,
 }: {
   deviceId: string | null;
   lessonId: number;
   isOffline: boolean;
   setIsOffline: (isOffline: boolean) => void;
+  hasFiles: boolean;
 }) {
   const [isUpdating, setIsUpdating] = useState(false);
 
   const handleToggle = async () => {
-    if (isUpdating || !deviceId || Number.isNaN(lessonId)) {
+    if (isUpdating || !deviceId || Number.isNaN(lessonId) || !hasFiles) {
       return;
     }
 
@@ -41,6 +43,10 @@ function OfflineToggle({
 
         setIsOffline(false);
       } else {
+        if (!hasFiles) {
+          console.error("Cannot send lesson to offline without files.");
+          return;
+        }
         const { error } = await supabase.from("DeviceLessons").insert({
           device_id: deviceId,
           lesson_id: lessonId,
@@ -74,7 +80,7 @@ function OfflineToggle({
   return (
     <SyncButton
       onClick={handleToggle}
-      disabled={isUpdating || !deviceId || Number.isNaN(lessonId)}
+      disabled={isUpdating || !deviceId || Number.isNaN(lessonId) || !hasFiles}
     >
       {syncLabel[syncButtonKey]}
     </SyncButton>

@@ -55,6 +55,7 @@ export default function LessonDetailClient({
           lessonId={lesson.id}
           isOffline={isOffline}
           setIsOffline={setIsOffline}
+          hasFiles={files.length > 0}
         />
 
         <EditLessonButton lesson={lesson} />

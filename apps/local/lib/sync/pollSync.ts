@@ -1,9 +1,9 @@
 import supabase from "@/api/supabase/client";
 import { getDeviceId } from "@/lib/getDeviceId";
-import { getIsSyncRunning, runSync } from "@/lib/sync/runSync";
 
 const DEVICE_ID = getDeviceId();
 const POLL_INTERVAL_MS = 30000;
+const LOCAL_APP_ORIGIN = `http://127.0.0.1:${process.env.PORT ?? "3000"}`;
 
 let intervalId: ReturnType<typeof setInterval> | null = null;
 let isPolling = false;
@@ -17,11 +17,6 @@ type PendingSyncRun = {
 async function pollForRequestedSync() {
   if (isPolling) {
     console.log("[PI] Sync poll already in progress.");
-    return;
-  }
-
-  if (getIsSyncRunning()) {
-    console.log("[PI] Sync already running; skipping poll.");
     return;
   }
 
@@ -52,10 +47,14 @@ async function pollForRequestedSync() {
     const pendingRun = data as PendingSyncRun;
     console.log("[PI] Found requested sync:", pendingRun.id);
 
-    const result = await runSync({ syncRunId: pendingRun.id });
+    const syncUrl = new URL("/api/sync", LOCAL_APP_ORIGIN);
+    syncUrl.searchParams.set("syncRunId", String(pendingRun.id));
 
-    if (!result.ok) {
-      console.error("[PI] Sync failed:", result.message);
+    const response = await fetch(syncUrl);
+
+    if (!response.ok) {
+      const body = await response.text();
+      console.error("[PI] Sync route failed:", response.status, body);
       return;
     }
 

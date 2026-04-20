@@ -21,9 +21,12 @@ type LessonFile = {
   sizeBytes: number | null;
   createdAt: string | null;
   updatedAt: string | null;
+  order: number;
 };
 
 type LessonFileRow = {
+  file_id: number;
+  display_order: number;
   Files: {
     id: number;
     name: string;
@@ -101,8 +104,9 @@ export default async function LessonDetailPage({ params }: PageProps) {
 
   const { data: lessonFileRows, error: filesError } = await supabase
     .from("LessonFiles")
-    .select("Files(id, name, size_bytes, created_at)")
+    .select("file_id, display_order, Files(id, name, size_bytes, created_at)")
     .eq("lesson_id", numericLessonId)
+    .order("display_order", { ascending: true })
     .returns<LessonFileRow[]>();
 
   if (filesError) {
@@ -111,16 +115,20 @@ export default async function LessonDetailPage({ params }: PageProps) {
 
   const normalizedFiles: LessonFile[] =
     lessonFileRows
-      ?.map(row => row.Files)
-      .filter(
-        (file): file is NonNullable<LessonFileRow["Files"]> => file !== null,
+      ?.filter(
+        (
+          row,
+        ): row is LessonFileRow & {
+          Files: NonNullable<LessonFileRow["Files"]>;
+        } => row.Files !== null,
       )
-      .map(file => ({
-        id: String(file.id),
-        name: file.name,
-        sizeBytes: file.size_bytes,
-        createdAt: file.created_at,
-        updatedAt: file.created_at,
+      .map(row => ({
+        id: String(row.Files.id),
+        name: row.Files.name,
+        sizeBytes: row.Files.size_bytes,
+        createdAt: row.Files.created_at,
+        updatedAt: row.Files.created_at,
+        order: row.display_order,
       })) ?? [];
 
   const isOffline = !!offlineRows && offlineRows.length > 0;

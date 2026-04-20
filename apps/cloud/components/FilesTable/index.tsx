@@ -1,7 +1,7 @@
 "use client";
 
 /* eslint-disable react-hooks/incompatible-library */
-import { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   closestCenter,
   DndContext,
@@ -42,10 +42,11 @@ export type FileRow = {
 
 type FilesTableProps = {
   files: FileRow[];
-  setFiles: Dispatch<SetStateAction<FileRow[]>>;
   searchTerm: string;
   onDeleteFiles: (fileIds: string[]) => Promise<void>;
   isDeleting: boolean;
+  onReorderFiles: (nextFiles: FileRow[]) => Promise<void>;
+  isReordering: boolean;
 };
 
 function formatBytes(bytes: number) {
@@ -226,10 +227,11 @@ function TableMarkup({
 
 export default function FilesTable({
   files,
-  setFiles,
   searchTerm,
   onDeleteFiles,
   isDeleting,
+  onReorderFiles,
+  isReordering,
 }: FilesTableProps) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
@@ -290,7 +292,7 @@ export default function FilesTable({
             type="checkbox"
             aria-label={`Select ${row.original.name}`}
             checked={row.getIsSelected()}
-            disabled={!row.getCanSelect() || isDeleting}
+            disabled={!row.getCanSelect() || isDeleting || isReordering}
             onChange={row.getToggleSelectedHandler()}
           />
         ),
@@ -324,7 +326,7 @@ export default function FilesTable({
         cell: ({ row }) => formatBytes(row.original.sizeBytes),
       },
     ],
-    [isDeleting],
+    [isDeleting, isReordering],
   );
 
   const table = useReactTable({
@@ -345,7 +347,7 @@ export default function FilesTable({
   const renderedRows = table.getRowModel().rows;
   const isSearchActive = normalizedSearchTerm.length > 0;
   const isManualOrderMode =
-    sorting.length === 0 && !isSearchActive && !isDeleting;
+    sorting.length === 0 && !isSearchActive && !isDeleting && !isReordering;
 
   const selectedIds = Object.keys(rowSelection).filter(id => rowSelection[id]);
   const selectedCount = selectedIds.length;
@@ -358,7 +360,7 @@ export default function FilesTable({
   }
 
   async function handleDeleteSelected() {
-    if (selectedCount === 0 || isDeleting) return;
+    if (selectedCount === 0 || isDeleting || isReordering) return;
 
     await onDeleteFiles(selectedIds);
     setRowSelection({});
@@ -375,18 +377,18 @@ export default function FilesTable({
       return;
     }
 
-    setFiles(currentFiles => {
-      const orderedFiles = [...currentFiles].sort((a, b) => a.order - b.order);
+    const orderedFiles = [...files].sort((a, b) => a.order - b.order);
 
-      const oldIndex = orderedFiles.findIndex(file => file.id === active.id);
-      const newIndex = orderedFiles.findIndex(file => file.id === over.id);
+    const oldIndex = orderedFiles.findIndex(file => file.id === active.id);
+    const newIndex = orderedFiles.findIndex(file => file.id === over.id);
 
-      if (oldIndex === -1 || newIndex === -1) {
-        return currentFiles;
-      }
+    if (oldIndex === -1 || newIndex === -1) {
+      return;
+    }
 
-      return reindexFiles(arrayMove(orderedFiles, oldIndex, newIndex));
-    });
+    const nextFiles = reindexFiles(arrayMove(orderedFiles, oldIndex, newIndex));
+
+    void onReorderFiles(nextFiles);
   }
 
   const hasNoFiles = files.length === 0;
@@ -406,7 +408,7 @@ export default function FilesTable({
         <button
           type="button"
           onClick={handleDeleteSelected}
-          disabled={selectedCount === 0 || isDeleting}
+          disabled={selectedCount === 0 || isDeleting || isReordering}
         >
           {isDeleting ? "Deleting..." : "Delete selected"}
         </button>
@@ -414,7 +416,7 @@ export default function FilesTable({
         <button
           type="button"
           onClick={handleClearSorting}
-          disabled={sorting.length === 0 || isDeleting}
+          disabled={sorting.length === 0 || isDeleting || isReordering}
         >
           Clear sorting
         </button>
@@ -449,7 +451,7 @@ export default function FilesTable({
             <TableMarkup
               table={table}
               renderedRows={renderedRows}
-              isDeleting={isDeleting}
+              isDeleting={isDeleting || isReordering}
               isMounted={true}
               canDrag={isManualOrderMode}
             />
@@ -459,7 +461,7 @@ export default function FilesTable({
         <TableMarkup
           table={table}
           renderedRows={renderedRows}
-          isDeleting={isDeleting}
+          isDeleting={isDeleting || isReordering}
           isMounted={false}
           canDrag={false}
         />

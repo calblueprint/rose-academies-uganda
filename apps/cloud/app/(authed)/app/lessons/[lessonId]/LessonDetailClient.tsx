@@ -9,7 +9,7 @@ import OfflineToggle from "@/components/OfflineToggle";
 import SearchBar from "@/components/SearchBar";
 import UploadFilesButton from "@/components/UploadFilesButton";
 import VillageTags from "@/components/VillageTags";
-import { deleteLessonFilesAction } from "./actions";
+import { deleteLessonFilesAction, reorderLessonFilesAction } from "./actions";
 import {
   HeaderBox,
   HeaderButtons,
@@ -26,6 +26,7 @@ type LessonFile = {
   sizeBytes: number | null;
   createdAt: string | null;
   updatedAt: string | null;
+  order: number;
 };
 
 type Lesson = {
@@ -55,25 +56,29 @@ export default function LessonDetailClient({
   const [isOffline, setIsOffline] = useState(initialIsOffline);
   const [searchTerm, setSearchTerm] = useState("");
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [reorderError, setReorderError] = useState<string | null>(null);
   const [isDeleting, startDeleteTransition] = useTransition();
+  const [isReordering, startReorderTransition] = useTransition();
 
   const initialTableFiles = useMemo<FileRow[]>(
     () =>
-      files.map((file, index) => ({
+      files.map(file => ({
         id: file.id,
         name: file.name,
         sizeBytes: file.sizeBytes ?? 0,
-        createdAt: file.createdAt ?? new Date(2026, 0, index + 1).toISOString(),
+        createdAt: file.createdAt ?? new Date(2026, 0, 1).toISOString(),
         updatedAt:
           file.updatedAt ??
           file.createdAt ??
-          new Date(2026, 0, index + 1).toISOString(),
-        order: index,
+          new Date(2026, 0, 1).toISOString(),
+        order: file.order,
       })),
     [files],
   );
 
-  const [tableFiles, setTableFiles] = useState<FileRow[]>(initialTableFiles);
+  const [tableFiles, setTableFiles] = useState<FileRow[]>(
+    [...initialTableFiles].sort((a, b) => a.order - b.order),
+  );
 
   async function handleDeleteFiles(fileIds: string[]) {
     if (fileIds.length === 0) return;
@@ -98,6 +103,29 @@ export default function LessonDetailClient({
       } catch (error) {
         setDeleteError(
           error instanceof Error ? error.message : "Failed to delete files",
+        );
+      }
+    });
+  }
+
+  async function handleReorderFiles(nextFiles: FileRow[]) {
+    setReorderError(null);
+
+    const previousFiles = tableFiles;
+    setTableFiles(nextFiles);
+
+    startReorderTransition(async () => {
+      try {
+        await reorderLessonFilesAction({
+          lessonId: lesson.id,
+          orderedFileIds: nextFiles
+            .sort((a, b) => a.order - b.order)
+            .map(file => file.id),
+        });
+      } catch (error) {
+        setTableFiles(previousFiles);
+        setReorderError(
+          error instanceof Error ? error.message : "Failed to save file order",
         );
       }
     });
@@ -140,13 +168,15 @@ export default function LessonDetailClient({
         </SearchBarRow>
 
         {deleteError && <p>{deleteError}</p>}
+        {reorderError && <p>{reorderError}</p>}
 
         <FilesTable
           files={tableFiles}
-          setFiles={setTableFiles}
           searchTerm={searchTerm}
           onDeleteFiles={handleDeleteFiles}
           isDeleting={isDeleting}
+          onReorderFiles={handleReorderFiles}
+          isReordering={isReordering}
         />
       </LessonInformation>
     </PageContainer>

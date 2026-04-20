@@ -7,6 +7,11 @@ type DeleteLessonFilesInput = {
   fileIds: string[];
 };
 
+type ReorderLessonFilesInput = {
+  lessonId: number;
+  orderedFileIds: string[];
+};
+
 export async function deleteLessonFilesAction({
   lessonId,
   fileIds,
@@ -31,6 +36,39 @@ export async function deleteLessonFilesAction({
 
   if (error) {
     throw new Error(error.message);
+  }
+
+  return { success: true };
+}
+
+export async function reorderLessonFilesAction({
+  lessonId,
+  orderedFileIds,
+}: ReorderLessonFilesInput) {
+  if (orderedFileIds.length === 0) {
+    return { success: true };
+  }
+
+  const supabase = await getSupabaseServerClient();
+
+  const numericFileIds = orderedFileIds.map(fileId => Number(fileId));
+
+  if (numericFileIds.some(fileId => Number.isNaN(fileId))) {
+    throw new Error("Invalid file ids");
+  }
+
+  for (let index = 0; index < numericFileIds.length; index += 1) {
+    const fileId = numericFileIds[index];
+
+    const { error } = await supabase
+      .from("LessonFiles")
+      .update({ display_order: index })
+      .eq("lesson_id", lessonId)
+      .eq("file_id", fileId);
+
+    if (error) {
+      throw new Error(error.message);
+    }
   }
 
   return { success: true };

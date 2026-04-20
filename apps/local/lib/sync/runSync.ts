@@ -19,6 +19,7 @@ type DB = InstanceType<typeof Database>;
 type SyncRunStatus = "requested" | "in_progress" | "success" | "failed";
 
 type Group = { id: number; name: string; join_code: string | null };
+
 type Lesson = {
   id: number;
   name: string;
@@ -26,6 +27,7 @@ type Lesson = {
   image_path: string | null;
   group_id: number;
 };
+
 type FileRow = {
   id: number;
   name: string;
@@ -299,6 +301,7 @@ function insertIntoSQLite(
       stmt.run(r.lesson_id, r.file_id);
     }
   });
+
   db.prepare("DELETE FROM lesson_files").run();
   insertLessonFiles(lessonFiles);
 }
@@ -494,6 +497,7 @@ export async function runSync({ syncRunId }: RunSyncOptions = {}) {
       syncPayload.files,
       syncPayload.lessonFiles,
     );
+
     finalizeDownloadedFiles(db, syncPayload.files, stagingDir);
 
     fs.rmSync(stagingDir, { recursive: true, force: true });

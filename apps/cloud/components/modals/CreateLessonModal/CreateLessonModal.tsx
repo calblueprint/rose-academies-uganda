@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useContext, useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { getSupabaseBrowserClient } from "@/api/supabase/browser";
 import { uploadFile } from "@/api/supabase/files";
 import FileTypeBadge from "@/components/FileTypeBadge";
@@ -89,6 +90,14 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const data = useContext(DataContext);
   const supabase = getSupabaseBrowserClient();
+  const router = useRouter();
+  const hasFiles = files.length > 0;
+
+  useEffect(() => {
+    if (!hasFiles && sendToOffline) {
+      setSendToOffline(false);
+    }
+  }, [hasFiles, sendToOffline]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -232,6 +241,11 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
       }
 
       if (sendToOffline) {
+        if (snapshot.length === 0) {
+          throw new Error(
+            "Cannot send lesson to offline library without files.",
+          );
+        }
         const { error: deviceLessonError } = await supabase
           .from("DeviceLessons")
           .upsert(
@@ -253,6 +267,7 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
       resetForm();
       setIsSubmitting(false);
       onClose();
+      router.refresh();
     } catch (err) {
       console.error("Failed to create lesson:", err);
 
@@ -530,8 +545,15 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
               id="offline-toggle"
               checked={sendToOffline}
               onChange={e => setSendToOffline(e.target.checked)}
+              disabled={!hasFiles}
             />
-            <ToggleTrack htmlFor="offline-toggle" $checked={sendToOffline}>
+            <ToggleTrack
+              htmlFor="offline-toggle"
+              $checked={sendToOffline}
+              style={{
+                pointerEvents: hasFiles ? "auto" : "none",
+              }}
+            >
               <ToggleThumb $checked={sendToOffline} />
             </ToggleTrack>
           </ToggleWrapper>

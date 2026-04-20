@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import ArchiveToggle from "@/components/ArchiveToggle/ArchiveToggle";
 import EditLessonButton from "@/components/EditLessonButton";
 import LessonHeader from "@/components/LessonHeader";
@@ -72,6 +71,7 @@ export default function LessonDetailClient({
               lessonId={lesson.id}
               isOffline={isOffline}
               setIsOffline={setIsOffline}
+              hasFiles={files.length > 0}
             />
             <EditLessonButton lesson={lesson} />
           </HeaderButtons>

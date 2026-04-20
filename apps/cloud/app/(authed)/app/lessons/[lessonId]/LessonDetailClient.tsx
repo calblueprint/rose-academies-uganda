@@ -22,6 +22,9 @@ import {
 type LessonFile = {
   id: string;
   name: string;
+  sizeBytes: number | null;
+  createdAt: string | null;
+  updatedAt: string | null;
 };
 
 type Lesson = {
@@ -51,30 +54,23 @@ export default function LessonDetailClient({
   const [isOffline, setIsOffline] = useState(initialIsOffline);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const filteredFiles = useMemo(() => {
-    const normalizedSearch = searchTerm.trim().toLowerCase();
-
-    if (!normalizedSearch) {
-      return files;
-    }
-
-    return files.filter(file =>
-      file.name.toLowerCase().includes(normalizedSearch),
-    );
-  }, [files, searchTerm]);
-
-  const tableFiles = useMemo<FileRow[]>(
+  const initialTableFiles = useMemo<FileRow[]>(
     () =>
-      filteredFiles.map((file, index) => ({
+      files.map((file, index) => ({
         id: file.id,
         name: file.name,
-        sizeBytes: 1024 * (index + 1),
-        createdAt: new Date(2026, 0, index + 1).toISOString(),
-        updatedAt: new Date(2026, 1, index + 1).toISOString(),
+        sizeBytes: file.sizeBytes ?? 0,
+        createdAt: file.createdAt ?? new Date(2026, 0, index + 1).toISOString(),
+        updatedAt:
+          file.updatedAt ??
+          file.createdAt ??
+          new Date(2026, 0, index + 1).toISOString(),
         order: index,
       })),
-    [filteredFiles],
+    [files],
   );
+
+  const [tableFiles, setTableFiles] = useState<FileRow[]>(initialTableFiles);
 
   return (
     <PageContainer>
@@ -97,7 +93,7 @@ export default function LessonDetailClient({
               lessonId={lesson.id}
               isOffline={isOffline}
               setIsOffline={setIsOffline}
-              hasFiles={files.length > 0}
+              hasFiles={tableFiles.length > 0}
             />
             <EditLessonButton lesson={lesson} />
           </HeaderButtons>
@@ -112,7 +108,11 @@ export default function LessonDetailClient({
           <UploadFilesButton lessonId={lesson.id} />
         </SearchBarRow>
 
-        <FilesTable initialFiles={tableFiles} />
+        <FilesTable
+          files={tableFiles}
+          setFiles={setTableFiles}
+          searchTerm={searchTerm}
+        />
       </LessonInformation>
     </PageContainer>
   );

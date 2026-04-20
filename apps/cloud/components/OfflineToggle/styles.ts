@@ -12,7 +12,7 @@ export const SyncButton = styled.button`
   font-weight: 500;
   line-height: 20px;
   border: none;
-  border-radius: 8px;
+  border-radius: 12px;
   cursor: pointer;
   white-space: nowrap;
   transition:

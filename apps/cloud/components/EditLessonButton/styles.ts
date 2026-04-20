@@ -4,7 +4,7 @@ import COLORS from "@/styles/colors";
 export const EditButton = styled.button`
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   padding: 8px 16px;
   background-color: ${COLORS.evergreen};
   color: ${COLORS.white};
@@ -12,7 +12,7 @@ export const EditButton = styled.button`
   font-weight: 500;
   line-height: 20px;
   border: none;
-  border-radius: 8px;
+  border-radius: 12px;
   cursor: pointer;
   white-space: nowrap;
   transition:

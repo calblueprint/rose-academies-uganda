@@ -40,7 +40,6 @@ export default function LessonHeader({
             </style.CustomizeButton>
           </style.HeaderTopRow>
         </style.ImageBanner>
-        <style.LessonTitle>{lessonName}</style.LessonTitle>
       </style.HeaderContainer>
       <UploadLessonImageModal
         isOpen={isUploadLessonImageModalOpen}

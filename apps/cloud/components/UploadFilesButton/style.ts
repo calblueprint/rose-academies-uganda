@@ -4,9 +4,9 @@ import styled from "styled-components";
 
 export const ButtonContainer = styled.button`
   display: flex;
+  padding: 4.367px 20.96px;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.125rem;
+  gap: 8px;
   border-radius: 1rem;
   border-top: 0.5px solid #d9d9d9;
   border-right: 1px solid #d9d9d9;

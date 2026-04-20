@@ -4,7 +4,7 @@ export const ArchiveButton = styled.button`
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 12px 18px;
+  padding: 8px 16px;
 
   border-radius: 12px;
   border: 1px solid var(--gray-40, #d9d9d9);

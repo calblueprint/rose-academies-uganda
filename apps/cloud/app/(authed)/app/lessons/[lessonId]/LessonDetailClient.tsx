@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useTransition } from "react";
 import ArchiveToggle from "@/components/ArchiveToggle/ArchiveToggle";
 import EditLessonButton from "@/components/EditLessonButton";
 import FilesTable, { FileRow } from "@/components/FilesTable";
@@ -9,6 +9,7 @@ import OfflineToggle from "@/components/OfflineToggle";
 import SearchBar from "@/components/SearchBar";
 import UploadFilesButton from "@/components/UploadFilesButton";
 import VillageTags from "@/components/VillageTags";
+import { deleteLessonFilesAction } from "./actions";
 import {
   HeaderBox,
   HeaderButtons,
@@ -53,6 +54,8 @@ export default function LessonDetailClient({
 }: LessonDetailClientProps) {
   const [isOffline, setIsOffline] = useState(initialIsOffline);
   const [searchTerm, setSearchTerm] = useState("");
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [isDeleting, startDeleteTransition] = useTransition();
 
   const initialTableFiles = useMemo<FileRow[]>(
     () =>
@@ -71,6 +74,34 @@ export default function LessonDetailClient({
   );
 
   const [tableFiles, setTableFiles] = useState<FileRow[]>(initialTableFiles);
+
+  async function handleDeleteFiles(fileIds: string[]) {
+    if (fileIds.length === 0) return;
+
+    setDeleteError(null);
+
+    startDeleteTransition(async () => {
+      try {
+        await deleteLessonFilesAction({
+          lessonId: lesson.id,
+          fileIds,
+        });
+
+        setTableFiles(currentFiles =>
+          currentFiles
+            .filter(file => !fileIds.includes(file.id))
+            .map((file, index) => ({
+              ...file,
+              order: index,
+            })),
+        );
+      } catch (error) {
+        setDeleteError(
+          error instanceof Error ? error.message : "Failed to delete files",
+        );
+      }
+    });
+  }
 
   return (
     <PageContainer>
@@ -108,10 +139,14 @@ export default function LessonDetailClient({
           <UploadFilesButton lessonId={lesson.id} />
         </SearchBarRow>
 
+        {deleteError && <p>{deleteError}</p>}
+
         <FilesTable
           files={tableFiles}
           setFiles={setTableFiles}
           searchTerm={searchTerm}
+          onDeleteFiles={handleDeleteFiles}
+          isDeleting={isDeleting}
         />
       </LessonInformation>
     </PageContainer>

@@ -1,7 +1,7 @@
 "use client";
 
 /* eslint-disable react-hooks/incompatible-library */
-import { Dispatch, SetStateAction, useMemo, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react";
 import {
   closestCenter,
   DndContext,
@@ -44,6 +44,8 @@ type FilesTableProps = {
   files: FileRow[];
   setFiles: Dispatch<SetStateAction<FileRow[]>>;
   searchTerm: string;
+  onDeleteFiles: (fileIds: string[]) => Promise<void>;
+  isDeleting: boolean;
 };
 
 function formatBytes(bytes: number) {
@@ -124,13 +126,118 @@ function SortableRow({ row, canDrag }: SortableRowProps) {
   );
 }
 
+type StaticRowProps = {
+  row: Row<FileRow>;
+};
+
+function StaticRow({ row }: StaticRowProps) {
+  return (
+    <tr>
+      {row.getVisibleCells().map(cell => {
+        if (cell.column.id === "drag") {
+          return (
+            <td key={cell.id}>
+              <DragHandle
+                type="button"
+                disabled
+                aria-label="Drag to reorder file"
+              >
+                ↕
+              </DragHandle>
+            </td>
+          );
+        }
+
+        return (
+          <td key={cell.id}>
+            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+          </td>
+        );
+      })}
+    </tr>
+  );
+}
+
+type TableMarkupProps = {
+  table: ReturnType<typeof useReactTable<FileRow>>;
+  renderedRows: Row<FileRow>[];
+  isDeleting: boolean;
+  isMounted: boolean;
+  canDrag: boolean;
+};
+
+function TableMarkup({
+  table,
+  renderedRows,
+  isDeleting,
+  isMounted,
+  canDrag,
+}: TableMarkupProps) {
+  return (
+    <table>
+      <thead>
+        {table.getHeaderGroups().map(headerGroup => (
+          <tr key={headerGroup.id}>
+            {headerGroup.headers.map(header => {
+              const canSort = header.column.getCanSort();
+              const sortDirection = header.column.getIsSorted();
+
+              return (
+                <th key={header.id}>
+                  {header.isPlaceholder ? null : canSort ? (
+                    <button
+                      type="button"
+                      onClick={header.column.getToggleSortingHandler()}
+                      disabled={isDeleting}
+                    >
+                      {flexRender(
+                        header.column.columnDef.header,
+                        header.getContext(),
+                      )}{" "}
+                      {sortDirection === "asc"
+                        ? "↑"
+                        : sortDirection === "desc"
+                          ? "↓"
+                          : ""}
+                    </button>
+                  ) : (
+                    flexRender(
+                      header.column.columnDef.header,
+                      header.getContext(),
+                    )
+                  )}
+                </th>
+              );
+            })}
+          </tr>
+        ))}
+      </thead>
+
+      <tbody>
+        {isMounted
+          ? renderedRows.map(row => (
+              <SortableRow key={row.id} row={row} canDrag={canDrag} />
+            ))
+          : renderedRows.map(row => <StaticRow key={row.id} row={row} />)}
+      </tbody>
+    </table>
+  );
+}
+
 export default function FilesTable({
   files,
   setFiles,
   searchTerm,
+  onDeleteFiles,
+  isDeleting,
 }: FilesTableProps) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -183,7 +290,7 @@ export default function FilesTable({
             type="checkbox"
             aria-label={`Select ${row.original.name}`}
             checked={row.getIsSelected()}
-            disabled={!row.getCanSelect()}
+            disabled={!row.getCanSelect() || isDeleting}
             onChange={row.getToggleSelectedHandler()}
           />
         ),
@@ -217,7 +324,7 @@ export default function FilesTable({
         cell: ({ row }) => formatBytes(row.original.sizeBytes),
       },
     ],
-    [],
+    [isDeleting],
   );
 
   const table = useReactTable({
@@ -237,7 +344,8 @@ export default function FilesTable({
 
   const renderedRows = table.getRowModel().rows;
   const isSearchActive = normalizedSearchTerm.length > 0;
-  const isManualOrderMode = sorting.length === 0 && !isSearchActive;
+  const isManualOrderMode =
+    sorting.length === 0 && !isSearchActive && !isDeleting;
 
   const selectedIds = Object.keys(rowSelection).filter(id => rowSelection[id]);
   const selectedCount = selectedIds.length;
@@ -249,13 +357,10 @@ export default function FilesTable({
     }));
   }
 
-  function handleDeleteSelected() {
-    if (selectedCount === 0) return;
+  async function handleDeleteSelected() {
+    if (selectedCount === 0 || isDeleting) return;
 
-    setFiles(currentFiles =>
-      reindexFiles(currentFiles.filter(file => !rowSelection[file.id])),
-    );
-
+    await onDeleteFiles(selectedIds);
     setRowSelection({});
   }
 
@@ -301,15 +406,15 @@ export default function FilesTable({
         <button
           type="button"
           onClick={handleDeleteSelected}
-          disabled={selectedCount === 0}
+          disabled={selectedCount === 0 || isDeleting}
         >
-          Delete selected
+          {isDeleting ? "Deleting..." : "Delete selected"}
         </button>
 
         <button
           type="button"
           onClick={handleClearSorting}
-          disabled={sorting.length === 0}
+          disabled={sorting.length === 0 || isDeleting}
         >
           Clear sorting
         </button>
@@ -331,66 +436,33 @@ export default function FilesTable({
         <p>No files have been added to this lesson yet.</p>
       ) : hasNoSearchResults ? (
         <p>No files match your search.</p>
-      ) : (
+      ) : isMounted ? (
         <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}
           onDragEnd={handleDragEnd}
         >
-          <table>
-            <thead>
-              {table.getHeaderGroups().map(headerGroup => (
-                <tr key={headerGroup.id}>
-                  {headerGroup.headers.map(header => {
-                    const canSort = header.column.getCanSort();
-                    const sortDirection = header.column.getIsSorted();
-
-                    return (
-                      <th key={header.id}>
-                        {header.isPlaceholder ? null : canSort ? (
-                          <button
-                            type="button"
-                            onClick={header.column.getToggleSortingHandler()}
-                          >
-                            {flexRender(
-                              header.column.columnDef.header,
-                              header.getContext(),
-                            )}{" "}
-                            {sortDirection === "asc"
-                              ? "↑"
-                              : sortDirection === "desc"
-                                ? "↓"
-                                : ""}
-                          </button>
-                        ) : (
-                          flexRender(
-                            header.column.columnDef.header,
-                            header.getContext(),
-                          )
-                        )}
-                      </th>
-                    );
-                  })}
-                </tr>
-              ))}
-            </thead>
-
-            <tbody>
-              <SortableContext
-                items={renderedRows.map(row => row.original.id)}
-                strategy={verticalListSortingStrategy}
-              >
-                {renderedRows.map(row => (
-                  <SortableRow
-                    key={row.id}
-                    row={row}
-                    canDrag={isManualOrderMode}
-                  />
-                ))}
-              </SortableContext>
-            </tbody>
-          </table>
+          <SortableContext
+            items={renderedRows.map(row => row.original.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            <TableMarkup
+              table={table}
+              renderedRows={renderedRows}
+              isDeleting={isDeleting}
+              isMounted={true}
+              canDrag={isManualOrderMode}
+            />
+          </SortableContext>
         </DndContext>
+      ) : (
+        <TableMarkup
+          table={table}
+          renderedRows={renderedRows}
+          isDeleting={isDeleting}
+          isMounted={false}
+          canDrag={false}
+        />
       )}
     </section>
   );

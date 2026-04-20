@@ -15,13 +15,11 @@ type Lesson = {
   is_archived: boolean;
 };
 
-const MOCK_FILES_BY_LESSON: Record<string, { id: string; name: string }[]> = {
-  "1": [
-    { id: "f1", name: "Fractions Worksheet.pdf" },
-    { id: "f2", name: "Fractions Slides.pptx" },
-  ],
-  "2": [{ id: "f1", name: "Plant Diagram.png" }],
-  "3": [{ id: "f1", name: "Short Story.pdf" }],
+type LessonFileRow = {
+  Files: {
+    id: number;
+    name: string;
+  } | null;
 };
 
 export default async function LessonDetailPage({ params }: PageProps) {
@@ -91,8 +89,28 @@ export default async function LessonDetailPage({ params }: PageProps) {
     villages = groupRows.map(row => row.name);
   }
 
+  const { data: lessonFileRows, error: filesError } = await supabase
+    .from("LessonFiles")
+    .select("Files(id, name)")
+    .eq("lesson_id", numericLessonId)
+    .returns<LessonFileRow[]>();
+
+  if (filesError) {
+    throw new Error(filesError.message);
+  }
+
+  const files =
+    lessonFileRows
+      ?.map(row => row.Files)
+      .filter(
+        (file): file is NonNullable<LessonFileRow["Files"]> => file !== null,
+      )
+      .map(file => ({
+        id: String(file.id),
+        name: file.name,
+      })) ?? [];
+
   const isOffline = !!offlineRows && offlineRows.length > 0;
-  const files = MOCK_FILES_BY_LESSON[String(lesson.id)] ?? [];
 
   return (
     <LessonDetailClient

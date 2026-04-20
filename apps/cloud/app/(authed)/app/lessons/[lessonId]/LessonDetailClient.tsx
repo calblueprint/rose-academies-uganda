@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import ArchiveToggle from "@/components/ArchiveToggle/ArchiveToggle";
 import EditLessonButton from "@/components/EditLessonButton";
+import FilesTable, { FileRow } from "@/components/FilesTable";
 import LessonHeader from "@/components/LessonHeader";
 import OfflineToggle from "@/components/OfflineToggle";
 import SearchBar from "@/components/SearchBar";
@@ -50,6 +51,31 @@ export default function LessonDetailClient({
   const [isOffline, setIsOffline] = useState(initialIsOffline);
   const [searchTerm, setSearchTerm] = useState("");
 
+  const filteredFiles = useMemo(() => {
+    const normalizedSearch = searchTerm.trim().toLowerCase();
+
+    if (!normalizedSearch) {
+      return files;
+    }
+
+    return files.filter(file =>
+      file.name.toLowerCase().includes(normalizedSearch),
+    );
+  }, [files, searchTerm]);
+
+  const tableFiles = useMemo<FileRow[]>(
+    () =>
+      filteredFiles.map((file, index) => ({
+        id: file.id,
+        name: file.name,
+        sizeBytes: 1024 * (index + 1),
+        createdAt: new Date(2026, 0, index + 1).toISOString(),
+        updatedAt: new Date(2026, 1, index + 1).toISOString(),
+        order: index,
+      })),
+    [filteredFiles],
+  );
+
   return (
     <PageContainer>
       <LessonInformation>
@@ -80,10 +106,13 @@ export default function LessonDetailClient({
         <LessonDescription>{lesson.description}</LessonDescription>
 
         <VillageTags villages={villages} />
+
         <SearchBarRow>
           <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
           <UploadFilesButton lessonId={lesson.id} />
         </SearchBarRow>
+
+        <FilesTable initialFiles={tableFiles} />
       </LessonInformation>
     </PageContainer>
   );

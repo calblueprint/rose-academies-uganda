@@ -2,6 +2,7 @@
 
 import { useMemo, useState, useTransition } from "react";
 import ArchiveToggle from "@/components/ArchiveToggle/ArchiveToggle";
+import DeleteSelectedFilesButton from "@/components/DeleteSelectedFilesButton";
 import EditLessonButton from "@/components/EditLessonButton";
 import FilesTable, { FileRow } from "@/components/FilesTable";
 import LessonHeader from "@/components/LessonHeader";
@@ -55,6 +56,7 @@ export default function LessonDetailClient({
 }: LessonDetailClientProps) {
   const [isOffline, setIsOffline] = useState(initialIsOffline);
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedFileIds, setSelectedFileIds] = useState<string[]>([]);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [reorderError, setReorderError] = useState<string | null>(null);
   const [isDeleting, startDeleteTransition] = useTransition();
@@ -100,6 +102,8 @@ export default function LessonDetailClient({
               order: index,
             })),
         );
+
+        setSelectedFileIds([]);
       } catch (error) {
         setDeleteError(
           error instanceof Error ? error.message : "Failed to delete files",
@@ -118,7 +122,7 @@ export default function LessonDetailClient({
       try {
         await reorderLessonFilesAction({
           lessonId: lesson.id,
-          orderedFileIds: nextFiles
+          orderedFileIds: [...nextFiles]
             .sort((a, b) => a.order - b.order)
             .map(file => file.id),
         });
@@ -164,6 +168,15 @@ export default function LessonDetailClient({
 
         <SearchBarRow>
           <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+          <DeleteSelectedFilesButton
+            selectedCount={selectedFileIds.length}
+            onClick={() => {
+              void handleDeleteFiles(selectedFileIds);
+            }}
+            disabled={
+              selectedFileIds.length === 0 || isDeleting || isReordering
+            }
+          />
           <UploadFilesButton lessonId={lesson.id} />
         </SearchBarRow>
 
@@ -177,6 +190,8 @@ export default function LessonDetailClient({
           isDeleting={isDeleting}
           onReorderFiles={handleReorderFiles}
           isReordering={isReordering}
+          selectedFileIds={selectedFileIds}
+          onSelectionChange={setSelectedFileIds}
         />
       </LessonInformation>
     </PageContainer>

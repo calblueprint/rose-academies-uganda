@@ -16,6 +16,7 @@ const COLORS = {
   rose10: "#FCEFEF",
   rose80: "#EA6172",
   rose11: "#F393A5",
+  rose100: "#AF2028",
   whiteSmoke: "#F4F5F7",
   orange: "#D97708",
   lightLightGreen: "#248F5D",

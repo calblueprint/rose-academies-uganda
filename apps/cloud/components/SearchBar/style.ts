@@ -6,16 +6,18 @@ export const SearchBarContainer = styled.div`
   align-items: center;
   gap: 0.75rem;
   width: 100%;
+  flex: 1;
+  min-width: 0;
 `;
 
 export const SearchBarField = styled.div`
   display: flex;
-  width: 876px;
+  width: 100%;
+  min-width: 0;
   height: 44px;
   padding: 4.367px 20.96px;
   justify-content: space-between;
   align-items: center;
-  flex-shrink: 0;
   border-radius: 16px;
   border-top: 0.437px solid var(--gray, #d9d9d9);
   border-right: 0.873px solid var(--gray, #d9d9d9);
@@ -26,6 +28,7 @@ export const SearchBarField = styled.div`
 
 export const SearchInput = styled.input`
   width: 100%;
+  min-width: 0;
   overflow: hidden;
   color: ${COLORS.gray60};
   text-overflow: ellipsis;

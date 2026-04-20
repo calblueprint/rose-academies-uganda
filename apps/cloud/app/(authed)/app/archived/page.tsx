@@ -30,6 +30,7 @@ export default async function ArchivedLessonsPage() {
       showSearchBar={false}
       showViewToggle={false}
       defaultView="list"
+      listAction="restore"
     />
   );
 }

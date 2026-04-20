@@ -1,6 +1,10 @@
 import styled from "styled-components";
 import COLORS from "@/styles/colors";
 
+type LayoutProps = {
+  $layout?: "page" | "embedded";
+};
+
 export const CardWrapper = styled.div`
   position: relative;
 
@@ -31,22 +35,29 @@ export const EditImageButton = styled.button`
   }
 `;
 
-export const PageContainer = styled.div`
+export const PageContainer = styled.div<LayoutProps>`
   display: flex;
   flex-direction: column;
   gap: 1.09rem;
   width: 100%;
-  min-height: 100vh;
-  padding: 1.44rem 7.25rem;
-  background: ${COLORS.gray10};
+  min-width: 0;
+  min-height: ${({ $layout = "page" }) =>
+    $layout === "page" ? "100vh" : "auto"};
+  padding: ${({ $layout = "page" }) =>
+    $layout === "page" ? "1.44rem 7.25rem" : "0"};
+  background: ${({ $layout = "page" }) =>
+    $layout === "page" ? COLORS.gray10 : "transparent"};
 `;
 
-export const Title = styled.h1`
-  margin: 0
+export const Title = styled.h1<LayoutProps>`
+  margin: ${({ $layout = "page" }) =>
+    $layout === "embedded" ? "1.25rem 0 0 0" : "0"};
+
   font-family: var(--font-gilroy);
-  font-size: 2.25rem;
+  font-size: ${({ $layout = "page" }) =>
+    $layout === "page" ? "2.25rem" : "1.25rem"};
   font-style: normal;
-  font-weight: 500;
+  font-weight: ${({ $layout = "page" }) => ($layout === "page" ? 500 : 400)};
   line-height: normal;
 `;
 
@@ -69,12 +80,14 @@ export const LessonsGrid = styled.div`
   display: flex;
   gap: 1.8125rem;
   flex-wrap: wrap;
+  width: 100%;
 `;
 
 export const LessonsList = styled.div`
   display: flex;
   flex-direction: column;
   gap: 1.06rem;
+  width: 100%;
 `;
 
 export const SearchBarRow = styled.div`
@@ -133,7 +146,7 @@ export const GridToggle = styled.div<ToggleProps>`
 `;
 
 export const Description = styled.p`
-  margin: 0
+  margin: 0;
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 1;

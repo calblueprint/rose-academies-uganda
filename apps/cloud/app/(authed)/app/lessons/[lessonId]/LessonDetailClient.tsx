@@ -73,7 +73,6 @@ export default function LessonDetailClient({
               isOffline={isOffline}
               setIsOffline={setIsOffline}
             />
-
             <EditLessonButton lesson={lesson} />
           </HeaderButtons>
         </HeaderBox>
@@ -83,7 +82,6 @@ export default function LessonDetailClient({
         <VillageTags villages={villages} />
         <SearchBarRow>
           <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
-
           <UploadFilesButton lessonId={lesson.id} />
         </SearchBarRow>
       </LessonInformation>

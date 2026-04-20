@@ -33,6 +33,12 @@ type FileRow = {
   storage_path: string | null;
   lesson_id: number | null;
 };
+
+type LessonFileRow = {
+  lesson_id: number;
+  file_id: number;
+};
+
 type DeviceLessonRow = {
   lesson_id: number;
   status: "pending" | "available" | "failed";
@@ -48,10 +54,18 @@ type SyncPayload = {
   groups: Group[];
   lessons: Lesson[];
   files: FileRow[];
+  lessonFiles: LessonFileRow[];
 };
 
 function createSchema(db: DB) {
   const tableSchemaSql = [
+    `CREATE TABLE IF NOT EXISTS lesson_files (
+      lesson_id INTEGER NOT NULL,
+      file_id INTEGER NOT NULL,
+      PRIMARY KEY (lesson_id, file_id),
+      FOREIGN KEY (lesson_id) REFERENCES lessons(id),
+      FOREIGN KEY (file_id) REFERENCES files(id)
+    )`,
     `CREATE TABLE IF NOT EXISTS groups (
       id INTEGER PRIMARY KEY,
       name TEXT,
@@ -124,6 +138,7 @@ async function fetchAssignedSyncData(): Promise<SyncPayload> {
       groups: [],
       lessons: [],
       files: [],
+      lessonFiles: [],
     };
   }
 
@@ -148,13 +163,48 @@ async function fetchAssignedSyncData(): Promise<SyncPayload> {
     );
   }
 
-  const { data: files, error: fileError } = await supabase
-    .from("Files")
-    .select("id, name, size_bytes, storage_path, lesson_id")
+  const { data: lessonFilesData, error: lessonFilesError } = await supabase
+    .from("LessonFiles")
+    .select("lesson_id, file_id")
     .in("lesson_id", lessonIds);
 
-  if (fileError) {
-    throw new Error(fileError.message);
+  if (lessonFilesError) {
+    throw new Error(lessonFilesError.message);
+  }
+
+  const lessonFiles = (lessonFilesData ?? []) as LessonFileRow[];
+
+  const fileIds = Array.from(
+    new Set(
+      lessonFiles
+        .map(row => row.file_id)
+        .filter((fileId): fileId is number => Number.isInteger(fileId)),
+    ),
+  );
+
+  let files: FileRow[] = [];
+  if (fileIds.length > 0) {
+    const { data: filesData, error: fileError } = await supabase
+      .from("Files")
+      .select("id, name, size_bytes, storage_path, lesson_id")
+      .in("id", fileIds);
+
+    if (fileError) {
+      throw new Error(fileError.message);
+    }
+
+    files = (filesData ?? []) as FileRow[];
+
+    const returnedFileIds = new Set(files.map(file => file.id));
+    const missingFileIds = fileIds.filter(
+      fileId => !returnedFileIds.has(fileId),
+    );
+
+    if (missingFileIds.length > 0) {
+      throw new Error(
+        `LessonFiles references missing files: ${missingFileIds.join(", ")}`,
+      );
+    }
   }
 
   const groupIds = Array.from(
@@ -193,14 +243,16 @@ async function fetchAssignedSyncData(): Promise<SyncPayload> {
   console.log("[SYNC] Device-scoped fetch complete:", {
     lessonIds: lessonIds.length,
     lessons: typedLessons.length,
-    files: files?.length ?? 0,
+    lessonFiles: lessonFiles.length,
+    files: files.length,
     groups: groups.length,
   });
 
   return {
     groups,
     lessons: typedLessons,
-    files: (files ?? []) as FileRow[],
+    files,
+    lessonFiles,
   };
 }
 
@@ -209,6 +261,7 @@ function insertIntoSQLite(
   groups: Group[],
   lessons: Lesson[],
   files: FileRow[],
+  lessonFiles: LessonFileRow[],
 ) {
   const insertGroups = db.transaction((rows: Group[]) => {
     const stmt = db.prepare(
@@ -237,6 +290,17 @@ function insertIntoSQLite(
     }
   });
   insertFiles(files);
+
+  const insertLessonFiles = db.transaction((rows: LessonFileRow[]) => {
+    const stmt = db.prepare(
+      "INSERT OR REPLACE INTO lesson_files (lesson_id, file_id) VALUES (?, ?)",
+    );
+    for (const r of rows) {
+      stmt.run(r.lesson_id, r.file_id);
+    }
+  });
+  db.prepare("DELETE FROM lesson_files").run();
+  insertLessonFiles(lessonFiles);
 }
 
 function storageUrlToKey(url: string, bucket: string): string {
@@ -253,6 +317,7 @@ function storageUrlToKey(url: string, bucket: string): string {
 async function downloadFiles(
   files: FileRow[],
   lessons: Lesson[],
+  lessonFiles: LessonFileRow[],
   stagingDir: string,
 ) {
   console.log("[SYNC] Starting downloadFiles", {
@@ -265,20 +330,31 @@ async function downloadFiles(
     lessonMap.set(lesson.id, lesson.name);
   }
 
+  const fileToLessonIds = new Map<number, number[]>();
+  for (const row of lessonFiles) {
+    const existing = fileToLessonIds.get(row.file_id) ?? [];
+    existing.push(row.lesson_id);
+    fileToLessonIds.set(row.file_id, existing);
+  }
+
   const printedLessons = new Set<number>();
 
   for (const file of files) {
     if (!file.storage_path) continue;
 
-    const lessonId = file.lesson_id ?? null;
+    const linkedLessonIds = fileToLessonIds.get(file.id) ?? [];
 
-    if (lessonId !== null && !printedLessons.has(lessonId)) {
-      console.log(
-        `Syncing lesson: "${lessonMap.get(lessonId) ?? "Unknown Lesson"}" (lesson_id=${lessonId})`,
-      );
-      printedLessons.add(lessonId);
-    } else if (lessonId === null) {
-      console.log(`Syncing file "${file.name}" with no lesson_id`);
+    for (const lessonId of linkedLessonIds) {
+      if (!printedLessons.has(lessonId)) {
+        console.log(
+          `Syncing lesson: "${lessonMap.get(lessonId) ?? "Unknown Lesson"}" (lesson_id=${lessonId})`,
+        );
+        printedLessons.add(lessonId);
+      }
+    }
+
+    if (linkedLessonIds.length === 0) {
+      console.log(`Syncing file "${file.name}" with no LessonFiles mapping`);
     }
 
     const objectKey = storageUrlToKey(file.storage_path, BUCKET);
@@ -404,12 +480,19 @@ export async function runSync({ syncRunId }: RunSyncOptions = {}) {
 
     const syncPayload = await fetchAssignedSyncData();
 
-    await downloadFiles(syncPayload.files, syncPayload.lessons, stagingDir);
+    await downloadFiles(
+      syncPayload.files,
+      syncPayload.lessons,
+      syncPayload.lessonFiles,
+      stagingDir,
+    );
+
     insertIntoSQLite(
       db,
       syncPayload.groups,
       syncPayload.lessons,
       syncPayload.files,
+      syncPayload.lessonFiles,
     );
     finalizeDownloadedFiles(db, syncPayload.files, stagingDir);
 

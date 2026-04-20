@@ -1,15 +1,13 @@
 import { getSupabaseServerClientReadOnly } from "@/api/supabase/server-readonly";
-import LessonItem from "@/components/LessonItem";
+import LessonsClient from "@/app/(authed)/app/lessons/LessonsClient";
 import StorageAndSync from "@/components/StorageAndSync";
 import SyncSummaryCard from "@/components/SyncSummaryCard";
 import { getCurrentDeviceId } from "@/lib/getCurrentUserDevice";
 import {
   Content,
-  LessonsStack,
   PageSubtitle,
   PageTitle,
   PageWrapper,
-  SectionTitle,
   SyncCardsRow,
 } from "./styles";
 
@@ -17,11 +15,6 @@ type DeviceLessonLessonRow = {
   id: number;
   name: string;
   image_path: string | null;
-  group_id: number | null;
-};
-
-type OfflineLessonItem = DeviceLessonLessonRow & {
-  status: "available" | "pending" | undefined;
 };
 
 type DeviceLessonRow = {
@@ -31,9 +24,7 @@ type DeviceLessonRow = {
 };
 
 function formatLastSynced(lastSyncedAt: string | null) {
-  if (!lastSyncedAt) {
-    return "Not synced yet";
-  }
+  if (!lastSyncedAt) return "Not synced yet";
 
   const date = new Date(lastSyncedAt);
 
@@ -51,99 +42,58 @@ export default async function OfflineLibraryPage() {
 
   const {
     data: { user },
-    error: userError,
   } = await supabase.auth.getUser();
 
-  if (userError || !user) {
-    return (
-      <PageWrapper>
-        <PageTitle>Sync Lessons</PageTitle>
-        <PageSubtitle>Could not load offline library.</PageSubtitle>
-        <pre
-          style={{ marginTop: 12, whiteSpace: "pre-wrap", color: "crimson" }}
-        >
-          {userError?.message ?? "User not authenticated."}
-        </pre>
-      </PageWrapper>
-    );
-  }
+  if (!user) throw new Error("User not authenticated");
 
   const deviceId = await getCurrentDeviceId({ userId: user.id });
 
-  const { data, error } = await supabase
+  const { data } = await supabase
     .from("DeviceLessons")
-    .select("lesson_id, status, Lessons(id, name, image_path, group_id)")
-    .eq("device_id", deviceId)
-    .order("created_at", { ascending: false });
+    .select("lesson_id, status, Lessons(id, name, image_path)")
+    .eq("device_id", deviceId);
 
-  const { data: deviceData, error: deviceError } = await supabase
+  const { data: deviceData } = await supabase
     .from("devices")
     .select("last_synced_at")
     .eq("id", deviceId)
     .single();
 
-  if (error) {
-    return (
-      <PageWrapper>
-        <PageTitle>Sync Lessons</PageTitle>
-        <PageSubtitle>Could not load offline library.</PageSubtitle>
-        <pre
-          style={{ marginTop: 12, whiteSpace: "pre-wrap", color: "crimson" }}
-        >
-          {error.message}
-        </pre>
-      </PageWrapper>
-    );
-  }
+  const deviceLessonRows = (data as DeviceLessonRow[]) ?? [];
 
-  if (deviceError) {
-    return (
-      <PageWrapper>
-        <PageTitle>Sync Lessons</PageTitle>
-        <PageSubtitle>Could not load offline library.</PageSubtitle>
-        <pre
-          style={{ marginTop: 12, whiteSpace: "pre-wrap", color: "crimson" }}
-        >
-          {deviceError.message}
-        </pre>
-      </PageWrapper>
-    );
-  }
+  const lessons = deviceLessonRows.reduce<
+    { id: number; name: string; image_path: string | null }[]
+  >((acc, row) => {
+    const lesson = Array.isArray(row.Lessons) ? row.Lessons[0] : row.Lessons;
 
-  const lessons: OfflineLessonItem[] =
-    (data as DeviceLessonRow[] | null)?.reduce<OfflineLessonItem[]>(
-      (acc, row) => {
-        const lesson = Array.isArray(row.Lessons)
-          ? row.Lessons[0]
-          : row.Lessons;
-        if (!lesson) return acc;
+    if (!lesson) return acc;
 
-        acc.push({
-          ...lesson,
-          status:
-            row.status === "available" || row.status === "pending"
-              ? row.status
-              : undefined,
-        });
+    acc.push({
+      id: lesson.id,
+      name: lesson.name,
+      image_path: lesson.image_path,
+    });
 
-        return acc;
-      },
-      [],
-    ) ?? [];
+    return acc;
+  }, []);
 
-  const { availableCount, pendingCount } = (
-    data as DeviceLessonRow[] | null
-  )?.reduce(
+  const lessonStatuses = deviceLessonRows.reduce<
+    Partial<Record<number, "available" | "pending">>
+  >((acc, row) => {
+    if (row.status === "available" || row.status === "pending") {
+      acc[row.lesson_id] = row.status;
+    }
+    return acc;
+  }, {});
+
+  const { availableCount, pendingCount } = deviceLessonRows.reduce(
     (acc, row) => {
-      if (row.status === "available") {
-        acc.availableCount += 1;
-      } else if (row.status === "pending") {
-        acc.pendingCount += 1;
-      }
+      if (row.status === "available") acc.availableCount++;
+      if (row.status === "pending") acc.pendingCount++;
       return acc;
     },
     { availableCount: 0, pendingCount: 0 },
-  ) ?? { availableCount: 0, pendingCount: 0 };
+  );
 
   const lastSyncedLabel = formatLastSynced(deviceData?.last_synced_at ?? null);
 
@@ -164,18 +114,18 @@ export default async function OfflineLibraryPage() {
           />
         </SyncCardsRow>
 
-        <SectionTitle>Lessons to Sync</SectionTitle>
-
-        <LessonsStack>
-          {lessons.map(lesson => (
-            <LessonItem
-              key={lesson.id}
-              lessonId={lesson.id}
-              lessonName={lesson.name}
-              status={lesson.status}
-            />
-          ))}
-        </LessonsStack>
+        <LessonsClient
+          initialLessons={lessons}
+          lessonStatuses={lessonStatuses}
+          title="Lessons to Sync"
+          showCreateButton={false}
+          showSearchBar={false}
+          showViewToggle={false}
+          defaultView="list"
+          listAction="remove"
+          deviceId={deviceId}
+          layout="embedded"
+        />
       </Content>
     </PageWrapper>
   );

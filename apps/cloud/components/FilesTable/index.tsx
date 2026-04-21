@@ -347,14 +347,22 @@ export default function FilesTable({
       selectedFileIds.map(fileId => [fileId, true]),
     ) as RowSelectionState;
 
-    const currentSelectedIds = Object.keys(rowSelection).filter(
-      id => rowSelection[id],
-    );
+    setRowSelection(prevSelection => {
+      const currentSelectedIds = Object.keys(prevSelection).filter(
+        id => prevSelection[id],
+      );
 
-    if (!haveSameIds(currentSelectedIds, selectedFileIds)) {
-      setRowSelection(nextSelection);
-    }
+      if (haveSameIds(currentSelectedIds, selectedFileIds)) {
+        return prevSelection;
+      }
+
+      return nextSelection;
+    });
   }, [selectedFileIds]);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {

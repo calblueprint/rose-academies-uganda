@@ -33,6 +33,7 @@ export const ButtonText = styled.span`
   color: #808582;
   text-align: center;
   font-family: "Google Sans", sans-serif;
+  white-space: nowrap;
   font-size: 0.875rem;
   font-style: normal;
   font-weight: 500;

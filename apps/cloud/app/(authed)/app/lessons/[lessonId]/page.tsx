@@ -15,13 +15,24 @@ type Lesson = {
   is_archived: boolean;
 };
 
-const MOCK_FILES_BY_LESSON: Record<string, { id: string; name: string }[]> = {
-  "1": [
-    { id: "f1", name: "Fractions Worksheet.pdf" },
-    { id: "f2", name: "Fractions Slides.pptx" },
-  ],
-  "2": [{ id: "f1", name: "Plant Diagram.png" }],
-  "3": [{ id: "f1", name: "Short Story.pdf" }],
+type LessonFile = {
+  id: string;
+  name: string;
+  sizeBytes: number | null;
+  createdAt: string | null;
+  updatedAt: string | null;
+  order: number;
+};
+
+type LessonFileRow = {
+  file_id: number;
+  display_order: number;
+  Files: {
+    id: number;
+    name: string;
+    size_bytes: number | null;
+    created_at: string | null;
+  } | null;
 };
 
 export default async function LessonDetailPage({ params }: PageProps) {
@@ -91,15 +102,43 @@ export default async function LessonDetailPage({ params }: PageProps) {
     villages = groupRows.map(row => row.name);
   }
 
+  const { data: lessonFileRows, error: filesError } = await supabase
+    .from("LessonFiles")
+    .select("file_id, display_order, Files(id, name, size_bytes, created_at)")
+    .eq("lesson_id", numericLessonId)
+    .order("display_order", { ascending: true })
+    .returns<LessonFileRow[]>();
+
+  if (filesError) {
+    throw new Error(filesError.message);
+  }
+
+  const normalizedFiles: LessonFile[] =
+    lessonFileRows
+      ?.filter(
+        (
+          row,
+        ): row is LessonFileRow & {
+          Files: NonNullable<LessonFileRow["Files"]>;
+        } => row.Files !== null,
+      )
+      .map(row => ({
+        id: String(row.Files.id),
+        name: row.Files.name,
+        sizeBytes: row.Files.size_bytes,
+        createdAt: row.Files.created_at,
+        updatedAt: row.Files.created_at,
+        order: row.display_order,
+      })) ?? [];
+
   const isOffline = !!offlineRows && offlineRows.length > 0;
-  const files = MOCK_FILES_BY_LESSON[String(lesson.id)] ?? [];
 
   return (
     <LessonDetailClient
       lesson={lesson}
       deviceId={deviceId}
       initialIsOffline={isOffline}
-      files={files}
+      files={normalizedFiles}
       villages={villages}
     />
   );

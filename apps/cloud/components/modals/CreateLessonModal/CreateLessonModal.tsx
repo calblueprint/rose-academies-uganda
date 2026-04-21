@@ -231,7 +231,7 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
           ),
         );
 
-        await uploadFile(lesson.id, snapshot[i].file);
+        await uploadFile(lesson.id, snapshot[i].file, i);
 
         setFiles(prev =>
           prev.map((entry, idx) =>
@@ -270,6 +270,7 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
       router.refresh();
     } catch (err) {
       console.error("Failed to create lesson:", err);
+      console.error("Stringified error:", JSON.stringify(err, null, 2));
 
       setFiles(prev =>
         prev.map(f =>

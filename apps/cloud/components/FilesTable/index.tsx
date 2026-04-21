@@ -356,6 +356,10 @@ export default function FilesTable({
     }
   }, [selectedFileIds]);
 
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {

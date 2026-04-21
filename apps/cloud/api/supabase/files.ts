@@ -12,6 +12,7 @@ async function hashFile(file: File): Promise<string> {
 export async function uploadFile(
   lessonId: number,
   file: File,
+  displayOrder: number,
 ): Promise<LocalFile> {
   const supabase = getSupabaseBrowserClient();
 
@@ -19,20 +20,23 @@ export async function uploadFile(
 
   const hash = await hashFile(file);
 
-  const { data: existingFile } = await supabase
+  const { data: existingFile, error: existingFileError } = await supabase
     .from("Files")
     .select("*")
     .eq("hash", hash)
     .eq("user_id", user.id)
     .maybeSingle();
 
+  if (existingFileError) throw new Error(existingFileError.message);
+
   if (existingFile) {
     const { error } = await supabase.from("LessonFiles").insert({
       lesson_id: lessonId,
       file_id: existingFile.id,
+      display_order: displayOrder,
     });
 
-    if (error) throw error;
+    if (error) throw new Error(error.message);
 
     return existingFile as LocalFile;
   }
@@ -43,7 +47,7 @@ export async function uploadFile(
     .from("files")
     .upload(objectPath, file, { upsert: true });
 
-  if (storageError) throw storageError;
+  if (storageError) throw new Error(storageError.message);
 
   const { data: pub } = supabase.storage.from("files").getPublicUrl(objectPath);
 
@@ -62,14 +66,15 @@ export async function uploadFile(
     .select()
     .single();
 
-  if (fileError) throw fileError;
+  if (fileError) throw new Error(fileError.message);
 
   const { error: joinError } = await supabase.from("LessonFiles").insert({
     lesson_id: lessonId,
     file_id: fileRow.id,
+    display_order: displayOrder,
   });
 
-  if (joinError) throw joinError;
+  if (joinError) throw new Error(joinError.message);
 
   return fileRow as LocalFile;
 }

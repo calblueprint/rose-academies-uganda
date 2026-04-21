@@ -124,7 +124,7 @@ export default function UploadFilesModal({ isOpen, onClose, lessonId }: Props) {
           ),
         );
 
-        await uploadFile(lessonId, snapshot[i].file);
+        await uploadFile(lessonId, snapshot[i].file, i);
 
         setFiles(prev =>
           prev.map((entry, idx) =>
@@ -142,6 +142,7 @@ export default function UploadFilesModal({ isOpen, onClose, lessonId }: Props) {
       onClose();
     } catch (err) {
       console.error("Failed to upload files:", err);
+      console.error("Stringified error:", JSON.stringify(err, null, 2));
 
       setFiles(prev =>
         prev.map(file =>

@@ -4,6 +4,7 @@ import COLORS from "@/styles/colors";
 export const Card = styled.div`
   display: flex;
   width: 100%;
+  height: 100%;
   padding: 1.5rem;
   flex-direction: column;
   justify-content: center;
@@ -13,11 +14,11 @@ export const Card = styled.div`
   border-radius: 1rem;
   background: ${COLORS.white};
   box-shadow:
-    0 22px 6px 0 rgba(170, 171, 181, 0.01),
-    0 14px 6px 0 rgba(170, 171, 181, 0.05),
-    0 8px 5px 0 rgba(170, 171, 181, 0.18),
-    0 4px 4px 0 rgba(170, 171, 181, 0.31),
-    0 1px 2px 0 rgba(170, 171, 181, 0.36);
+    0 22px 6px 0 rgba(170, 170, 170, 0),
+    0 14px 6px 0 rgba(170, 170, 170, 0.01),
+    0 8px 5px 0 rgba(170, 170, 170, 0.05),
+    0 4px 4px 0 rgba(170, 170, 170, 0.09),
+    0 1px 2px 0 rgba(170, 170, 170, 0.1);
 `;
 
 export const Content = styled.div`

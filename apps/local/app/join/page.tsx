@@ -56,7 +56,7 @@ export default function JoinPage() {
       <Card>
         <HeaderSection>
           <LogoContainer>
-            <Image src={RoseLogo} alt="Rose Academies Logo" />
+            <Image src={RoseLogo} alt="Rose Academies Logo" unoptimized />
           </LogoContainer>
           <Title>Join Your Class</Title>
           <Helper>Enter the join code provided by your instructor</Helper>

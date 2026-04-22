@@ -20,7 +20,7 @@ export default function Header() {
       <LogoAndTitle>
         <PageShell />
         <LogoContainer>
-          <Image src={RoseLogo} alt="Rose Academies Logo" />
+          <Image src={RoseLogo} alt="Rose Academies Logo" unoptimized />
           <Title>Rose Academies-Uganda</Title>
         </LogoContainer>
       </LogoAndTitle>

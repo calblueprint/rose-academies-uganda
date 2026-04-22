@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useContext, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { uploadFile } from "@/api/supabase/files";
 import FileTypeBadge from "@/components/FileTypeBadge";
@@ -59,6 +59,14 @@ export default function UploadFilesModal({ isOpen, onClose, lessonId }: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const data = useContext(DataContext);
   const router = useRouter();
+
+  useEffect(() => {
+    if (!isOpen) return;
+    document.documentElement.style.overflowY = "hidden";
+    return () => {
+      document.documentElement.style.overflowY = "";
+    };
+  }, [isOpen]);
 
   if (!isOpen) return null;
 

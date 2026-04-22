@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { IconSvgs } from "@/lib/icons";
 import {
   ActionsRow,
@@ -30,6 +30,13 @@ const SyncModal: React.FC<SyncModalProps> = ({
   onSyncAgain,
   bodyText,
 }) => {
+  useEffect(() => {
+    document.documentElement.style.overflowY = "hidden";
+    return () => {
+      document.documentElement.style.overflowY = "";
+    };
+  }, []);
+
   const isSuccess = variant === "success";
 
   const defaultBodyText = isSuccess

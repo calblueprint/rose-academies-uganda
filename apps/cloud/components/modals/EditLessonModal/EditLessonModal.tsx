@@ -63,6 +63,14 @@ export default function EditLessonModal({ isOpen, onClose, lesson }: Props) {
   const isDescriptionEdited = description !== (lesson.description ?? "");
 
   useEffect(() => {
+    if (!isOpen) return;
+    document.documentElement.style.overflowY = "hidden";
+    return () => {
+      document.documentElement.style.overflowY = "";
+    };
+  }, [isOpen]);
+
+  useEffect(() => {
     if (!isOpen) {
       return;
     }

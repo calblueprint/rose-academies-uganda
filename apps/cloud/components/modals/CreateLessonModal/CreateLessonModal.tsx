@@ -101,6 +101,14 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
 
   useEffect(() => {
     if (!isOpen) return;
+    document.documentElement.style.overflowY = "hidden";
+    return () => {
+      document.documentElement.style.overflowY = "";
+    };
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) return;
 
     const fetchGroups = async () => {
       const { data: groupsData, error: groupsError } = await supabase

@@ -13,10 +13,12 @@ export default function LoginForm() {
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (isSubmitting) return;
+
     setIsSubmitting(true);
     setErrorMessage("");
 
     const result = await loginWithEmailPassword({ email, password });
+
     if (result?.error) {
       setErrorMessage("Invalid email or password");
       setIsSubmitting(false);
@@ -29,50 +31,50 @@ export default function LoginForm() {
         <style.LogoWrap>
           <style.Logo src="/logo.png" alt="Logo" />
         </style.LogoWrap>
-        <style.H1>Login</style.H1>
+
+        <style.Title>Login</style.Title>
+
         <style.Form onSubmit={handleSubmit}>
-          <style.Label>
-            Email
-            <style.Input
-              name="email"
-              type="email"
-              required
-              autoComplete="email"
-              placeholder="Email"
-              value={email}
-              onChange={e => {
-                setEmail(e.target.value);
-                if (errorMessage) setErrorMessage("");
-              }}
-            />
-          </style.Label>
-          <style.Label>
-            Password
-            <style.Input
-              name="password"
-              type="password"
-              required
-              autoComplete="current-password"
-              placeholder="Password"
-              value={password}
-              onChange={e => {
-                setPassword(e.target.value);
-                if (errorMessage) setErrorMessage("");
-              }}
-            />
-          </style.Label>
-          {<style.Error>{errorMessage}</style.Error>}
+          <style.Input
+            name="email"
+            type="email"
+            required
+            autoComplete="email"
+            placeholder="Email"
+            value={email}
+            onChange={e => {
+              setEmail(e.target.value);
+              if (errorMessage) setErrorMessage("");
+            }}
+          />
+
+          <style.Input
+            name="password"
+            type="password"
+            required
+            autoComplete="current-password"
+            placeholder="Password"
+            value={password}
+            onChange={e => {
+              setPassword(e.target.value);
+              if (errorMessage) setErrorMessage("");
+            }}
+          />
+
+          {errorMessage ? <style.Error>{errorMessage}</style.Error> : null}
+
           <style.Button
             type="submit"
             disabled={isSubmitting}
             style={{ opacity: isSubmitting ? 0.7 : 1 }}
           >
-            {isSubmitting ? "Logging in..." : "Log in"}
+            {isSubmitting ? "Logging in..." : "Join"}
           </style.Button>
         </style.Form>
-        <style.Paragraph>
-          Invite-only. Contact an administrator for access.
-        </style.Paragraph>
+
+        <style.HelperText>
+          Invite only. Ask your administrator to create your account.
+        </style.HelperText>
       </style.Card>
     </style.Main>
   );

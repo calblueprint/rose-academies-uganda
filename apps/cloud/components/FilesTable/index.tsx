@@ -29,6 +29,7 @@ import {
   SortingState,
   useReactTable,
 } from "@tanstack/react-table";
+import FileTypeBadge from "@/components/FileTypeBadge";
 import * as style from "./styles";
 
 export type FileRow = {
@@ -157,9 +158,12 @@ function SortableRow({ row, canDrag }: SortableRowProps) {
         if (cell.column.id === "name") {
           return (
             <style.BodyCell key={cell.id}>
-              <style.FileNameText>
-                {flexRender(cell.column.columnDef.cell, cell.getContext())}
-              </style.FileNameText>
+              <style.FileNameContainer>
+                <FileTypeBadge fileName={row.original.name} />
+                <style.FileNameText>
+                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                </style.FileNameText>
+              </style.FileNameContainer>
             </style.BodyCell>
           );
         }
@@ -215,9 +219,12 @@ function StaticRow({ row }: StaticRowProps) {
         if (cell.column.id === "name") {
           return (
             <style.BodyCell key={cell.id}>
-              <style.FileNameText>
-                {flexRender(cell.column.columnDef.cell, cell.getContext())}
-              </style.FileNameText>
+              <style.FileNameContainer>
+                <FileTypeBadge fileName={row.original.name} />
+                <style.FileNameText>
+                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                </style.FileNameText>
+              </style.FileNameContainer>
             </style.BodyCell>
           );
         }

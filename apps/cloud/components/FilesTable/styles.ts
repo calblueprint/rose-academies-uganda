@@ -34,7 +34,7 @@ export const StatusText = styled.p`
 export const StyledTable = styled.table`
   width: 100%;
   border-collapse: separate;
-  border-spacing: 0 0.5rem;
+  border-spacing: 0;
   table-layout: fixed;
 `;
 
@@ -42,7 +42,7 @@ export const TableHead = styled.thead`
   tr {
     display: grid;
     grid-template-columns:
-      3rem 3rem minmax(0, 2.2fr) minmax(0, 1.2fr) minmax(0, 1.2fr)
+      1.75rem 1.75rem minmax(0, 2.2fr) minmax(0, 1.2fr) minmax(0, 1.2fr)
       minmax(0, 1fr);
     align-items: center;
     padding: 1.125rem;
@@ -52,6 +52,7 @@ export const TableHead = styled.thead`
 
 export const HeaderCell = styled.th<{ $align?: "left" | "right" | "center" }>`
   text-align: ${({ $align = "left" }) => $align};
+  font-family: inherit;
   font-size: 0.875rem;
   font-weight: 600;
   color: ${COLORS.gray60};
@@ -80,28 +81,48 @@ export const TableBody = styled.tbody`
   tr {
     display: grid;
     grid-template-columns:
-      3rem 3rem minmax(0, 2.2fr) minmax(0, 1.2fr) minmax(0, 1.2fr)
+      1.75rem 1.5rem minmax(0, 2.2fr) minmax(0, 1.2fr) minmax(0, 1.2fr)
       minmax(0, 1fr);
     align-items: center;
     min-height: 3.48338rem;
     padding: 1.03131rem 1.80481rem 1.03131rem 1.03131rem;
     background: var(--white, #fff);
-    border-radius: 0.75rem;
+    transition: background-color 0.15s ease;
+  }
+
+  tr + tr {
+    border-top: 1px solid #e5e7eb;
+  }
+
+  tr:hover {
+    background: #f4f5f7;
   }
 `;
 
 export const BodyCell = styled.td<{ $align?: "left" | "right" | "center" }>`
   padding: 0;
   text-align: ${({ $align = "left" }) => $align};
-  font-size: 0.9375rem;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
   color: ${COLORS.veryDarkBlue};
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 `;
 
+export const FileNameContainer = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-left: 0.5rem;
+  min-width: 0;
+`;
+
 export const FileNameText = styled.span`
   display: block;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -111,6 +132,7 @@ export const FileNameText = styled.span`
 export const Checkbox = styled.input`
   width: 1rem;
   height: 1rem;
+  accent-color: #808582;
   cursor: pointer;
 `;
 

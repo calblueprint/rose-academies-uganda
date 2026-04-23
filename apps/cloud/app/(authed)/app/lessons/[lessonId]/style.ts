@@ -19,6 +19,33 @@ export const HeaderButtons = styled.div`
   gap: 12px;
 `;
 
+export const TitleWithEditIcon = styled.div`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+`;
+
+export const DescriptionWithEditIcon = styled.div`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+`;
+
+export const InlineEditIcon = styled.span`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 4px 2px;
+  gap: 10px;
+  border-radius: 20px;
+  background: #e6e8ea;
+  flex-shrink: 0;
+`;
+
 export const PageContainer = styled.div`
   display: flex;
   flex-direction: column;
@@ -34,6 +61,7 @@ export const LessonTitle = styled.h1`
   font-style: normal;
   font-weight: 400;
   line-height: normal;
+  margin: 0;
 `;
 
 export const LessonDescription = styled.h1`
@@ -42,6 +70,7 @@ export const LessonDescription = styled.h1`
   font-style: normal;
   font-weight: 400;
   line-height: normal;
+  margin: 0;
 `;
 
 export const SearchBarRow = styled.div`

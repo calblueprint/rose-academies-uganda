@@ -4,8 +4,11 @@ import COLORS from "@/styles/colors";
 export const SyncButton = styled.button`
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 16px;
+  justify-content: center;
+  gap: 8px;
+  min-width: 148px;
+  height: 42px;
+  padding: 12px 18px;
   background-color: ${COLORS.evergreen};
   color: ${COLORS.white};
   font-size: 14px;
@@ -26,5 +29,9 @@ export const SyncButton = styled.button`
   &:disabled {
     opacity: 0.6;
     cursor: not-allowed;
+  }
+
+  svg {
+    flex-shrink: 0;
   }
 `;

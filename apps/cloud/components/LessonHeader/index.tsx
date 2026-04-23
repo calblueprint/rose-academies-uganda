@@ -34,9 +34,11 @@ export default function LessonHeader({
               onClick={() => {
                 setIsUploadLessonImageModalOpen(true);
               }}
+              aria-label="Customize lesson image"
             >
-              <style.IconContainer>{IconSvgs.pencil}</style.IconContainer>
-              <span>Customize</span>
+              <style.IconContainer>
+                {IconSvgs.pencilEvergreen}
+              </style.IconContainer>
             </style.CustomizeButton>
           </style.HeaderTopRow>
         </style.ImageBanner>

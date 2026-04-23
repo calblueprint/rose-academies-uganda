@@ -41,16 +41,16 @@ export const BackLink = styled(Link)`
 
 export const CustomizeButton = styled.button`
   display: inline-flex;
-  padding: 0.5rem 1rem;
+  width: 24px;
+  height: 24px;
+  padding: 4px 2px;
   justify-content: center;
   align-items: center;
-  gap: 0.5rem;
-  border-radius: 0.5rem;
+  gap: 10px;
+  border-radius: 20px;
   border: none;
-  background: rgba(244, 245, 247, 0.7);
+  background: #e6e8ea;
   color: var(--evergreen-100, #1e4240);
-  font-size: 1rem;
-  font-weight: 500;
   cursor: pointer;
 `;
 

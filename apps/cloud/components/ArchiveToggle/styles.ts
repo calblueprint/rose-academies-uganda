@@ -3,8 +3,11 @@ import styled from "styled-components";
 export const ArchiveButton = styled.button`
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
-  padding: 8px 16px;
+  width: 162px;
+  height: 42px;
+  padding: 12px 18px;
 
   border-radius: 12px;
   border: 1px solid var(--gray-40, #d9d9d9);

@@ -126,7 +126,7 @@ export default function CloudSyncButton({ userId }: { userId: string }) {
         title="Click to request sync on the Pi"
       >
         <IconWrapper $isSpinning={isSyncing}>{IconSvgs.refresh}</IconWrapper>
-        {"Sync Lessons"}
+        {"Sync"}
       </ButtonWrapper>
 
       {modalVariant && (

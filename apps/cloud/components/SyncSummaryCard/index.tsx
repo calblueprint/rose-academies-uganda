@@ -34,7 +34,7 @@ export default function SyncSummaryCard({
           <Row>
             <LeftGroup>
               <Dot $color={COLORS.lightLightGreen} />
-              <Label>Available</Label>
+              <Label>Available Offline</Label>
             </LeftGroup>
             <Value>{availableCount}</Value>
           </Row>

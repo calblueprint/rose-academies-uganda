@@ -1,5 +1,6 @@
 import styled from "styled-components";
 import COLORS from "@/styles/colors";
+import { Body, Subtitle2 } from "@/styles/text";
 
 export const Card = styled.div`
   display: flex;
@@ -39,13 +40,11 @@ export const TopSection = styled.div`
   gap: 1rem;
 `;
 
-export const Title = styled.div`
-  color: ${COLORS.black};
-  font-family: "Google Sans", sans-serif;
-  font-size: 1rem;
-  font-style: normal;
+/* Sync Summary */
+export const Title = styled(Body)`
+  color: ${COLORS.gray100};
+  font-size: 16px; /* custom override */
   font-weight: 500;
-  line-height: normal;
 `;
 
 export const Row = styled.div`
@@ -69,22 +68,14 @@ export const Dot = styled.div<{ $color: string }>`
   flex-shrink: 0;
 `;
 
-export const Label = styled.div`
+/* Available Offline / Pending Sync */
+export const Label = styled(Body)`
   color: ${COLORS.gray60};
-  font-family: "Google Sans", sans-serif;
-  font-size: 0.875rem;
-  font-style: normal;
-  font-weight: 400;
-  line-height: normal;
 `;
 
-export const Value = styled.div`
+/* Values for those rows (same spec) */
+export const Value = styled(Body)`
   color: ${COLORS.gray60};
-  font-family: Mulish, sans-serif;
-  font-size: 0.8955rem;
-  font-style: normal;
-  font-weight: 400;
-  line-height: normal;
 `;
 
 export const Divider = styled.div`
@@ -100,11 +91,14 @@ export const BottomRow = styled.div`
   align-self: stretch;
 `;
 
-export const LastSyncedValue = styled.div`
-  color: ${COLORS.black};
-  font-family: "Google Sans", sans-serif;
-  font-size: 1rem;
-  font-style: normal;
+/* "Last synced" label */
+export const LastSyncedLabel = styled(Subtitle2)`
+  color: ${COLORS.gray60};
   font-weight: 500;
-  line-height: normal;
+`;
+
+/* Date value */
+export const LastSyncedValue = styled(Subtitle2)`
+  color: ${COLORS.gray100};
+  font-weight: 500;
 `;

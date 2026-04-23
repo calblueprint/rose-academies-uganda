@@ -1,5 +1,6 @@
 import styled, { css, keyframes } from "styled-components";
 import COLORS from "@/styles/colors";
+import { Subtitle1 } from "@/styles/text";
 
 const spin = keyframes`
   from {
@@ -12,23 +13,19 @@ const spin = keyframes`
 
 export const ButtonWrapper = styled.button`
   display: flex;
-  font-family: var(--font-gilroy);
-
-  width: 100%;
-  height: 50px;
-  padding: 12px 20px;
-  flex-direction: row;
+  height: 3.25rem;
+  padding: 0.625rem;
   justify-content: center;
   align-items: center;
+  flex: 1 0 0;
   gap: 8px;
 
-  border-radius: 20px;
+  border-radius: 0.75rem;
   background: ${COLORS.evergreen};
   border: none;
   cursor: pointer;
+
   color: ${COLORS.white};
-  font-size: 16px;
-  font-weight: 400;
 
   transition: opacity 0.2s ease;
 
@@ -37,6 +34,8 @@ export const ButtonWrapper = styled.button`
     cursor: not-allowed;
   }
 `;
+
+export const ButtonText = styled(Subtitle1)``;
 
 export const IconWrapper = styled.div<{ $isSpinning?: boolean }>`
   display: flex;

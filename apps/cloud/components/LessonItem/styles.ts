@@ -1,10 +1,15 @@
 import styled from "styled-components";
 
 export const LessonWrapper = styled.div`
-  border-radius: 0.75rem;
-  border: 1px solid var(--gray, #d9d9d9);
+  border-radius: 1rem;
   background: var(--white, #fff);
   overflow: hidden;
+  box-shadow:
+    0 22px 6px 0 rgba(170, 170, 170, 0),
+    0 14px 6px 0 rgba(170, 170, 170, 0.01),
+    0 8px 5px 0 rgba(170, 170, 170, 0.05),
+    0 4px 4px 0 rgba(170, 170, 170, 0.09),
+    0 1px 2px 0 rgba(170, 170, 170, 0.1);
 `;
 
 export const LessonHeader = styled.div`

@@ -1,5 +1,6 @@
 import styled from "styled-components";
 import COLORS from "@/styles/colors";
+import { Subtitle1 } from "@/styles/text";
 
 export const Card = styled.div`
   display: flex;
@@ -36,12 +37,7 @@ export const Titleholder = styled.div`
   border-radius: 0 0 0.938rem 0.938rem;
 `;
 
-export const Title = styled.h3`
-  margin: 0;
-  color: ${COLORS.black};
-  font-family: var(--font-gilroy);
-  font-size: 1.14356rem;
-  font-style: normal;
-  font-weight: 500;
-  line-height: normal;
-`;
+export const Title = styled(Subtitle1).attrs({
+  $color: COLORS.black,
+  $fontWeight: 500,
+})``;

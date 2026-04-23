@@ -69,7 +69,7 @@ export default function ArchiveToggle({
           />
         </svg>
 
-        {isArchived ? "Restore" : "Archive Lesson"}
+        {isArchived ? "Restore" : "Archive"}
       </ArchiveButton>
 
       {isOpen && (

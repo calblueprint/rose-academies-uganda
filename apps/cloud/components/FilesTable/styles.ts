@@ -1,6 +1,9 @@
 import styled from "styled-components";
 import COLORS from "@/styles/colors";
 
+const FILE_TABLE_COLUMNS =
+  "1.75rem 1.5rem minmax(0, 1.35fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 0.75fr)";
+
 export const TableSection = styled.section`
   display: flex;
   flex-direction: column;
@@ -41,11 +44,9 @@ export const StyledTable = styled.table`
 export const TableHead = styled.thead`
   tr {
     display: grid;
-    grid-template-columns:
-      1.75rem 1.75rem minmax(0, 2.2fr) minmax(0, 1.2fr) minmax(0, 1.2fr)
-      minmax(0, 1fr);
+    grid-template-columns: ${FILE_TABLE_COLUMNS};
     align-items: center;
-    padding: 1.125rem;
+    padding: 1.125rem 1.80481rem 1.125rem 1.03131rem;
     background: var(--white, #fff);
   }
 `;
@@ -80,18 +81,31 @@ export const SortButton = styled.button`
 export const TableBody = styled.tbody`
   tr {
     display: grid;
-    grid-template-columns:
-      1.75rem 1.5rem minmax(0, 2.2fr) minmax(0, 1.2fr) minmax(0, 1.2fr)
-      minmax(0, 1fr);
+    grid-template-columns: ${FILE_TABLE_COLUMNS};
     align-items: center;
     min-height: 3.48338rem;
     padding: 1.03131rem 1.80481rem 1.03131rem 1.03131rem;
+    position: relative;
     background: var(--white, #fff);
     transition: background-color 0.15s ease;
   }
 
-  tr + tr {
-    border-top: 1px solid #e5e7eb;
+  tr::before,
+  tr::after {
+    content: "";
+    position: absolute;
+    left: 1.03131rem;
+    right: 1.80481rem;
+    height: 1px;
+    background: #e5e7eb;
+  }
+
+  tr::before {
+    top: 0;
+  }
+
+  tr::after {
+    bottom: 0;
   }
 
   tr:hover {
@@ -166,15 +180,19 @@ export const DragHandle = styled.button`
 `;
 
 export const FooterRow = styled.div`
-  display: flex;
+  display: grid;
+  grid-template-columns: ${FILE_TABLE_COLUMNS};
   padding: 1.03131rem;
   align-items: center;
-  justify-content: space-between;
   align-self: stretch;
   background: var(--white, #fff);
 `;
 
-export const FooterText = styled.p`
+export const FooterText = styled.p<{ $column?: "selection" | "size" }>`
+  grid-column: ${({ $column = "selection" }) =>
+    $column === "size" ? "6" : "1 / span 3"};
+  transform: ${({ $column = "selection" }) =>
+    $column === "size" ? "translateX(-1.25rem)" : "none"};
   margin: 0;
   font-size: 0.9375rem;
   color: ${COLORS.gray60};

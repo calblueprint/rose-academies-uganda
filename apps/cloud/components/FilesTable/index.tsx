@@ -168,14 +168,6 @@ function SortableRow({ row, canDrag }: SortableRowProps) {
           );
         }
 
-        if (cell.column.id === "sizeBytes") {
-          return (
-            <style.BodyCell key={cell.id} $align="right">
-              {flexRender(cell.column.columnDef.cell, cell.getContext())}
-            </style.BodyCell>
-          );
-        }
-
         return (
           <style.BodyCell key={cell.id}>
             {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -225,14 +217,6 @@ function StaticRow({ row }: StaticRowProps) {
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </style.FileNameText>
               </style.FileNameContainer>
-            </style.BodyCell>
-          );
-        }
-
-        if (cell.column.id === "sizeBytes") {
-          return (
-            <style.BodyCell key={cell.id} $align="right">
-              {flexRender(cell.column.columnDef.cell, cell.getContext())}
             </style.BodyCell>
           );
         }
@@ -292,10 +276,8 @@ function TableMarkup({
                 );
               }
 
-              const align = header.id === "sizeBytes" ? "right" : "left";
-
               return (
-                <style.HeaderCell key={header.id} $align={align}>
+                <style.HeaderCell key={header.id}>
                   {header.isPlaceholder ? null : canSort ? (
                     <style.SortButton
                       type="button"
@@ -583,7 +565,7 @@ export default function FilesTable({
               {selectedCount} of {files.length} selected
             </style.FooterText>
 
-            <style.FooterText>
+            <style.FooterText $column="size">
               Total size: {formatBytes(totalSizeBytes)}
             </style.FooterText>
           </style.FooterRow>

@@ -34,11 +34,11 @@ export default function LessonHeader({
               onClick={() => {
                 setIsUploadLessonImageModalOpen(true);
               }}
-              aria-label="Customize lesson image"
             >
               <style.IconContainer>
                 {IconSvgs.pencilEvergreen}
               </style.IconContainer>
+              <span>Customize</span>
             </style.CustomizeButton>
           </style.HeaderTopRow>
         </style.ImageBanner>

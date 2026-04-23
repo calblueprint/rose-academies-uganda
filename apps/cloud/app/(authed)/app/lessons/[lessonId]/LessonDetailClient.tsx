@@ -3,26 +3,22 @@
 import { useMemo, useState, useTransition } from "react";
 import ArchiveToggle from "@/components/ArchiveToggle/ArchiveToggle";
 import DeleteSelectedFilesButton from "@/components/DeleteSelectedFilesButton";
-// import EditLessonButton from "@/components/EditLessonButton";
+import EditLessonButton from "@/components/EditLessonButton";
 import FilesTable, { FileRow } from "@/components/FilesTable";
 import LessonHeader from "@/components/LessonHeader";
 import OfflineToggle from "@/components/OfflineToggle";
 import SearchBar from "@/components/SearchBar";
 import UploadFilesButton from "@/components/UploadFilesButton";
 import VillageTags from "@/components/VillageTags";
-import { IconSvgs } from "@/lib/icons";
 import { deleteLessonFilesAction, reorderLessonFilesAction } from "./actions";
 import {
-  DescriptionWithEditIcon,
   HeaderBox,
   HeaderButtons,
-  InlineEditIcon,
   LessonDescription,
   LessonInformation,
   LessonTitle,
   PageContainer,
   SearchBarRow,
-  TitleWithEditIcon,
 } from "./style";
 
 type LessonFile = {
@@ -149,12 +145,7 @@ export default function LessonDetailClient({
         />
 
         <HeaderBox>
-          <TitleWithEditIcon>
-            <LessonTitle>{lesson.name}</LessonTitle>
-            <InlineEditIcon aria-hidden="true">
-              {IconSvgs.pencilEvergreen}
-            </InlineEditIcon>
-          </TitleWithEditIcon>
+          <LessonTitle>{lesson.name}</LessonTitle>
           <HeaderButtons>
             <ArchiveToggle
               lesson_Id={lesson.id}
@@ -167,16 +158,11 @@ export default function LessonDetailClient({
               setIsOffline={setIsOffline}
               hasFiles={tableFiles.length > 0}
             />
-            {/* <EditLessonButton lesson={lesson} /> */}
+            <EditLessonButton lesson={lesson} />
           </HeaderButtons>
         </HeaderBox>
 
-        <DescriptionWithEditIcon>
-          <LessonDescription>{lesson.description}</LessonDescription>
-          <InlineEditIcon aria-hidden="true">
-            {IconSvgs.pencilEvergreen}
-          </InlineEditIcon>
-        </DescriptionWithEditIcon>
+        <LessonDescription>{lesson.description}</LessonDescription>
 
         <VillageTags villages={villages} />
 

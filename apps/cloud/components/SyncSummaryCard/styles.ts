@@ -41,10 +41,11 @@ export const TopSection = styled.div`
 `;
 
 /* Sync Summary */
-export const Title = styled(Body)`
-  color: ${COLORS.gray100};
-  font-size: 16px; /* custom override */
-  font-weight: 500;
+export const Title = styled(Body).attrs({
+  $color: COLORS.gray100,
+  $fontWeight: 500,
+})`
+  font-size: 16px;
 `;
 
 export const Row = styled.div`
@@ -69,14 +70,14 @@ export const Dot = styled.div<{ $color: string }>`
 `;
 
 /* Available Offline / Pending Sync */
-export const Label = styled(Body)`
-  color: ${COLORS.gray60};
-`;
+export const Label = styled(Body).attrs({
+  $color: COLORS.gray60,
+})``;
 
 /* Values for those rows (same spec) */
-export const Value = styled(Body)`
-  color: ${COLORS.gray60};
-`;
+export const Value = styled(Body).attrs({
+  $color: COLORS.gray60,
+})``;
 
 export const Divider = styled.div`
   width: 100%;
@@ -92,13 +93,13 @@ export const BottomRow = styled.div`
 `;
 
 /* "Last synced" label */
-export const LastSyncedLabel = styled(Subtitle2)`
-  color: ${COLORS.gray60};
-  font-weight: 500;
-`;
+export const LastSyncedLabel = styled(Subtitle2).attrs({
+  $color: COLORS.gray60,
+  $fontWeight: 500,
+})``;
 
 /* Date value */
-export const LastSyncedValue = styled(Subtitle2)`
-  color: ${COLORS.gray100};
-  font-weight: 500;
-`;
+export const LastSyncedValue = styled(Subtitle2).attrs({
+  $fontWeight: 500,
+  $color: COLORS.gray100,
+})``;

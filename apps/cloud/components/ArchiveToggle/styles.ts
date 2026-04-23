@@ -39,10 +39,10 @@ export const ArchiveButton = styled.button`
   }
 `;
 
-export const ArchiveButtonText = styled(Subtitle2)`
-  font-weight: 500;
-  color: ${COLORS.gray80};
-`;
+export const ArchiveButtonText = styled(Subtitle2).attrs({
+  $fontWeight: 500,
+  $color: COLORS.gray80,
+})``;
 
 export const ModalBackdrop = styled.div`
   position: fixed;
@@ -80,15 +80,15 @@ export const ModalHeader = styled.div`
   align-self: stretch;
 `;
 
-export const ModalTitle = styled(H3)`
-  color: ${COLORS.black};
-  font-weight: 500;
-`;
+export const ModalTitle = styled(H3).attrs({
+  $color: COLORS.black,
+  $fontWeight: 500,
+})``;
 
-export const ModalText = styled(Subtitle2)`
+export const ModalText = styled(Subtitle2).attrs({
+  $color: COLORS.gray60,
+})`
   align-self: stretch;
-  color: ${COLORS.gray60};
-  margin: 0;
 `;
 
 export const ButtonRow = styled.div`
@@ -113,10 +113,10 @@ export const CancelButton = styled.button`
   cursor: pointer;
 `;
 
-export const CancelButtonText = styled(Subtitle2)`
-  font-weight: 500;
-  color: ${COLORS.gray80};
-`;
+export const CancelButtonText = styled(Subtitle2).attrs({
+  $fontWeight: 500,
+  $color: COLORS.gray80,
+})``;
 
 export const ConfirmButton = styled.button`
   display: flex;
@@ -139,6 +139,7 @@ export const ConfirmButton = styled.button`
   }
 `;
 
-export const ConfirmButtonText = styled(Subtitle2)`
-  font-weight: 500;
-`;
+export const ConfirmButtonText = styled(Subtitle2).attrs({
+  $fontWeight: 500,
+  $color: COLORS.white,
+})``;

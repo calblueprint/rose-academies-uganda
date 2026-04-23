@@ -1,5 +1,6 @@
 import styled from "styled-components";
 import COLORS from "@/styles/colors";
+import { Subtitle2 } from "@/styles/text";
 
 export const SyncButton = styled.button`
   display: inline-flex;
@@ -7,11 +8,7 @@ export const SyncButton = styled.button`
   gap: 8px;
   padding: 8px 16px;
   background-color: ${COLORS.white};
-  color: var(--gray-80, #4b4a49);
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 20px;
-  border: 1px solid var(--gray-40, #d9d9d9);
+  border: 1px solid ${COLORS.gray40};
   border-radius: 12px;
   cursor: pointer;
   white-space: nowrap;
@@ -20,8 +17,8 @@ export const SyncButton = styled.button`
     opacity 0.15s ease;
 
   &:hover {
-    background-color: #f5f5f5;
-    border-color: #cfcfcf;
+    background-color: ${COLORS.gray10};
+    border-color: ${COLORS.gray40};
   }
 
   &:disabled {
@@ -31,5 +28,11 @@ export const SyncButton = styled.button`
 
   svg {
     flex-shrink: 0;
+    stroke: ${COLORS.gray60};
   }
 `;
+
+export const SyncButtonText = styled(Subtitle2).attrs({
+  $fontWeight: 500,
+  $color: COLORS.gray80,
+})``;

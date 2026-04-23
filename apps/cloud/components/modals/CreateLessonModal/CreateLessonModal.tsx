@@ -83,6 +83,7 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
   const [sendToOffline, setSendToOffline] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [titleError, setTitleError] = useState<string | null>(null);
   const [groups, setGroups] = useState<Group[]>([]);
   const [selectedGroupIds, setSelectedGroupIds] = useState<number[]>([]);
   const [isVillageDropdownOpen, setIsVillageDropdownOpen] = useState(false);
@@ -175,6 +176,7 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
     setError(null);
     setSelectedGroupIds([]);
     setIsVillageDropdownOpen(false);
+    setTitleError(null);
   }
 
   function handleClose() {
@@ -184,11 +186,30 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
   }
 
   async function handleSubmit() {
-    if (!title.trim() || isSubmitting) return;
+    const trimmedTitle = title.trim();
+
+    if (!trimmedTitle || isSubmitting) return;
     setIsSubmitting(true);
     setError(null);
 
     try {
+      // duplicate check
+      const { data: existingLesson, error: existingError } = await supabase
+        .from("Lessons")
+        .select("id")
+        .ilike("name", trimmedTitle)
+        .limit(1)
+        .maybeSingle();
+
+      if (existingError) throw existingError;
+
+      if (existingLesson) {
+        setTitleError(
+          `You already have a lesson called '${trimmedTitle}'. Try a different name.`,
+        );
+        setIsSubmitting(false);
+        return;
+      }
       const user = await getCurrentUserOrThrow();
       const { data: device, error: deviceError } = await supabase
         .from("devices")
@@ -206,7 +227,7 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
       const { data: lesson, error: lessonError } = await supabase
         .from("Lessons")
         .insert({
-          name: title.trim(),
+          name: trimmedTitle,
           description: description.trim() || null,
           group_id: fallbackGroupId,
           image_path: null,
@@ -325,9 +346,13 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
             id="lesson-title"
             placeholder="Lesson title"
             value={title}
-            onChange={e => setTitle(e.target.value)}
+            onChange={e => {
+              setTitle(e.target.value);
+              if (titleError) setTitleError(null);
+            }}
             disabled={isSubmitting}
           />
+          {titleError && <ErrorText>{titleError}</ErrorText>}
         </FieldSection>
 
         <FieldSection>

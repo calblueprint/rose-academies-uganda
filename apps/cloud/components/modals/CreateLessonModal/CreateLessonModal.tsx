@@ -176,11 +176,28 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
   }
 
   async function handleSubmit() {
-    if (!title.trim() || isSubmitting) return;
+    const trimmedTitle = title.trim();
+
+    if (!trimmedTitle || isSubmitting) return;
     setIsSubmitting(true);
     setError(null);
 
     try {
+      // duplicate check
+      const { data: existingLesson, error: existingError } = await supabase
+        .from("Lessons")
+        .select("id")
+        .ilike("name", trimmedTitle)
+        .limit(1)
+        .maybeSingle();
+
+      if (existingError) throw existingError;
+
+      if (existingLesson) {
+        setError("A lesson with this name already exists.");
+        setIsSubmitting(false);
+        return;
+      }
       const user = await getCurrentUserOrThrow();
       const { data: device, error: deviceError } = await supabase
         .from("devices")
@@ -198,7 +215,7 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
       const { data: lesson, error: lessonError } = await supabase
         .from("Lessons")
         .insert({
-          name: title.trim(),
+          name: trimmedTitle,
           description: description.trim() || null,
           group_id: fallbackGroupId,
           image_path: null,

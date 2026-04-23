@@ -19,6 +19,7 @@
   --font-h3: 32px;
   --font-h4: 24px;
   --font-h5: 20px;
+  --font-h6: 16px;
 
   --font-subtitle-1: 18px;
   --font-subtitle-2: 14px;
@@ -33,6 +34,7 @@
   --lh-h3: 48px;
   --lh-h4: normal;
   --lh-h5: 25px;
+  --lh-h6: normal;
 
   --lh-subtitle-1: normal;
   --lh-subtitle-2: normal;

@@ -11,6 +11,7 @@ const COLORS = {
   gray10: "#FAFAFA",
   gray40: "#D9D9D9",
   gray60: "#808582",
+  gray80: "#4B4A49",
   lightGreen: "#F9FAF3",
   activeGreen: "#1F5A2A",
   rose10: "#FCEFEF",

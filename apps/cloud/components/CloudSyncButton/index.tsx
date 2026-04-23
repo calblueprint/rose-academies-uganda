@@ -5,7 +5,7 @@ import React, { useState } from "react";
 import supabase from "@/api/supabase/client";
 import SyncModal from "@/components/SyncModal";
 import { IconSvgs } from "@/lib/icons";
-import { ButtonWrapper, IconWrapper } from "./styles";
+import { ButtonText, ButtonWrapper, IconWrapper } from "./styles";
 
 const POLL_INTERVAL_MS = 3000;
 const POLL_TIMEOUT_MS = 120 * 1000;
@@ -126,7 +126,7 @@ export default function CloudSyncButton({ userId }: { userId: string }) {
         title="Click to request sync on the Pi"
       >
         <IconWrapper $isSpinning={isSyncing}>{IconSvgs.refresh}</IconWrapper>
-        {"Sync"}
+        <ButtonText>Sync</ButtonText>
       </ButtonWrapper>
 
       {modalVariant && (

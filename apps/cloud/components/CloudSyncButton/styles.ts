@@ -35,7 +35,11 @@ export const ButtonWrapper = styled.button`
   }
 `;
 
-export const ButtonText = styled(Subtitle1)``;
+export const ButtonText = styled(Subtitle1).attrs({
+  $color: COLORS.white,
+})`
+  text-align: center;
+`;
 
 export const IconWrapper = styled.div<{ $isSpinning?: boolean }>`
   display: flex;

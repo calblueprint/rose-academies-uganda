@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import supabase from "@/api/supabase/client";
+import { IconSvgs } from "@/lib/icons";
 import { SyncButton } from "./styles";
 
 function OfflineToggle({
@@ -82,6 +83,7 @@ function OfflineToggle({
       onClick={handleToggle}
       disabled={isUpdating || !deviceId || Number.isNaN(lessonId) || !hasFiles}
     >
+      {IconSvgs.sync}
       {syncLabel[syncButtonKey]}
     </SyncButton>
   );

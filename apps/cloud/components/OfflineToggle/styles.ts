@@ -4,14 +4,14 @@ import COLORS from "@/styles/colors";
 export const SyncButton = styled.button`
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   padding: 8px 16px;
-  background-color: ${COLORS.evergreen};
-  color: ${COLORS.white};
+  background-color: ${COLORS.white};
+  color: var(--gray-80, #4b4a49);
   font-size: 14px;
   font-weight: 500;
   line-height: 20px;
-  border: none;
+  border: 1px solid var(--gray-40, #d9d9d9);
   border-radius: 12px;
   cursor: pointer;
   white-space: nowrap;
@@ -20,11 +20,16 @@ export const SyncButton = styled.button`
     opacity 0.15s ease;
 
   &:hover {
-    background-color: #14312d;
+    background-color: #f5f5f5;
+    border-color: #cfcfcf;
   }
 
   &:disabled {
     opacity: 0.6;
     cursor: not-allowed;
+  }
+
+  svg {
+    flex-shrink: 0;
   }
 `;

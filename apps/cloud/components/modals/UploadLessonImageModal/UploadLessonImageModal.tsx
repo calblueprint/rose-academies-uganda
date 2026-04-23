@@ -66,6 +66,14 @@ export default function UploadLessonImageModal({
     };
   }, [previewUrl]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+    document.documentElement.style.overflowY = "hidden";
+    return () => {
+      document.documentElement.style.overflowY = "";
+    };
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   function clearSelectedFile() {

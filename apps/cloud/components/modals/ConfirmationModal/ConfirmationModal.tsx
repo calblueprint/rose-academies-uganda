@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import {
   ActionRow,
   CancelButton,
@@ -31,6 +32,14 @@ export default function ConfirmationModal({
   onCancel,
   onConfirm,
 }: ConfirmationModalProps) {
+  useEffect(() => {
+    if (!isOpen) return;
+    document.documentElement.style.overflowY = "hidden";
+    return () => {
+      document.documentElement.style.overflowY = "";
+    };
+  }, [isOpen]);
+
   if (!isOpen) return null;
   return (
     <Overlay

@@ -7,51 +7,85 @@ interface TextProps {
 }
 
 const TextStyles = css<TextProps>`
-  color: ${({ $color }) => $color || "black"};
+  color: ${({ $color }) => $color || "inherit"};
   text-align: ${({ $align }) => $align};
   margin: 0;
 `;
 
-// Add more styled components for different text elements if needed,
-// or edit current component props according to the project design system
+/* Headings */
+
 export const H1 = styled.h1<TextProps>`
   ${TextStyles}
-  font-weight: ${({ $fontWeight }) => $fontWeight || "500"};
-  font-size: 2rem;
+  font-size: var(--font-h1);
+  line-height: var(--lh-h1);
+  font-weight: ${({ $fontWeight }) => $fontWeight || 400};
 `;
 
 export const H2 = styled.h2<TextProps>`
   ${TextStyles}
-  font-weight: ${({ $fontWeight }) => $fontWeight || "400"};
-  font-size: 1.75rem;
+  font-size: var(--font-h2);
+  line-height: var(--lh-h2);
+  font-weight: ${({ $fontWeight }) => $fontWeight || 400};
 `;
 
 export const H3 = styled.h3<TextProps>`
   ${TextStyles}
-  font-weight: ${({ $fontWeight }) => $fontWeight || "400"};
-  font-size: 1.5rem;
+  font-size: var(--font-h3);
+  line-height: var(--lh-h3);
+  font-weight: ${({ $fontWeight }) => $fontWeight || 400};
 `;
 
 export const H4 = styled.h4<TextProps>`
   ${TextStyles}
-  font-weight: ${({ $fontWeight }) => $fontWeight || "300"};
-  font-size: 1.25rem;
+  font-size: var(--font-h4);
+  line-height: var(--lh-h4);
+  font-weight: ${({ $fontWeight }) => $fontWeight || 400};
 `;
 
-export const P1 = styled.p<TextProps>`
+export const H5 = styled.h5<TextProps>`
   ${TextStyles}
-  font-weight: ${({ $fontWeight }) => $fontWeight || "300"};
-  font-size: 1rem;
+  font-size: var(--font-h5);
+  line-height: var(--lh-h5);
+  font-weight: ${({ $fontWeight }) => $fontWeight || 400};
 `;
 
-export const P2 = styled.p<TextProps>`
+/* Subtitles */
+
+export const Subtitle1 = styled.p<TextProps>`
   ${TextStyles}
-  font-weight: ${({ $fontWeight }) => $fontWeight || "300"};
-  font-size: 0.875rem;
+  font-size: var(--font-subtitle-1);
+  line-height: var(--lh-subtitle-1);
+  font-weight: ${({ $fontWeight }) => $fontWeight || 400};
 `;
 
-export const P3 = styled.p<TextProps>`
+export const Subtitle2 = styled.p<TextProps>`
   ${TextStyles}
-  font-weight: ${({ $fontWeight }) => $fontWeight || "300"};
-  font-size: 0.75rem;
+  font-size: var(--font-subtitle-2);
+  line-height: var(--lh-subtitle-2);
+  font-weight: ${({ $fontWeight }) => $fontWeight || 400};
+`;
+
+export const Subtitle3 = styled.p<TextProps>`
+  ${TextStyles}
+  font-size: var(--font-subtitle-3);
+  line-height: var(--lh-subtitle-3);
+  font-weight: ${({ $fontWeight }) => $fontWeight || 400};
+`;
+
+/* Body */
+
+export const Body = styled.p<TextProps>`
+  ${TextStyles}
+  font-size: var(--font-body);
+  line-height: var(--lh-body);
+  font-weight: ${({ $fontWeight }) => $fontWeight || 400};
+`;
+
+/* Caption */
+
+export const Caption = styled.p<TextProps>`
+  ${TextStyles}
+  font-size: var(--font-caption);
+  line-height: var(--lh-caption);
+  font-weight: ${({ $fontWeight }) => $fontWeight || 400};
 `;

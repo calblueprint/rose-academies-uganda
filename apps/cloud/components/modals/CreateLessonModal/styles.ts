@@ -421,7 +421,7 @@ export const ToggleThumb = styled.div<{ $checked: boolean }>`
 
 export const ErrorText = styled.p`
   font-family: var(--font-gilroy);
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   color: ${COLORS.red};
   margin: 0;
 `;

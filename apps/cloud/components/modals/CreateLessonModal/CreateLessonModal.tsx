@@ -83,6 +83,7 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
   const [sendToOffline, setSendToOffline] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [titleError, setTitleError] = useState<string | null>(null);
   const [groups, setGroups] = useState<Group[]>([]);
   const [selectedGroupIds, setSelectedGroupIds] = useState<number[]>([]);
   const [isVillageDropdownOpen, setIsVillageDropdownOpen] = useState(false);
@@ -167,6 +168,7 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
     setError(null);
     setSelectedGroupIds([]);
     setIsVillageDropdownOpen(false);
+    setTitleError(null);
   }
 
   function handleClose() {
@@ -194,7 +196,9 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
       if (existingError) throw existingError;
 
       if (existingLesson) {
-        setError("A lesson with this name already exists.");
+        setTitleError(
+          `You already have a lesson called '${trimmedTitle}'. Try a different name.`,
+        );
         setIsSubmitting(false);
         return;
       }
@@ -334,9 +338,13 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
             id="lesson-title"
             placeholder="Lesson title"
             value={title}
-            onChange={e => setTitle(e.target.value)}
+            onChange={e => {
+              setTitle(e.target.value);
+              if (titleError) setTitleError(null);
+            }}
             disabled={isSubmitting}
           />
+          {titleError && <ErrorText>{titleError}</ErrorText>}
         </FieldSection>
 
         <FieldSection>

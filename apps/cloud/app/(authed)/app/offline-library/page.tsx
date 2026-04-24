@@ -47,6 +47,7 @@ export default async function OfflineLibraryPage() {
   if (!user) throw new Error("User not authenticated");
 
   const deviceId = await getCurrentDeviceId({ userId: user.id });
+  if (!deviceId) return null;
 
   const { data } = await supabase
     .from("DeviceLessons")

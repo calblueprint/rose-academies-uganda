@@ -21,11 +21,11 @@ export async function getCurrentDeviceId(
     .from("devices")
     .select("id")
     .eq("user_id", userId)
-    .single();
+    .maybeSingle();
 
-  if (error || !device?.id) {
-    throw error ?? new Error("Unable to find device for user.");
+  if (error) {
+    throw error;
   }
 
-  return device.id as string;
+  return device?.id ?? null;
 }

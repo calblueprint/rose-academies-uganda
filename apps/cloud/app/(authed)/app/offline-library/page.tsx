@@ -5,6 +5,7 @@ import SyncSummaryCard from "@/components/SyncSummaryCard";
 import { getCurrentDeviceId } from "@/lib/getCurrentUserDevice";
 import {
   Content,
+  PageHeader,
   PageSubtitle,
   PageTitle,
   PageWrapper,
@@ -102,10 +103,12 @@ export default async function OfflineLibraryPage() {
   return (
     <PageWrapper>
       <Content>
-        <PageTitle>Sync Lessons</PageTitle>
-        <PageSubtitle>
-          Manage which lessons are sent to village devices.
-        </PageSubtitle>
+        <PageHeader>
+          <PageTitle>Sync Lessons</PageTitle>
+          <PageSubtitle>
+            Manage which lessons are sent to village devices.
+          </PageSubtitle>
+        </PageHeader>
 
         <SyncCardsRow>
           <StorageAndSync userId={user.id} />

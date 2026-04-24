@@ -34,9 +34,12 @@ import {
   ModalTitle,
   OfflineLabel,
   OfflineRow,
+  OfflineSupportingText,
+  OfflineTextColumn,
   Overlay,
   ProgressFill,
   ProgressTrack,
+  RequiredAsterisk,
   TextArea,
   TextInput,
   ToggleThumb,
@@ -341,7 +344,9 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
         </ModalHeader>
 
         <FieldSection>
-          <FieldLabel htmlFor="lesson-title">Title</FieldLabel>
+          <FieldLabel htmlFor="lesson-title">
+            Name <RequiredAsterisk>*</RequiredAsterisk>
+          </FieldLabel>
           <TextInput
             id="lesson-title"
             placeholder="Lesson title"
@@ -356,10 +361,20 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
         </FieldSection>
 
         <FieldSection>
+          <FieldLabel htmlFor="lesson-description">Description</FieldLabel>
+          <TextArea
+            id="lesson-description"
+            placeholder="Brief description of the lesson"
+            value={description}
+            onChange={e => setDescription(e.target.value)}
+            disabled={isSubmitting}
+            rows={4}
+          />
+        </FieldSection>
+
+        <FieldSection>
           <AssignedVillageRow>
-            <FieldLabel style={{ marginBottom: 0 }}>
-              Assigned Village
-            </FieldLabel>
+            <FieldLabel style={{ marginBottom: 0 }}>Classroom</FieldLabel>
 
             <VillageDropdownWrapper>
               <VillageSelectTrigger
@@ -367,7 +382,11 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
                 onClick={() => setIsVillageDropdownOpen(prev => !prev)}
                 disabled={isSubmitting}
               >
-                <VillageSelectTriggerText>Select</VillageSelectTriggerText>
+                <VillageSelectTriggerText>
+                  {selectedGroupIds.length > 0
+                    ? `${selectedGroupIds.length} selected`
+                    : "Select"}
+                </VillageSelectTriggerText>
 
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -428,18 +447,6 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
               )}
             </VillageDropdownWrapper>
           </AssignedVillageRow>
-        </FieldSection>
-
-        <FieldSection>
-          <FieldLabel htmlFor="lesson-description">Description</FieldLabel>
-          <TextArea
-            id="lesson-description"
-            placeholder="Brief description of the lesson"
-            value={description}
-            onChange={e => setDescription(e.target.value)}
-            disabled={isSubmitting}
-            rows={4}
-          />
         </FieldSection>
 
         <FieldSection>
@@ -572,7 +579,13 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
         </FieldSection>
 
         <OfflineRow>
-          <OfflineLabel>Send Lesson to Offline Library?</OfflineLabel>
+          <OfflineTextColumn>
+            <OfflineLabel>Send lesson to sync</OfflineLabel>
+            <OfflineSupportingText>
+              Add a file and select classroom to sync
+            </OfflineSupportingText>
+          </OfflineTextColumn>
+
           <ToggleWrapper>
             <HiddenCheckbox
               type="checkbox"

@@ -1,5 +1,6 @@
 import styled from "styled-components";
 import COLORS from "@/styles/colors";
+import { Subtitle2 } from "@/styles/text";
 
 export const EditButton = styled.button`
   display: inline-flex;
@@ -8,9 +9,6 @@ export const EditButton = styled.button`
   padding: 8px 16px;
   background-color: ${COLORS.evergreen};
   color: ${COLORS.white};
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 20px;
   border: none;
   border-radius: 12px;
   cursor: pointer;
@@ -27,4 +25,14 @@ export const EditButton = styled.button`
     opacity: 0.6;
     cursor: not-allowed;
   }
+
+  svg {
+    flex-shrink: 0;
+    stroke: ${COLORS.white};
+  }
 `;
+
+export const EditButtonText = styled(Subtitle2).attrs({
+  $fontWeight: 500,
+  $color: COLORS.white,
+})``;

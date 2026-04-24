@@ -53,12 +53,15 @@ export const Title = styled.h1<LayoutProps>`
   margin: ${({ $layout = "page" }) =>
     $layout === "embedded" ? "1.25rem 0 0 0" : "0"};
 
-  font-family: var(--font-gilroy);
+  color: ${COLORS.gray100};
+
   font-size: ${({ $layout = "page" }) =>
-    $layout === "page" ? "2.25rem" : "1.25rem"};
-  font-style: normal;
-  font-weight: ${({ $layout = "page" }) => ($layout === "page" ? 500 : 400)};
-  line-height: normal;
+    $layout === "embedded" ? "1.5rem" : "var(--font-h3)"};
+
+  line-height: ${({ $layout = "page" }) =>
+    $layout === "embedded" ? "normal" : "var(--lh-h3)"};
+
+  font-weight: 400;
 `;
 
 export const Header = styled.div`

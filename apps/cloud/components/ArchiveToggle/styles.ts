@@ -1,4 +1,6 @@
 import styled from "styled-components";
+import COLORS from "@/styles/colors";
+import { H3, Subtitle2 } from "@/styles/text";
 
 export const ArchiveButton = styled.button`
   display: inline-flex;
@@ -7,42 +9,40 @@ export const ArchiveButton = styled.button`
   padding: 8px 16px;
 
   border-radius: 12px;
-  border: 1px solid var(--gray-40, #d9d9d9);
-  background-color: white;
+  border: 1px solid ${COLORS.gray40};
+  background-color: ${COLORS.white};
 
-  color: var(--gray-80, #4b4a49);
-  font-family: "Google Sans", sans-serif;
-  font-size: 14px;
-  font-weight: 500;
+  color: ${COLORS.gray80};
 
   cursor: pointer;
   transition: all 0.2s ease;
 
-  /* Hover */
   &:hover {
-    background-color: #f5f5f5;
-    border-color: #cfcfcf;
+    background-color: ${COLORS.gray10};
+    border-color: ${COLORS.gray40};
   }
 
-  /* Active (click) */
   &:active {
-    background-color: #eaeaea;
+    background-color: ${COLORS.gray40};
   }
 
-  /* Toggle state */
   &.active {
-    background-color: #4b4a49;
-    color: white;
-    border-color: #4b4a49;
+    background-color: ${COLORS.gray80};
+    color: ${COLORS.white};
+    border-color: ${COLORS.gray80};
   }
 
-  /* SVG inside button */
   svg {
     width: 18px;
     height: 18px;
-    stroke: currentColor;
+    stroke: ${COLORS.gray80};
   }
 `;
+
+export const ArchiveButtonText = styled(Subtitle2).attrs({
+  $fontWeight: 500,
+  $color: COLORS.gray80,
+})``;
 
 export const ModalBackdrop = styled.div`
   position: fixed;
@@ -68,7 +68,7 @@ export const ModalContainer = styled.div`
 
   border-radius: 16px;
   border: 1px solid rgba(0, 0, 0, 0.1);
-  background: #fff;
+  background: ${COLORS.white};
   box-shadow: 20px 20px 20px rgba(0, 0, 0, 0.08);
   backdrop-filter: blur(2px);
 `;
@@ -80,26 +80,15 @@ export const ModalHeader = styled.div`
   align-self: stretch;
 `;
 
-export const ModalTitle = styled.h2`
-  color: var(--gray-100, #000);
-  font-family: "Google Sans", sans-serif;
-  font-size: 24px;
-  font-style: normal;
-  font-weight: 500;
-  line-height: normal;
-`;
+export const ModalTitle = styled(H3).attrs({
+  $color: COLORS.black,
+  $fontWeight: 500,
+})``;
 
-export const ModalText = styled.p`
+export const ModalText = styled(Subtitle2).attrs({
+  $color: COLORS.gray60,
+})`
   align-self: stretch;
-
-  color: var(--gray-60, #808582);
-
-  font-family: "Google Sans", sans-serif;
-  font-size: 14px;
-  font-weight: 400;
-  line-height: normal;
-
-  margin: 0;
 `;
 
 export const ButtonRow = styled.div`
@@ -116,17 +105,18 @@ export const CancelButton = styled.button`
   gap: 10px;
 
   border-radius: 8px;
-  border: 1px solid var(--gray-40, #d9d9d9);
-  background: var(--white, #fff);
+  border: 1px solid ${COLORS.gray40};
+  background: ${COLORS.white};
 
-  color: var(--gray-80, #4b4a49);
-
-  font-family: "Google Sans", sans-serif;
-  font-size: 14px;
-  font-weight: 500;
+  color: ${COLORS.gray80};
 
   cursor: pointer;
 `;
+
+export const CancelButtonText = styled(Subtitle2).attrs({
+  $fontWeight: 500,
+  $color: COLORS.gray80,
+})``;
 
 export const ConfirmButton = styled.button`
   display: flex;
@@ -136,14 +126,10 @@ export const ConfirmButton = styled.button`
   gap: 10px;
 
   border-radius: 8px;
-  background: var(--evergreen-100, #1e4240);
+  background: ${COLORS.evergreen};
   border: none;
 
-  color: var(--white, #fff);
-
-  font-family: "Google Sans", sans-serif;
-  font-size: 14px;
-  font-weight: 500;
+  color: ${COLORS.white};
 
   cursor: pointer;
 
@@ -152,3 +138,8 @@ export const ConfirmButton = styled.button`
     cursor: not-allowed;
   }
 `;
+
+export const ConfirmButtonText = styled(Subtitle2).attrs({
+  $fontWeight: 500,
+  $color: COLORS.white,
+})``;

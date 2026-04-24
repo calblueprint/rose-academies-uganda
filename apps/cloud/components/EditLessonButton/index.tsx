@@ -3,7 +3,7 @@
 import { useState } from "react";
 import EditLessonModal from "@/components/modals/EditLessonModal/EditLessonModal";
 import { IconSvgs } from "@/lib/icons";
-import { EditButton } from "./styles";
+import { EditButton, EditButtonText } from "./styles";
 
 function EditLessonButton({
   lesson,
@@ -20,7 +20,8 @@ function EditLessonButton({
   return (
     <>
       <EditButton onClick={() => setIsOpen(true)}>
-        {IconSvgs.pencil}Edit Details
+        {IconSvgs.pencil}
+        <EditButtonText>Edit Details</EditButtonText>
       </EditButton>
 
       <EditLessonModal

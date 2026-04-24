@@ -2,17 +2,21 @@ import styled from "styled-components";
 import COLORS from "@/styles/colors";
 
 export const VillageTag = styled.span`
-  display: flex;
-  padding: 0.25rem 0.75rem;
+  display: inline-flex;
+  align-items: center;
 
-  background-color: #dee3d1;
+  padding: 0.25rem 0.75rem;
   border-radius: 999px;
-  padding: 6px 16px;
-  font-size: 14px;
+
+  font-size: var(--font-body);
+  line-height: var(--lh-body);
+  font-weight: 400;
+
+  background-color: ${COLORS.green20};
   color: ${COLORS.evergreen};
 `;
 
 export const TagGroup = styled.div`
   display: flex;
-  gap: 12px;
+  gap: 0.75rem;
 `;

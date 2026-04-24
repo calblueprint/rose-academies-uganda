@@ -4,17 +4,22 @@ import COLORS from "@/styles/colors";
 export const Header = styled.header`
   width: 100%;
   height: 4rem;
+
   display: flex;
   align-items: center;
   justify-content: space-between;
+
   padding: 0.81rem 7.25rem;
+
   box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.06);
-  font-family: var(--font-gilroy);
-  font-size: 20px;
-  font-style: normal;
+
+  /* Subtitle1 + evergreen */
+  font-size: var(--font-subtitle-1);
+  line-height: var(--lh-subtitle-1);
   font-weight: 400;
-  line-height: 23.343px;
+  color: ${COLORS.evergreen};
 `;
+
 export const LogoAndTitle = styled.div`
   display: flex;
   align-items: center;

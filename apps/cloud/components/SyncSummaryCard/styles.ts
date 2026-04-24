@@ -1,5 +1,6 @@
 import styled from "styled-components";
 import COLORS from "@/styles/colors";
+import { Body, Subtitle2 } from "@/styles/text";
 
 export const Card = styled.div`
   display: flex;
@@ -39,13 +40,12 @@ export const TopSection = styled.div`
   gap: 1rem;
 `;
 
-export const Title = styled.div`
-  color: ${COLORS.black};
-  font-family: "Google Sans", sans-serif;
-  font-size: 1rem;
-  font-style: normal;
-  font-weight: 500;
-  line-height: normal;
+/* Sync Summary */
+export const Title = styled(Body).attrs({
+  $color: COLORS.gray100,
+  $fontWeight: 500,
+})`
+  font-size: 16px;
 `;
 
 export const Row = styled.div`
@@ -69,23 +69,15 @@ export const Dot = styled.div<{ $color: string }>`
   flex-shrink: 0;
 `;
 
-export const Label = styled.div`
-  color: ${COLORS.gray60};
-  font-family: "Google Sans", sans-serif;
-  font-size: 0.875rem;
-  font-style: normal;
-  font-weight: 400;
-  line-height: normal;
-`;
+/* Available Offline / Pending Sync */
+export const Label = styled(Body).attrs({
+  $color: COLORS.gray60,
+})``;
 
-export const Value = styled.div`
-  color: ${COLORS.gray60};
-  font-family: Mulish, sans-serif;
-  font-size: 0.8955rem;
-  font-style: normal;
-  font-weight: 400;
-  line-height: normal;
-`;
+/* Values for those rows (same spec) */
+export const Value = styled(Body).attrs({
+  $color: COLORS.gray60,
+})``;
 
 export const Divider = styled.div`
   width: 100%;
@@ -100,11 +92,14 @@ export const BottomRow = styled.div`
   align-self: stretch;
 `;
 
-export const LastSyncedValue = styled.div`
-  color: ${COLORS.black};
-  font-family: "Google Sans", sans-serif;
-  font-size: 1rem;
-  font-style: normal;
-  font-weight: 500;
-  line-height: normal;
-`;
+/* "Last synced" label */
+export const LastSyncedLabel = styled(Subtitle2).attrs({
+  $color: COLORS.gray60,
+  $fontWeight: 500,
+})``;
+
+/* Date value */
+export const LastSyncedValue = styled(Subtitle2).attrs({
+  $fontWeight: 500,
+  $color: COLORS.gray100,
+})``;

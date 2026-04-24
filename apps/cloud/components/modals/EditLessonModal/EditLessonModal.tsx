@@ -248,7 +248,7 @@ export default function EditLessonModal({ isOpen, onClose, lesson }: Props) {
         </ModalHeader>
 
         <FieldSection>
-          <FieldLabel htmlFor="lesson-title">Title</FieldLabel>
+          <FieldLabel htmlFor="lesson-title">Name</FieldLabel>
           <EditTextInput
             id="lesson-title"
             value={title}
@@ -272,7 +272,9 @@ export default function EditLessonModal({ isOpen, onClose, lesson }: Props) {
 
         <FieldSection>
           <AssignedVillageRow>
-            <FieldLabel style={{ marginBottom: 0 }}>Classrooms</FieldLabel>
+            <FieldLabel style={{ marginBottom: 0 }}>
+              Assigned Classrooms
+            </FieldLabel>
 
             <VillageDropdownWrapper>
               <VillageSelectTrigger
@@ -348,7 +350,7 @@ export default function EditLessonModal({ isOpen, onClose, lesson }: Props) {
         </FieldSection>
 
         {showVillageError && selectedGroupIds.length === 0 && (
-          <ErrorText>At least one village is required.</ErrorText>
+          <ErrorText>At least one classroom is required.</ErrorText>
         )}
 
         <ActionRow>

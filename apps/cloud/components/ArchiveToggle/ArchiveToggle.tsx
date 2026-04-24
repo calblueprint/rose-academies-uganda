@@ -5,9 +5,12 @@ import { useRouter } from "next/navigation";
 import { getSupabaseBrowserClient } from "@/api/supabase/browser";
 import {
   ArchiveButton,
+  ArchiveButtonText,
   ButtonRow,
   CancelButton,
+  CancelButtonText,
   ConfirmButton,
+  ConfirmButtonText,
   ModalBackdrop,
   ModalContainer,
   ModalHeader,
@@ -69,7 +72,9 @@ export default function ArchiveToggle({
           />
         </svg>
 
-        {isArchived ? "Restore" : "Archive"}
+        <ArchiveButtonText>
+          {isArchived ? "Restore" : "Archive"}
+        </ArchiveButtonText>
       </ArchiveButton>
 
       {isOpen && (
@@ -89,11 +94,13 @@ export default function ArchiveToggle({
 
             <ButtonRow>
               <CancelButton type="button" onClick={() => setIsOpen(false)}>
-                Cancel
+                <CancelButtonText>Cancel</CancelButtonText>
               </CancelButton>
 
               <ConfirmButton type="button" onClick={handleConfirm}>
-                {isArchived ? "Restore Lesson" : "Archive Lesson"}
+                <ConfirmButtonText>
+                  {isArchived ? "Restore Lesson" : "Archive Lesson"}
+                </ConfirmButtonText>
               </ConfirmButton>
             </ButtonRow>
           </ModalContainer>

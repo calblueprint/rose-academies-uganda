@@ -4,7 +4,7 @@ import COLORS from "@/styles/colors";
 export const PageWrapper = styled.main`
   min-height: 100dvh;
   background: ${COLORS.gray10};
-  padding: 3.38rem 0 0 0;
+  padding: 1.38rem 0 0 0;
 `;
 
 export const Content = styled.div`

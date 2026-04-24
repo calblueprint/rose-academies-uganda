@@ -71,12 +71,8 @@ export const PageContainer = styled.div<LayoutVariantProps>`
   min-height: ${({ $layout = "page" }) =>
     $layout === "page" ? "100vh" : "auto"};
 
-  padding: ${({ $layout = "page", $variant = "dashboard" }) => {
-    if ($layout !== "page") return "0";
-    if ($variant === "archive") return "3.38rem 0 0 0";
-    if ($variant === "dashboard") return "3.38rem 0 0 0";
-    return "1.44rem 7.25rem";
-  }};
+  padding: ${({ $layout = "page" }) =>
+    $layout === "page" ? "1.38rem 0 0 0" : "0"};
 
   background: transparent;
 `;

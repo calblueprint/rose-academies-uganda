@@ -97,7 +97,7 @@ export const VillageDropdownWrapper = styled.div`
   align-items: flex-end;
 `;
 
-export const VillageSelectTrigger = styled.button`
+export const VillageSelectTrigger = styled.button<{ $flashError?: boolean }>`
   display: inline-flex;
   align-items: center;
   justify-content: space-between;
@@ -107,10 +107,13 @@ export const VillageSelectTrigger = styled.button`
   padding: 10px 16px;
 
   border-radius: 8px;
-  border: 1px solid ${COLORS.gray40};
-  background: ${COLORS.white};
+  border: 1px solid
+    ${({ $flashError }) => ($flashError ? COLORS.rose100 : COLORS.gray40)};
 
+  background: ${COLORS.white};
   cursor: pointer;
+
+  transition: border-color 0.15s ease;
 `;
 
 export const VillageSelectTriggerText = styled.span`
@@ -243,20 +246,33 @@ export const TextArea = styled.textarea`
   }
 `;
 
-export const DropZone = styled.div<{ $isDragging: boolean }>`
+export const DropZone = styled.div<{
+  $isDragging: boolean;
+  $flashError?: boolean;
+}>`
   border: 1.5px dashed
-    ${({ $isDragging }) => ($isDragging ? COLORS.evergreen : COLORS.gray40)};
+    ${({ $isDragging, $flashError }) =>
+      $flashError
+        ? COLORS.rose100
+        : $isDragging
+          ? COLORS.evergreen
+          : COLORS.gray40};
+
   border-radius: 8px;
   padding: 1.5rem 1rem;
+
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 0.375rem;
+
   background: ${({ $isDragging }) =>
     $isDragging ? COLORS.lightGreen : "transparent"};
+
   transition:
     border-color 0.15s,
     background 0.15s;
+
   cursor: pointer;
 `;
 
@@ -403,11 +419,13 @@ export const OfflineLabel = styled.p`
   margin: 0;
 `;
 
-export const OfflineSupportingText = styled.p`
+export const OfflineSupportingText = styled.p<{ $flashError?: boolean }>`
   font-size: var(--font-subtitle-3);
   line-height: var(--lh-subtitle-3);
-  color: ${COLORS.gray60};
+  color: ${({ $flashError }) => ($flashError ? COLORS.rose100 : COLORS.gray60)};
   margin: 0;
+
+  transition: color 0.15s ease;
 `;
 
 export const ToggleWrapper = styled.div`

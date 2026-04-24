@@ -96,12 +96,17 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
   const supabase = getSupabaseBrowserClient();
   const router = useRouter();
   const hasFiles = files.length > 0;
+  const hasClassroom = selectedGroupIds.length > 0;
+  const canSendToSync = hasFiles && hasClassroom;
+
+  const [shouldFlashSyncRequirements, setShouldFlashSyncRequirements] =
+    useState(false);
 
   useEffect(() => {
-    if (!hasFiles && sendToOffline) {
+    if (!canSendToSync && sendToOffline) {
       setSendToOffline(false);
     }
-  }, [hasFiles, sendToOffline]);
+  }, [canSendToSync, sendToOffline]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -132,6 +137,14 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
   }, [isOpen, supabase]);
 
   if (!isOpen) return null;
+
+  function flashSyncRequirements() {
+    setShouldFlashSyncRequirements(true);
+
+    window.setTimeout(() => {
+      setShouldFlashSyncRequirements(false);
+    }, 1000);
+  }
 
   function handleToggleGroup(groupId: number) {
     setSelectedGroupIds(prev =>
@@ -379,6 +392,7 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
             <VillageDropdownWrapper>
               <VillageSelectTrigger
                 type="button"
+                $flashError={shouldFlashSyncRequirements && !hasClassroom}
                 onClick={() => setIsVillageDropdownOpen(prev => !prev)}
                 disabled={isSubmitting}
               >
@@ -454,6 +468,7 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
 
           <DropZone
             $isDragging={isDragging}
+            $flashError={shouldFlashSyncRequirements && !hasFiles}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
@@ -581,7 +596,7 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
         <OfflineRow>
           <OfflineTextColumn>
             <OfflineLabel>Send lesson to sync</OfflineLabel>
-            <OfflineSupportingText>
+            <OfflineSupportingText $flashError={shouldFlashSyncRequirements}>
               Add a file and select classroom to sync
             </OfflineSupportingText>
           </OfflineTextColumn>
@@ -591,16 +606,16 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
               type="checkbox"
               id="offline-toggle"
               checked={sendToOffline}
-              onChange={e => setSendToOffline(e.target.checked)}
-              disabled={!hasFiles}
-            />
-            <ToggleTrack
-              htmlFor="offline-toggle"
-              $checked={sendToOffline}
-              style={{
-                pointerEvents: hasFiles ? "auto" : "none",
+              onChange={e => {
+                if (e.target.checked && !canSendToSync) {
+                  flashSyncRequirements();
+                  return;
+                }
+
+                setSendToOffline(e.target.checked);
               }}
-            >
+            />
+            <ToggleTrack htmlFor="offline-toggle" $checked={sendToOffline}>
               <ToggleThumb $checked={sendToOffline} />
             </ToggleTrack>
           </ToggleWrapper>

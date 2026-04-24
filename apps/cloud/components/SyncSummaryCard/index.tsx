@@ -41,7 +41,7 @@ export default function SyncSummaryCard({
 
           <Row>
             <LeftGroup>
-              <Dot $color={COLORS.orange} />
+              <Dot $color={COLORS.orange100} />
               <Label>Pending Sync</Label>
             </LeftGroup>
             <Value>{pendingCount}</Value>

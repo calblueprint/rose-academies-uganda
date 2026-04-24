@@ -20,8 +20,10 @@ const COLORS = {
   rose11: "#F393A5",
   rose100: "#AF2028",
   whiteSmoke: "#F4F5F7",
-  orange: "#D97708",
+  orange100: "#D97708",
+  orange20: "#FFF6EA",
   lightLightGreen: "#248F5D",
+  green20: "#E9F4E9",
 };
 
 export default COLORS;

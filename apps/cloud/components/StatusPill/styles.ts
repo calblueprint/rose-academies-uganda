@@ -1,30 +1,30 @@
 import styled from "styled-components";
+import COLORS from "@/styles/colors";
 
 export const Pill = styled.span<{ $status: "available" | "pending" }>`
   display: inline-flex;
   align-items: center;
-  border-radius: 999px;
+  gap: 0.375rem;
+
   padding: 0.25rem 0.6rem;
-  font-size: 0.75rem;
-  font-weight: 500;
-  font-family: var(--font-gilroy);
-  gap: 6px;
+  border-radius: 17.38px;
+
+  font-size: var(--font-h6);
+  line-height: var(--lh-h6);
+  font-weight: 400;
 
   background: ${({ $status }) =>
-    $status === "available" ? "#E9F4E9" : "#FFF6EA"};
-  color: ${({ $status }) =>
-    $status === "available"
-      ? "var(--evergreen-100, #1E4240)"
-      : "var(--Orange-100, #D97708)"};
+    $status === "available" ? COLORS.green20 : COLORS.orange20};
 
-  border-radius: 17.38px;
+  color: ${({ $status }) =>
+    $status === "available" ? COLORS.evergreen : COLORS.orange100};
 `;
 
 export const Dot = styled.div<{ $status: "available" | "pending" }>`
-  width: 8px;
-  height: 8px;
+  width: 0.5rem;
+  height: 0.5rem;
   border-radius: 50%;
 
   background: ${({ $status }) =>
-    $status === "available" ? "#1E4240" : "#D97706"};
+    $status === "available" ? COLORS.evergreen : COLORS.orange100};
 `;

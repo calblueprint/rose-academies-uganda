@@ -35,11 +35,12 @@ export const ModalHeader = styled.div`
 `;
 
 export const ModalTitle = styled.h2`
-  font-family: var(--font-gilroy);
-  font-size: 1.625rem;
-  font-weight: 600;
-  color: ${COLORS.veryDarkBlue};
+  color: ${COLORS.gray100};
   margin: 0;
+
+  font-size: 1.5rem;
+  font-weight: 500;
+  line-height: normal;
 `;
 
 export const CloseButton = styled.button`
@@ -50,12 +51,12 @@ export const CloseButton = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
-  color: ${COLORS.lightGrey};
+  color: ${COLORS.gray60};
   border-radius: 4px;
   transition: color 0.15s;
 
   &:hover:not(:disabled) {
-    color: ${COLORS.veryDarkBlue};
+    color: ${COLORS.gray100};
   }
 
   &:disabled {
@@ -71,10 +72,10 @@ export const FieldSection = styled.div`
 `;
 
 export const FieldLabel = styled.label`
-  font-family: var(--font-gilroy);
-  font-size: 0.9375rem;
+  font-size: var(--font-subtitle-2);
+  line-height: var(--lh-subtitle-2);
   font-weight: 500;
-  color: ${COLORS.veryDarkBlue};
+  color: ${COLORS.gray100};
 `;
 
 export const AssignedVillageRow = styled.div`
@@ -93,27 +94,27 @@ export const VillageDropdownWrapper = styled.div`
 `;
 
 export const VillageSelectTrigger = styled.button`
-  display: flex;
-  width: 108px;
+  display: inline-flex;
   height: 44px;
   padding: 10px 16px;
   justify-content: space-between;
   align-items: center;
+  gap: 0.5rem;
   flex-shrink: 0;
 
   border-radius: 8px;
   border: 1px solid ${COLORS.gray40};
-  background: #fff;
+  background: ${COLORS.white};
 
   cursor: pointer;
 `;
 
 export const VillageSelectTriggerText = styled.span`
-  font-family: "Google Sans", sans-serif;
-  font-size: 12px;
+  font-size: var(--font-subtitle-2);
+  line-height: var(--lh-subtitle-2);
   font-weight: 400;
-  color: ${COLORS.gray40};
-  line-height: normal;
+  color: ${COLORS.gray100};
+  white-space: nowrap;
 `;
 
 export const VillageDropdownMenu = styled.div`
@@ -132,7 +133,7 @@ export const VillageDropdownMenu = styled.div`
   box-sizing: border-box;
 
   border-radius: 8px;
-  background: #fff;
+  background: ${COLORS.white};
   box-shadow:
     0 29px 8px 0 rgba(0, 0, 0, 0),
     0 19px 7px 0 rgba(0, 0, 0, 0.01),
@@ -158,8 +159,8 @@ export const VillageBox = styled.div<{ $checked: boolean }>`
   align-items: center;
   justify-content: center;
 
-  border: 1px solid ${COLORS.lightGrey};
-  background: ${({ $checked }) => ($checked ? "#808582" : "transparent")};
+  border: 1px solid ${COLORS.gray60};
+  background: ${({ $checked }) => ($checked ? COLORS.gray60 : "transparent")};
 
   transition: all 0.15s ease;
 `;
@@ -170,11 +171,10 @@ export const Checkmark = styled.svg`
 `;
 
 export const VillageOptionText = styled.span`
-  font-family: "Google Sans", sans-serif;
-  font-size: 12px;
+  font-size: var(--font-subtitle-3);
+  line-height: var(--lh-subtitle-3);
   font-weight: 400;
-  color: ${COLORS.lightGrey};
-  line-height: normal;
+  color: ${COLORS.gray100};
 `;
 
 export const TextInput = styled.input`
@@ -182,16 +182,19 @@ export const TextInput = styled.input`
   padding: 0.6875rem 1rem;
   border: 1px solid ${COLORS.gray40};
   border-radius: 8px;
-  font-family: var(--font-gilroy);
-  font-size: 0.9375rem;
-  color: ${COLORS.veryDarkBlue};
+
+  font-family: inherit;
+  font-size: var(--font-subtitle-3);
+  line-height: var(--lh-subtitle-3);
+  color: ${COLORS.gray100};
+
   background: ${COLORS.white};
   outline: none;
   box-sizing: border-box;
   transition: border-color 0.15s;
 
   &::placeholder {
-    color: ${COLORS.gray40};
+    color: ${COLORS.gray60};
   }
 
   &:focus {
@@ -209,19 +212,21 @@ export const TextArea = styled.textarea`
   padding: 0.6875rem 1rem;
   border: 1px solid ${COLORS.gray40};
   border-radius: 8px;
-  font-family: var(--font-gilroy);
-  font-size: 0.9375rem;
-  color: ${COLORS.veryDarkBlue};
+
+  font-family: inherit;
+  font-size: var(--font-subtitle-3);
+  line-height: var(--lh-subtitle-3);
+  color: ${COLORS.gray100};
+
   background: ${COLORS.white};
   outline: none;
   resize: vertical;
   min-height: 100px;
   box-sizing: border-box;
   transition: border-color 0.15s;
-  line-height: 1.5;
 
   &::placeholder {
-    color: ${COLORS.gray40};
+    color: ${COLORS.gray60};
   }
 
   &:focus {
@@ -252,17 +257,17 @@ export const DropZone = styled.div<{ $isDragging: boolean }>`
 `;
 
 export const DropZoneText = styled.p`
-  font-family: var(--font-gilroy);
-  font-size: 0.9375rem;
+  font-size: var(--font-subtitle-2);
+  line-height: var(--lh-subtitle-2);
   font-weight: 500;
-  color: ${COLORS.veryDarkBlue};
+  color: ${COLORS.gray100};
   margin: 0;
 `;
 
 export const DropZoneSubtext = styled.p`
-  font-family: var(--font-gilroy);
-  font-size: 0.75rem;
-  color: ${COLORS.lightGrey};
+  font-size: var(--font-subtitle-3);
+  line-height: var(--lh-subtitle-3);
+  color: ${COLORS.gray60};
   margin: 0 0 0.375rem;
 `;
 
@@ -271,14 +276,16 @@ export const BrowseButton = styled.button`
   background: ${COLORS.white};
   border: 1px solid ${COLORS.gray40};
   border-radius: 8px;
-  font-family: var(--font-gilroy);
-  font-size: 0.875rem;
-  color: ${COLORS.veryDarkBlue};
+
+  font-size: var(--font-subtitle-2);
+  line-height: var(--lh-subtitle-2);
+  color: ${COLORS.gray100};
+
   cursor: pointer;
   transition: border-color 0.15s;
 
   &:hover:not(:disabled) {
-    border-color: ${COLORS.veryDarkBlue};
+    border-color: ${COLORS.gray100};
   }
 
   &:disabled {
@@ -316,14 +323,14 @@ export const DeleteFileButton = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
-  color: ${COLORS.lightGrey};
+  color: ${COLORS.gray60};
   border-radius: 4px;
   flex-shrink: 0;
   margin-left: auto;
   transition: color 0.15s;
 
   &:hover {
-    color: ${COLORS.red};
+    color: ${COLORS.rose100};
   }
 `;
 
@@ -333,10 +340,10 @@ export const FileInfo = styled.div`
 `;
 
 export const FileNameText = styled.p`
-  font-family: var(--font-gilroy);
-  font-size: 0.875rem;
+  font-size: var(--font-subtitle-2);
+  line-height: var(--lh-subtitle-2);
   font-weight: 500;
-  color: ${COLORS.veryDarkBlue};
+  color: ${COLORS.gray100};
   margin: 0 0 0.125rem;
   white-space: nowrap;
   overflow: hidden;
@@ -347,9 +354,10 @@ export const FileSubtext = styled.div`
   display: flex;
   align-items: center;
   gap: 0.25rem;
-  font-family: var(--font-gilroy);
-  font-size: 0.75rem;
-  color: ${COLORS.lightGrey};
+
+  font-size: var(--font-subtitle-3);
+  line-height: var(--lh-subtitle-3);
+  color: ${COLORS.gray60};
   margin: 0;
 `;
 
@@ -376,9 +384,10 @@ export const OfflineRow = styled.div`
 `;
 
 export const OfflineLabel = styled.p`
-  font-family: var(--font-gilroy);
-  font-size: 0.9375rem;
-  color: ${COLORS.veryDarkBlue};
+  font-size: var(--font-subtitle-2);
+  line-height: var(--lh-subtitle-2);
+  font-weight: 500;
+  color: ${COLORS.gray100};
   margin: 0;
 `;
 
@@ -420,9 +429,9 @@ export const ToggleThumb = styled.div<{ $checked: boolean }>`
 `;
 
 export const ErrorText = styled.p`
-  font-family: var(--font-gilroy);
-  font-size: 0.875rem;
-  color: ${COLORS.red};
+  font-size: var(--font-subtitle-3);
+  line-height: var(--lh-subtitle-3);
+  color: ${COLORS.rose100};
   margin: 0;
 `;
 
@@ -438,14 +447,17 @@ export const CancelButton = styled.button`
   background: ${COLORS.white};
   border: 1px solid ${COLORS.gray40};
   border-radius: 8px;
-  font-family: var(--font-gilroy);
-  font-size: 0.9375rem;
-  color: ${COLORS.veryDarkBlue};
+
+  font-size: var(--font-subtitle-2);
+  line-height: var(--lh-subtitle-2);
+  font-weight: 500;
+  color: ${COLORS.gray80};
+
   cursor: pointer;
   transition: border-color 0.15s;
 
   &:hover:not(:disabled) {
-    border-color: ${COLORS.veryDarkBlue};
+    border-color: ${COLORS.gray100};
   }
 
   &:disabled {
@@ -459,10 +471,12 @@ export const CreateButton = styled.button`
   background: ${COLORS.evergreen};
   border: none;
   border-radius: 8px;
-  font-family: var(--font-gilroy);
-  font-size: 0.9375rem;
+
+  font-size: var(--font-subtitle-2);
+  line-height: var(--lh-subtitle-2);
   font-weight: 500;
   color: ${COLORS.white};
+
   cursor: pointer;
   transition: opacity 0.15s;
 
@@ -475,15 +489,18 @@ export const CreateButton = styled.button`
     cursor: not-allowed;
   }
 `;
+
 export const SaveButton = styled.button`
   padding: 0.625rem 1.5rem;
   background: ${COLORS.evergreen};
   border: none;
   border-radius: 8px;
-  font-family: var(--font-gilroy);
-  font-size: 0.9375rem;
+
+  font-size: var(--font-subtitle-2);
+  line-height: var(--lh-subtitle-2);
   font-weight: 500;
   color: ${COLORS.white};
+
   cursor: pointer;
   transition: opacity 0.15s;
 

@@ -53,12 +53,11 @@ export const Title = styled.h1<LayoutProps>`
   margin: ${({ $layout = "page" }) =>
     $layout === "embedded" ? "1.25rem 0 0 0" : "0"};
 
-  font-family: var(--font-gilroy);
-  font-size: ${({ $layout = "page" }) =>
-    $layout === "page" ? "2.25rem" : "1.25rem"};
-  font-style: normal;
-  font-weight: ${({ $layout = "page" }) => ($layout === "page" ? 500 : 400)};
-  line-height: normal;
+  color: ${COLORS.gray100};
+
+  font-size: var(--font-h3);
+  line-height: var(--lh-h3);
+  font-weight: 400;
 `;
 
 export const Header = styled.div`

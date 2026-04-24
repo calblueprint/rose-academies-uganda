@@ -51,8 +51,11 @@ export const PageContainer = styled.div<LayoutVariantProps>`
   align-items: ${({ $variant = "dashboard" }) =>
     $variant === "archive" ? "flex-start" : "stretch"};
 
-  gap: ${({ $variant = "dashboard" }) =>
-    $variant === "archive" ? "2rem" : "1.09rem"};
+  gap: ${({ $variant = "dashboard" }) => {
+    if ($variant === "archive") return "2rem";
+    if ($variant === "dashboard") return "1.09rem";
+    return "1.09rem";
+  }};
 
   align-self: stretch;
 
@@ -60,10 +63,10 @@ export const PageContainer = styled.div<LayoutVariantProps>`
   min-width: 0;
 
   max-width: ${({ $variant = "dashboard" }) =>
-    $variant === "archive" ? "67.5rem" : "none"};
+    $variant === "dashboard" || $variant === "archive" ? "67.5rem" : "none"};
 
   margin: ${({ $variant = "dashboard" }) =>
-    $variant === "archive" ? "0 auto" : "0"};
+    $variant === "dashboard" || $variant === "archive" ? "0 auto" : "0"};
 
   min-height: ${({ $layout = "page" }) =>
     $layout === "page" ? "100vh" : "auto"};
@@ -71,6 +74,7 @@ export const PageContainer = styled.div<LayoutVariantProps>`
   padding: ${({ $layout = "page", $variant = "dashboard" }) => {
     if ($layout !== "page") return "0";
     if ($variant === "archive") return "3.38rem 0 0 0";
+    if ($variant === "dashboard") return "3.38rem 0 0 0";
     return "1.44rem 7.25rem";
   }};
 
@@ -96,6 +100,7 @@ export const Header = styled.div<VariantProps>`
   display: flex;
   flex-direction: row;
   justify-content: space-between;
+  width: 100%;
 `;
 
 export const HeaderText = styled.div`
@@ -109,7 +114,8 @@ export const HeaderText = styled.div`
 
 export const LessonsGrid = styled.div<VariantProps>`
   display: flex;
-  gap: 1.8125rem;
+  gap: ${({ $variant = "dashboard" }) =>
+    $variant === "dashboard" ? "0.9375rem" : "1.8125rem"};
   flex-wrap: wrap;
   width: 100%;
 `;
@@ -125,6 +131,7 @@ export const SearchBarRow = styled.div<VariantProps>`
   display: flex;
   gap: 1.14rem;
   padding: 0.75rem 0rem;
+  width: 100%;
 `;
 
 export const ViewToggleButton = styled.div`

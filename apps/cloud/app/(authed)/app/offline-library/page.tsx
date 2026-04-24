@@ -83,6 +83,7 @@ export default async function OfflineLibraryPage() {
     if (row.status === "available" || row.status === "pending") {
       acc[row.lesson_id] = row.status;
     }
+
     return acc;
   }, {});
 
@@ -90,6 +91,7 @@ export default async function OfflineLibraryPage() {
     (acc, row) => {
       if (row.status === "available") acc.availableCount++;
       if (row.status === "pending") acc.pendingCount++;
+
       return acc;
     },
     { availableCount: 0, pendingCount: 0 },
@@ -125,6 +127,7 @@ export default async function OfflineLibraryPage() {
           listAction="remove"
           deviceId={deviceId}
           layout="embedded"
+          variant="offline"
         />
       </Content>
     </PageWrapper>

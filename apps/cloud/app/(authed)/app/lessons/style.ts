@@ -1,9 +1,18 @@
 import styled from "styled-components";
 import COLORS from "@/styles/colors";
 
+type Layout = "page" | "embedded";
+type LessonsClientVariant = "dashboard" | "offline" | "archive";
+
 type LayoutProps = {
-  $layout?: "page" | "embedded";
+  $layout?: Layout;
 };
+
+type VariantProps = {
+  $variant?: LessonsClientVariant;
+};
+
+type LayoutVariantProps = LayoutProps & VariantProps;
 
 export const CardWrapper = styled.div`
   position: relative;
@@ -35,10 +44,11 @@ export const EditImageButton = styled.button`
   }
 `;
 
-export const PageContainer = styled.div<LayoutProps>`
+export const PageContainer = styled.div<LayoutVariantProps>`
   display: flex;
   flex-direction: column;
-  gap: 1.09rem;
+  gap: ${({ $variant = "dashboard" }) =>
+    $variant === "dashboard" ? "1.09rem" : "1.09rem"};
   width: 100%;
   min-width: 0;
   min-height: ${({ $layout = "page" }) =>
@@ -49,7 +59,7 @@ export const PageContainer = styled.div<LayoutProps>`
     $layout === "page" ? COLORS.gray10 : "transparent"};
 `;
 
-export const Title = styled.h1<LayoutProps>`
+export const Title = styled.h1<LayoutVariantProps>`
   margin: ${({ $layout = "page" }) =>
     $layout === "embedded" ? "1.25rem 0 0 0" : "0"};
 
@@ -64,7 +74,7 @@ export const Title = styled.h1<LayoutProps>`
   font-weight: 400;
 `;
 
-export const Header = styled.div`
+export const Header = styled.div<VariantProps>`
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -79,21 +89,21 @@ export const HeaderText = styled.div`
   flex: 1;
 `;
 
-export const LessonsGrid = styled.div`
+export const LessonsGrid = styled.div<VariantProps>`
   display: flex;
   gap: 1.8125rem;
   flex-wrap: wrap;
   width: 100%;
 `;
 
-export const LessonsList = styled.div`
+export const LessonsList = styled.div<VariantProps>`
   display: flex;
   flex-direction: column;
   gap: 1.06rem;
   width: 100%;
 `;
 
-export const SearchBarRow = styled.div`
+export const SearchBarRow = styled.div<VariantProps>`
   display: flex;
   gap: 1.14rem;
   padding: 0.75rem 0rem;

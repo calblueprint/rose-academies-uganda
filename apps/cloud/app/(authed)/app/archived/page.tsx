@@ -3,6 +3,7 @@ import LessonsClient from "../lessons/LessonsClient";
 
 export default async function ArchivedLessonsPage() {
   const supabase = await getSupabaseServerClientReadOnly();
+
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -31,6 +32,7 @@ export default async function ArchivedLessonsPage() {
       showViewToggle={false}
       defaultView="list"
       listAction="restore"
+      variant="archive"
     />
   );
 }

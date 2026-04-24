@@ -4,6 +4,7 @@ import LessonsClient from "./LessonsClient";
 
 export default async function LessonsPage() {
   const supabase = await getSupabaseServerClientReadOnly();
+
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -42,6 +43,7 @@ export default async function LessonsPage() {
     <LessonsClient
       initialLessons={lessons ?? []}
       lessonStatuses={lessonStatuses}
+      variant="dashboard"
     />
   );
 }

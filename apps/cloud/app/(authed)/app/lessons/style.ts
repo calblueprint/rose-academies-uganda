@@ -55,8 +55,12 @@ export const Title = styled.h1<LayoutProps>`
 
   color: ${COLORS.gray100};
 
-  font-size: var(--font-h3);
-  line-height: var(--lh-h3);
+  font-size: ${({ $layout = "page" }) =>
+    $layout === "embedded" ? "1.5rem" : "var(--font-h3)"};
+
+  line-height: ${({ $layout = "page" }) =>
+    $layout === "embedded" ? "normal" : "var(--lh-h3)"};
+
   font-weight: 400;
 `;
 

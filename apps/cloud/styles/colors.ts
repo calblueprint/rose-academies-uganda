@@ -23,7 +23,8 @@ const COLORS = {
   orange100: "#D97708",
   orange20: "#FFF6EA",
   lightLightGreen: "#248F5D",
-  green20: "#E9F4E9",
+  green10: "#E9F4E9",
+  green20: "#DEE3D1",
 };
 
 export default COLORS;

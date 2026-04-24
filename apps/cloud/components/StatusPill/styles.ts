@@ -14,7 +14,7 @@ export const Pill = styled.span<{ $status: "available" | "pending" }>`
   font-weight: 400;
 
   background: ${({ $status }) =>
-    $status === "available" ? COLORS.green20 : COLORS.orange20};
+    $status === "available" ? COLORS.green10 : COLORS.orange20};
 
   color: ${({ $status }) =>
     $status === "available" ? COLORS.evergreen : COLORS.orange100};

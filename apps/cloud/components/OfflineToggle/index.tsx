@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import supabase from "@/api/supabase/client";
+import ConfirmationModal from "@/components/modals/ConfirmationModal/ConfirmationModal";
 import { SyncButton } from "./styles";
 
 function OfflineToggle({
@@ -18,8 +19,9 @@ function OfflineToggle({
   hasFiles: boolean;
 }) {
   const [isUpdating, setIsUpdating] = useState(false);
+  const [isRemoveConfirmOpen, setIsRemoveConfirmOpen] = useState(false);
 
-  const handleToggle = async () => {
+  const handleRemoveConfirm = async () => {
     if (isUpdating || !deviceId || Number.isNaN(lessonId) || !hasFiles) {
       return;
     }
@@ -27,41 +29,53 @@ function OfflineToggle({
     setIsUpdating(true);
 
     try {
-      if (isOffline) {
-        const { error } = await supabase
-          .from("DeviceLessons")
-          .delete()
-          .eq("device_id", deviceId)
-          .eq("lesson_id", lessonId);
+      const { error } = await supabase
+        .from("DeviceLessons")
+        .delete()
+        .eq("device_id", deviceId)
+        .eq("lesson_id", lessonId);
 
-        if (error) {
-          console.error(
-            `An error occurred trying to remove lesson ${lessonId}: ${error.message}`,
-          );
-          return;
-        }
-
-        setIsOffline(false);
-      } else {
-        if (!hasFiles) {
-          console.error("Cannot send lesson to offline without files.");
-          return;
-        }
-        const { error } = await supabase.from("DeviceLessons").insert({
-          device_id: deviceId,
-          lesson_id: lessonId,
-          status: "pending",
-        });
-
-        if (error) {
-          console.error(
-            `An error occurred trying to add lesson ${lessonId}: ${error.message}`,
-          );
-          return;
-        }
-
-        setIsOffline(true);
+      if (error) {
+        console.error(
+          `An error occurred trying to remove lesson ${lessonId}: ${error.message}`,
+        );
+        return;
       }
+
+      setIsOffline(false);
+      setIsRemoveConfirmOpen(false);
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleToggle = async () => {
+    if (isUpdating || !deviceId || Number.isNaN(lessonId) || !hasFiles) {
+      return;
+    }
+
+    if (isOffline) {
+      setIsRemoveConfirmOpen(true);
+      return;
+    }
+
+    setIsUpdating(true);
+
+    try {
+      const { error } = await supabase.from("DeviceLessons").insert({
+        device_id: deviceId,
+        lesson_id: lessonId,
+        status: "pending",
+      });
+
+      if (error) {
+        console.error(
+          `An error occurred trying to add lesson ${lessonId}: ${error.message}`,
+        );
+        return;
+      }
+
+      setIsOffline(true);
     } finally {
       setIsUpdating(false);
     }
@@ -78,12 +92,26 @@ function OfflineToggle({
     `${isOffline ? "online" : "offline"}_${isUpdating ? "updating" : "idle"}` as const;
 
   return (
-    <SyncButton
-      onClick={handleToggle}
-      disabled={isUpdating || !deviceId || Number.isNaN(lessonId) || !hasFiles}
-    >
-      {syncLabel[syncButtonKey]}
-    </SyncButton>
+    <>
+      <SyncButton
+        onClick={handleToggle}
+        disabled={
+          isUpdating || !deviceId || Number.isNaN(lessonId) || !hasFiles
+        }
+      >
+        {syncLabel[syncButtonKey]}
+      </SyncButton>
+
+      <ConfirmationModal
+        isOpen={isRemoveConfirmOpen}
+        title="Remove Lesson from Sync"
+        description="The lesson will still be saved, but you’ll need to send it to the Sync Lessons page to use it on the Raspberry Pi."
+        confirmText="Remove Lesson"
+        onCancel={() => setIsRemoveConfirmOpen(false)}
+        onConfirm={handleRemoveConfirm}
+        isLoading={isUpdating}
+      />
+    </>
   );
 }
 

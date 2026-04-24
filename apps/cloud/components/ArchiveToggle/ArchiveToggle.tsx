@@ -3,17 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { getSupabaseBrowserClient } from "@/api/supabase/browser";
-import {
-  ArchiveButton,
-  ButtonRow,
-  CancelButton,
-  ConfirmButton,
-  ModalBackdrop,
-  ModalContainer,
-  ModalHeader,
-  ModalText,
-  ModalTitle,
-} from "./styles";
+import ConfirmationModal from "@/components/modals/ConfirmationModal/ConfirmationModal";
+import { ArchiveButton } from "./styles";
 
 type ArchiveToggleProps = {
   lesson_Id: number;
@@ -72,33 +63,18 @@ export default function ArchiveToggle({
         {isArchived ? "Restore" : "Archive"}
       </ArchiveButton>
 
-      {isOpen && (
-        <ModalBackdrop onClick={() => setIsOpen(false)}>
-          <ModalContainer onClick={e => e.stopPropagation()}>
-            <ModalHeader>
-              <ModalTitle>
-                {isArchived ? "Restore Lesson" : "Archive Lesson"}
-              </ModalTitle>
-            </ModalHeader>
-
-            <ModalText>
-              {isArchived
-                ? "This lesson will be restored to the Lesson Dashboard and Sync Lessons pages."
-                : "This lesson will be removed from the Lesson Dashboard and Sync Lessons pages. You can restore it through the Archive page."}
-            </ModalText>
-
-            <ButtonRow>
-              <CancelButton type="button" onClick={() => setIsOpen(false)}>
-                Cancel
-              </CancelButton>
-
-              <ConfirmButton type="button" onClick={handleConfirm}>
-                {isArchived ? "Restore Lesson" : "Archive Lesson"}
-              </ConfirmButton>
-            </ButtonRow>
-          </ModalContainer>
-        </ModalBackdrop>
-      )}
+      <ConfirmationModal
+        isOpen={isOpen}
+        title={isArchived ? "Restore Lesson" : "Archive Lesson"}
+        description={
+          isArchived
+            ? "This lesson will be restored to the Lesson Dashboard and Sync Lessons pages."
+            : "This lesson will be removed from the Lesson Dashboard and Sync Lessons pages. You can restore it through the Archive page."
+        }
+        confirmText={isArchived ? "Restore Lesson" : "Archive Lesson"}
+        onCancel={() => setIsOpen(false)}
+        onConfirm={handleConfirm}
+      />
     </>
   );
 }

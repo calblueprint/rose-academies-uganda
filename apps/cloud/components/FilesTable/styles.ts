@@ -1,6 +1,9 @@
 import styled from "styled-components";
 import COLORS from "@/styles/colors";
 
+const FILE_TABLE_COLUMNS =
+  "1.75rem 1.5rem minmax(0, 1.35fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 0.75fr)";
+
 export const TableSection = styled.section`
   display: flex;
   flex-direction: column;
@@ -34,24 +37,23 @@ export const StatusText = styled.p`
 export const StyledTable = styled.table`
   width: 100%;
   border-collapse: separate;
-  border-spacing: 0 0.5rem;
+  border-spacing: 0;
   table-layout: fixed;
 `;
 
 export const TableHead = styled.thead`
   tr {
     display: grid;
-    grid-template-columns:
-      3rem 3rem minmax(0, 2.2fr) minmax(0, 1.2fr) minmax(0, 1.2fr)
-      minmax(0, 1fr);
+    grid-template-columns: ${FILE_TABLE_COLUMNS};
     align-items: center;
-    padding: 1.125rem;
+    padding: 1.125rem 1.80481rem 1.125rem 1.03131rem;
     background: var(--white, #fff);
   }
 `;
 
 export const HeaderCell = styled.th<{ $align?: "left" | "right" | "center" }>`
   text-align: ${({ $align = "left" }) => $align};
+  font-family: inherit;
   font-size: 0.875rem;
   font-weight: 600;
   color: ${COLORS.gray60};
@@ -79,29 +81,62 @@ export const SortButton = styled.button`
 export const TableBody = styled.tbody`
   tr {
     display: grid;
-    grid-template-columns:
-      3rem 3rem minmax(0, 2.2fr) minmax(0, 1.2fr) minmax(0, 1.2fr)
-      minmax(0, 1fr);
+    grid-template-columns: ${FILE_TABLE_COLUMNS};
     align-items: center;
     min-height: 3.48338rem;
     padding: 1.03131rem 1.80481rem 1.03131rem 1.03131rem;
+    position: relative;
     background: var(--white, #fff);
-    border-radius: 0.75rem;
+    transition: background-color 0.15s ease;
+  }
+
+  tr::before,
+  tr::after {
+    content: "";
+    position: absolute;
+    left: 1.03131rem;
+    right: 1.80481rem;
+    height: 1px;
+    background: #e5e7eb;
+  }
+
+  tr::before {
+    top: 0;
+  }
+
+  tr::after {
+    bottom: 0;
+  }
+
+  tr:hover {
+    background: #f4f5f7;
   }
 `;
 
 export const BodyCell = styled.td<{ $align?: "left" | "right" | "center" }>`
   padding: 0;
   text-align: ${({ $align = "left" }) => $align};
-  font-size: 0.9375rem;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
   color: ${COLORS.veryDarkBlue};
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 `;
 
+export const FileNameContainer = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-left: 0.5rem;
+  min-width: 0;
+`;
+
 export const FileNameText = styled.span`
   display: block;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -111,6 +146,7 @@ export const FileNameText = styled.span`
 export const Checkbox = styled.input`
   width: 1rem;
   height: 1rem;
+  accent-color: #808582;
   cursor: pointer;
 `;
 
@@ -144,15 +180,19 @@ export const DragHandle = styled.button`
 `;
 
 export const FooterRow = styled.div`
-  display: flex;
+  display: grid;
+  grid-template-columns: ${FILE_TABLE_COLUMNS};
   padding: 1.03131rem;
   align-items: center;
-  justify-content: space-between;
   align-self: stretch;
   background: var(--white, #fff);
 `;
 
-export const FooterText = styled.p`
+export const FooterText = styled.p<{ $column?: "selection" | "size" }>`
+  grid-column: ${({ $column = "selection" }) =>
+    $column === "size" ? "6" : "1 / span 3"};
+  transform: ${({ $column = "selection" }) =>
+    $column === "size" ? "translateX(-1.25rem)" : "none"};
   margin: 0;
   font-size: 0.9375rem;
   color: ${COLORS.gray60};

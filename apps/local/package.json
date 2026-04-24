@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev --webpack",
     "build": "next build --webpack",
-    "start": "next start",
+    "start": "next start -H 0.0.0.0",
     "lint": "pnpm exec eslint .",
     "lint:fix": "pnpm exec eslint . --fix",
     "tsc": "pnpm exec tsc --noEmit",

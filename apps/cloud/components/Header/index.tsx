@@ -58,7 +58,7 @@ export default function Header({ displayName }: { displayName: string }) {
     <HeaderBar>
       <LogoAndTitle>
         <LogoContainer>
-          <Image src={RoseLogo} alt="Rose Academies Logo" />
+          <Image src={RoseLogo} alt="Rose Academies Logo" unoptimized />
           <TitleWrapper>
             <Title>Rose Academies-Uganda</Title>
             <Subtitle>Educator Dashboard</Subtitle>

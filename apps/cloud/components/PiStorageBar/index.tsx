@@ -70,7 +70,7 @@ export default function PiStorageBar({ userId }: { userId: string }) {
 
   const totalGb = Math.round(storage.disk.totalKb / 1024 / 1024);
   const usedGb = Math.round(storage.disk.usedKb / 1024 / 1024);
-  const percent = storage.disk.usePercent;
+  const percent = Math.round((usedGb / totalGb) * 100);
 
   return (
     <Content>

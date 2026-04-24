@@ -34,6 +34,7 @@ export const LessonTitle = styled.h1`
   font-style: normal;
   font-weight: 400;
   line-height: normal;
+  margin: 0;
 `;
 
 export const LessonDescription = styled.h1`
@@ -42,6 +43,7 @@ export const LessonDescription = styled.h1`
   font-style: normal;
   font-weight: 400;
   line-height: normal;
+  margin: 0;
 `;
 
 export const SearchBarRow = styled.div`

@@ -1,6 +1,48 @@
+@font-face {
+  font-family: "Google Sans";
+  src: url("/fonts/google-sans/GoogleSans-Variable.ttf") format("truetype");
+  font-weight: 100 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
+
+  /* Font */
+  --font-primary: "Google Sans", Arial, Helvetica, sans-serif;
+
+  /* Font sizes */
+  --font-h1: 44px;
+  --font-h2: 36px;
+  --font-h3: 32px;
+  --font-h4: 24px;
+  --font-h5: 20px;
+
+  --font-subtitle-1: 18px;
+  --font-subtitle-2: 14px;
+  --font-subtitle-3: 12px;
+
+  --font-body: 14px;
+  --font-caption: 12px;
+
+  /* Line heights */
+  --lh-h1: normal;
+  --lh-h2: normal;
+  --lh-h3: 48px;
+  --lh-h4: normal;
+  --lh-h5: 25px;
+
+  --lh-subtitle-1: normal;
+  --lh-subtitle-2: normal;
+  --lh-subtitle-3: normal;
+
+  --lh-body: normal;
+  --lh-caption: normal;
+
+  /* Letter spacing */
+  --ls-default: 0;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -21,7 +63,8 @@ body {
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-primary);
+  letter-spacing: var(--ls-default);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }

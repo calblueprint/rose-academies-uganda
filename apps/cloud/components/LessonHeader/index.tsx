@@ -35,7 +35,9 @@ export default function LessonHeader({
                 setIsUploadLessonImageModalOpen(true);
               }}
             >
-              <style.IconContainer>{IconSvgs.pencil}</style.IconContainer>
+              <style.IconContainer>
+                {IconSvgs.pencilEvergreen}
+              </style.IconContainer>
               <span>Customize</span>
             </style.CustomizeButton>
           </style.HeaderTopRow>

@@ -61,7 +61,7 @@ export const SyncCardsRow = styled.div`
   display: grid;
   grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
   gap: 2rem;
-  align-items: flex-start;
+  align-items: stretch;
   width: 100%;
 
   @media (max-width: 1080px) {

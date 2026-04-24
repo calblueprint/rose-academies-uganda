@@ -47,16 +47,34 @@ export const EditImageButton = styled.button`
 export const PageContainer = styled.div<LayoutVariantProps>`
   display: flex;
   flex-direction: column;
+
+  align-items: ${({ $variant = "dashboard" }) =>
+    $variant === "archive" ? "flex-start" : "stretch"};
+
   gap: ${({ $variant = "dashboard" }) =>
-    $variant === "dashboard" ? "1.09rem" : "1.09rem"};
+    $variant === "archive" ? "2rem" : "1.09rem"};
+
+  align-self: stretch;
+
   width: 100%;
   min-width: 0;
+
+  max-width: ${({ $variant = "dashboard" }) =>
+    $variant === "archive" ? "67.5rem" : "none"};
+
+  margin: ${({ $variant = "dashboard" }) =>
+    $variant === "archive" ? "0 auto" : "0"};
+
   min-height: ${({ $layout = "page" }) =>
     $layout === "page" ? "100vh" : "auto"};
-  padding: ${({ $layout = "page" }) =>
-    $layout === "page" ? "1.44rem 7.25rem" : "0"};
-  background: ${({ $layout = "page" }) =>
-    $layout === "page" ? COLORS.gray10 : "transparent"};
+
+  padding: ${({ $layout = "page", $variant = "dashboard" }) => {
+    if ($layout !== "page") return "0";
+    if ($variant === "archive") return "3.38rem 0 0 0";
+    return "1.44rem 7.25rem";
+  }};
+
+  background: transparent;
 `;
 
 export const Title = styled.h1<LayoutVariantProps>`

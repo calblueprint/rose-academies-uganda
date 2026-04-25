@@ -11,6 +11,7 @@ import {
   DropdownMenu,
   DropdownWrapper,
   Header as HeaderBar,
+  HeaderInner,
   HeaderRight,
   LogoAndTitle,
   LogoContainer,
@@ -56,58 +57,62 @@ export default function Header({ displayName }: { displayName: string }) {
 
   return (
     <HeaderBar>
-      <LogoAndTitle>
-        <LogoContainer>
-          <Image src={RoseLogo} alt="Rose Academies Logo" unoptimized />
-          <TitleWrapper>
-            <Title>Rose Academies-Uganda</Title>
-            <Subtitle>Educator Dashboard</Subtitle>
-          </TitleWrapper>
-        </LogoContainer>
-      </LogoAndTitle>
+      <HeaderInner>
+        <LogoAndTitle>
+          <LogoContainer>
+            <Image src={RoseLogo} alt="Rose Academies Logo" unoptimized />
+            <TitleWrapper>
+              <Title>Rose Academies-Uganda</Title>
+              <Subtitle>Educator Dashboard</Subtitle>
+            </TitleWrapper>
+          </LogoContainer>
+        </LogoAndTitle>
 
-      <Nav>
-        {[
-          { label: "Lessons", href: "/app/lessons" },
-          { label: "Sync", href: "/app/offline-library" },
-          { label: "Archive", href: "/app/archived" },
-        ].map(tab => (
-          <NavTab
-            key={tab.label}
-            $active={pathname === tab.href}
-            onClick={() => {
-              router.push(tab.href);
-            }}
-          >
-            {tab.label}
-          </NavTab>
-        ))}
-      </Nav>
+        <Nav>
+          {[
+            { label: "Lessons", href: "/app/lessons" },
+            { label: "Sync", href: "/app/offline-library" },
+            { label: "Archive", href: "/app/archived" },
+          ].map(tab => (
+            <NavTab
+              key={tab.label}
+              $active={pathname === tab.href}
+              onClick={() => {
+                router.push(tab.href);
+              }}
+            >
+              {tab.label}
+            </NavTab>
+          ))}
+        </Nav>
 
-      <HeaderRight>
-        <DropdownWrapper ref={dropdownRef}>
-          <ProfileButton onClick={() => setDropdownOpen(prev => !prev)}>
-            <UserImg>{initials}</UserImg>
-            <UserName>{displayName}</UserName>
-          </ProfileButton>
+        <HeaderRight>
+          <DropdownWrapper ref={dropdownRef}>
+            <ProfileButton onClick={() => setDropdownOpen(prev => !prev)}>
+              <UserImg>{initials}</UserImg>
+              <UserName>{displayName}</UserName>
+            </ProfileButton>
 
-          {dropdownOpen && (
-            <DropdownMenu>
-              <DropdownItem onClick={() => console.log("Clicked Settings")}>
-                Settings
-              </DropdownItem>
-              <DropdownItem onClick={() => console.log("Clicked Information")}>
-                Information
-              </DropdownItem>
-              <DropdownDivider />
+            {dropdownOpen && (
+              <DropdownMenu>
+                <DropdownItem onClick={() => console.log("Clicked Settings")}>
+                  Settings
+                </DropdownItem>
+                <DropdownItem
+                  onClick={() => console.log("Clicked Information")}
+                >
+                  Information
+                </DropdownItem>
+                <DropdownDivider />
 
-              <form action={signOut}>
-                <DropdownItem type="submit">Sign Out</DropdownItem>
-              </form>
-            </DropdownMenu>
-          )}
-        </DropdownWrapper>
-      </HeaderRight>
+                <form action={signOut}>
+                  <DropdownItem type="submit">Sign Out</DropdownItem>
+                </form>
+              </DropdownMenu>
+            )}
+          </DropdownWrapper>
+        </HeaderRight>
+      </HeaderInner>
     </HeaderBar>
   );
 }

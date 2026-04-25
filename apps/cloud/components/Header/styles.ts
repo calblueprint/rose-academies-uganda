@@ -7,17 +7,20 @@ export const Header = styled.header`
 
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
 
-  padding: 0.81rem 7.25rem;
-
+  background: ${COLORS.white};
   box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.06);
+`;
 
-  /* Subtitle1 + evergreen */
-  font-size: var(--font-subtitle-1);
-  line-height: var(--lh-subtitle-1);
-  font-weight: 400;
-  color: ${COLORS.evergreen};
+export const HeaderInner = styled.div`
+  width: 100%;
+  max-width: 67.5rem;
+  height: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 `;
 
 export const LogoAndTitle = styled.div`
@@ -30,9 +33,11 @@ export const LogoContainer = styled.div`
   display: flex;
   align-items: center;
   gap: 0.75rem;
+
   font-size: 1.25rem;
   font-weight: 600;
   color: ${COLORS.veryDarkBlue};
+
   img {
     height: 2.5rem;
     width: auto;
@@ -52,51 +57,46 @@ export const TitleWrapper = styled.div`
   align-items: flex-start;
 `;
 
-export const Content = styled.div`
-  flex: 1;
-  width: 100%;
-  padding: 1.5rem 2rem;
-  box-sizing: border-box;
-`;
-
 export const Title = styled.h1`
   font-family: var(--font-gilroy);
   color: var(--gray-100, #000);
-  /* Heading 5 */
+
   font-size: 20px;
-  font-style: normal;
   font-weight: 400;
-  line-height: 25px; /* 125% */
+  line-height: 25px;
 `;
 
 export const Subtitle = styled.h3`
   color: var(--gray-100, #000);
-  /* Subtitle 3 */
+
   font-family: var(--font-gilroy);
   font-size: 12px;
-  font-style: normal;
   font-weight: 400;
-  line-height: normal;
 `;
 
 export const Nav = styled.nav`
   display: flex;
-  align-items: center;
+  align-items: stretch;
   height: 100%;
 `;
 
 export const NavTab = styled.button<{ $active?: boolean }>`
   height: 100%;
+  display: flex;
+  align-items: center;
+
   padding: 0 1.25rem;
   background: none;
   border: none;
   border-bottom: 2px solid
     ${({ $active }) => ($active ? COLORS.evergreen : "transparent")};
+
   color: ${({ $active }) => ($active ? COLORS.evergreen : COLORS.gray60)};
   font-family: var(--font-gilroy);
   font-size: 0.9375rem;
   font-weight: 400;
   cursor: pointer;
+
   transition:
     color 0.15s,
     border-color 0.15s;
@@ -106,14 +106,16 @@ export const UserImg = styled.div`
   width: 2rem;
   height: 2rem;
   border-radius: 50%;
+
   background-color: ${COLORS.gray10};
+
   display: flex;
   align-items: center;
   justify-content: center;
+
   font-size: 0.8rem;
   font-weight: 600;
   color: ${COLORS.gray60};
-  overflow: hidden;
 `;
 
 export const UserName = styled.span`
@@ -132,6 +134,7 @@ export const ProfileButton = styled.button`
   display: flex;
   align-items: center;
   gap: 1rem;
+
   background: none;
   border: none;
   cursor: pointer;
@@ -142,11 +145,15 @@ export const DropdownMenu = styled.div`
   position: absolute;
   top: calc(100% + 0.75rem);
   right: 0;
+
   min-width: 11rem;
+
   background: #fff;
   border-radius: 12px;
+
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
   padding: 0.5rem 0;
+
   z-index: 100;
 `;
 
@@ -154,23 +161,21 @@ export const DropdownItem = styled.button`
   width: 100%;
   display: flex;
   align-items: center;
-  gap: 0.65rem;
+
   padding: 0.65rem 1.25rem;
+
   background: none;
   border: none;
+
   font-family: var(--font-gilroy);
   font-size: 0.9375rem;
   color: ${COLORS.black};
+
   cursor: pointer;
   text-align: left;
 
   &:hover {
     background: ${COLORS.gray10};
-  }
-
-  svg {
-    color: ${COLORS.gray60};
-    flex-shrink: 0;
   }
 `;
 

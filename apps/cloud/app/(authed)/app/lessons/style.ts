@@ -1,9 +1,18 @@
 import styled from "styled-components";
 import COLORS from "@/styles/colors";
 
+type Layout = "page" | "embedded";
+type LessonsClientVariant = "dashboard" | "offline" | "archive";
+
 type LayoutProps = {
-  $layout?: "page" | "embedded";
+  $layout?: Layout;
 };
+
+type VariantProps = {
+  $variant?: LessonsClientVariant;
+};
+
+type LayoutVariantProps = LayoutProps & VariantProps;
 
 export const CardWrapper = styled.div`
   position: relative;
@@ -35,21 +44,40 @@ export const EditImageButton = styled.button`
   }
 `;
 
-export const PageContainer = styled.div<LayoutProps>`
+export const PageContainer = styled.div<LayoutVariantProps>`
   display: flex;
   flex-direction: column;
-  gap: 1.09rem;
+
+  align-items: ${({ $variant = "dashboard" }) =>
+    $variant === "archive" ? "flex-start" : "stretch"};
+
+  gap: ${({ $variant = "dashboard" }) => {
+    if ($variant === "archive") return "2rem";
+    if ($variant === "dashboard") return "1.09rem";
+    return "1.09rem";
+  }};
+
+  align-self: stretch;
+
   width: 100%;
   min-width: 0;
+
+  max-width: ${({ $variant = "dashboard" }) =>
+    $variant === "dashboard" || $variant === "archive" ? "67.5rem" : "none"};
+
+  margin: ${({ $variant = "dashboard" }) =>
+    $variant === "dashboard" || $variant === "archive" ? "0 auto" : "0"};
+
   min-height: ${({ $layout = "page" }) =>
     $layout === "page" ? "100vh" : "auto"};
+
   padding: ${({ $layout = "page" }) =>
-    $layout === "page" ? "1.44rem 7.25rem" : "0"};
-  background: ${({ $layout = "page" }) =>
-    $layout === "page" ? COLORS.gray10 : "transparent"};
+    $layout === "page" ? "1.38rem 0 0 0" : "0"};
+
+  background: transparent;
 `;
 
-export const Title = styled.h1<LayoutProps>`
+export const Title = styled.h1<LayoutVariantProps>`
   margin: ${({ $layout = "page" }) =>
     $layout === "embedded" ? "1.25rem 0 0 0" : "0"};
 
@@ -64,10 +92,11 @@ export const Title = styled.h1<LayoutProps>`
   font-weight: 400;
 `;
 
-export const Header = styled.div`
+export const Header = styled.div<VariantProps>`
   display: flex;
   flex-direction: row;
   justify-content: space-between;
+  width: 100%;
 `;
 
 export const HeaderText = styled.div`
@@ -79,24 +108,26 @@ export const HeaderText = styled.div`
   flex: 1;
 `;
 
-export const LessonsGrid = styled.div`
+export const LessonsGrid = styled.div<VariantProps>`
   display: flex;
-  gap: 1.8125rem;
+  gap: ${({ $variant = "dashboard" }) =>
+    $variant === "dashboard" ? "0.9375rem" : "1.8125rem"};
   flex-wrap: wrap;
   width: 100%;
 `;
 
-export const LessonsList = styled.div`
+export const LessonsList = styled.div<VariantProps>`
   display: flex;
   flex-direction: column;
   gap: 1.06rem;
   width: 100%;
 `;
 
-export const SearchBarRow = styled.div`
+export const SearchBarRow = styled.div<VariantProps>`
   display: flex;
   gap: 1.14rem;
   padding: 0.75rem 0rem;
+  width: 100%;
 `;
 
 export const ViewToggleButton = styled.div`

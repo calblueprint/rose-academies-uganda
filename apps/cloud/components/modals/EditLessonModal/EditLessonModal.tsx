@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getSupabaseBrowserClient } from "@/api/supabase/browser";
 import {
   ActionRow,
@@ -50,7 +50,7 @@ interface Props {
 
 export default function EditLessonModal({ isOpen, onClose, lesson }: Props) {
   const supabase = getSupabaseBrowserClient();
-
+  const villageDropdownRef = useRef<HTMLDivElement>(null);
   const [title, setTitle] = useState(lesson.name);
   const [description, setDescription] = useState(lesson.description ?? "");
   const [groups, setGroups] = useState<Group[]>([]);
@@ -114,6 +114,26 @@ export default function EditLessonModal({ isOpen, onClose, lesson }: Props) {
 
     void loadModalData();
   }, [isOpen, lesson.id, supabase]);
+  useEffect(() => {
+    if (!isOpen || !isVillageDropdownOpen) {
+      return;
+    }
+
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        villageDropdownRef.current &&
+        !villageDropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsVillageDropdownOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isOpen, isVillageDropdownOpen]);
 
   if (!isOpen) {
     return null;
@@ -276,7 +296,7 @@ export default function EditLessonModal({ isOpen, onClose, lesson }: Props) {
               Assigned Classrooms
             </FieldLabel>
 
-            <VillageDropdownWrapper>
+            <VillageDropdownWrapper ref={villageDropdownRef}>
               <VillageSelectTrigger
                 type="button"
                 onClick={() => setIsVillageDropdownOpen(prev => !prev)}

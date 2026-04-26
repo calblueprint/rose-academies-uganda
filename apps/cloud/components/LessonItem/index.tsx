@@ -64,6 +64,7 @@ export default function LessonItem({
   action,
   onAction,
   isActionLoading = false,
+  showIcon = true,
 }: {
   lessonId: number;
   lessonName: string;
@@ -71,6 +72,7 @@ export default function LessonItem({
   action?: LessonAction;
   onAction?: (lessonId: number) => void | Promise<void>;
   isActionLoading?: boolean;
+  showIcon?: boolean;
 }) {
   const [opened, setOpened] = useState(false);
   const data = useContext(DataContext);
@@ -87,7 +89,7 @@ export default function LessonItem({
     <LessonWrapper>
       <LessonHeader onClick={() => setOpened(prev => !prev)}>
         <LessonLeft>
-          <LessonIcon />
+          {showIcon ? <LessonIcon /> : null}
           <LessonName>{lessonName}</LessonName>
 
           {/* status stays on LEFT */}

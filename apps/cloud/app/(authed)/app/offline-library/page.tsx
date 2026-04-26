@@ -5,6 +5,7 @@ import SyncSummaryCard from "@/components/SyncSummaryCard";
 import { getCurrentDeviceId } from "@/lib/getCurrentUserDevice";
 import {
   Content,
+  PageHeader,
   PageSubtitle,
   PageTitle,
   PageWrapper,
@@ -47,6 +48,7 @@ export default async function OfflineLibraryPage() {
   if (!user) throw new Error("User not authenticated");
 
   const deviceId = await getCurrentDeviceId({ userId: user.id });
+  if (!deviceId) return null;
 
   const { data } = await supabase
     .from("DeviceLessons")
@@ -83,6 +85,7 @@ export default async function OfflineLibraryPage() {
     if (row.status === "available" || row.status === "pending") {
       acc[row.lesson_id] = row.status;
     }
+
     return acc;
   }, {});
 
@@ -90,6 +93,7 @@ export default async function OfflineLibraryPage() {
     (acc, row) => {
       if (row.status === "available") acc.availableCount++;
       if (row.status === "pending") acc.pendingCount++;
+
       return acc;
     },
     { availableCount: 0, pendingCount: 0 },
@@ -100,10 +104,12 @@ export default async function OfflineLibraryPage() {
   return (
     <PageWrapper>
       <Content>
-        <PageTitle>Sync Lessons</PageTitle>
-        <PageSubtitle>
-          Manage which lessons are sent to village devices.
-        </PageSubtitle>
+        <PageHeader>
+          <PageTitle>Sync Lessons</PageTitle>
+          <PageSubtitle>
+            Manage which lessons are sent to village devices.
+          </PageSubtitle>
+        </PageHeader>
 
         <SyncCardsRow>
           <StorageAndSync userId={user.id} />
@@ -125,6 +131,7 @@ export default async function OfflineLibraryPage() {
           listAction="remove"
           deviceId={deviceId}
           layout="embedded"
+          variant="offline"
         />
       </Content>
     </PageWrapper>

@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import COLORS from "@/styles/colors";
 
-/* Overlay stays the same pattern as your other modals */
+/* Overlay */
 export const Overlay = styled.div`
   position: fixed;
   inset: 0;
@@ -13,7 +13,7 @@ export const Overlay = styled.div`
   justify-content: center;
 `;
 
-/* Main modal card (matches Figma) */
+/* Modal */
 export const ModalCard = styled.div`
   display: flex;
   width: 31.25rem;
@@ -31,33 +31,31 @@ export const ModalCard = styled.div`
   backdrop-filter: blur(2px);
 `;
 
-/* Title */
+/* Title (custom spec, not tokenized) */
 export const Title = styled.h2`
   align-self: stretch;
-
   margin: 0;
 
-  font-family: "Google Sans", sans-serif;
+  color: ${COLORS.gray100};
+
   font-size: 1.5rem;
   font-weight: 500;
-
-  color: ${COLORS.black ?? "#000"};
+  line-height: normal;
 `;
 
-/* Description */
+/* Body → Body1 + gray60 */
 export const Description = styled.p`
   align-self: stretch;
-
   margin: 0;
 
-  font-family: "Google Sans", sans-serif;
-  font-size: 0.875rem;
-  font-weight: 400;
+  color: ${COLORS.gray60};
 
-  color: ${COLORS.gray60 ?? "#808582"};
+  font-size: var(--font-body);
+  line-height: var(--lh-body);
+  font-weight: 400;
 `;
 
-/* Button row */
+/* Buttons row */
 export const ActionRow = styled.div`
   display: flex;
   justify-content: flex-end;
@@ -66,22 +64,22 @@ export const ActionRow = styled.div`
   width: 100%;
 `;
 
-/* Cancel button */
+/* Cancel → Subtitle2 */
 export const CancelButton = styled.button`
   display: flex;
   padding: 0.75rem 1.5rem;
   justify-content: center;
   align-items: center;
-  gap: 0.625rem;
 
   border-radius: 0.5rem;
   border: 1px solid ${COLORS.gray40};
   background: ${COLORS.white};
 
-  font-family: "Google Sans", sans-serif;
-  font-size: 0.875rem;
+  color: ${COLORS.black};
+
+  font-size: var(--font-subtitle-2);
+  line-height: var(--lh-subtitle-2);
   font-weight: 500;
-  color: ${COLORS.black ?? "#000"};
 
   cursor: pointer;
 
@@ -95,22 +93,22 @@ export const CancelButton = styled.button`
   }
 `;
 
-/* Confirm button */
+/* Confirm → Subtitle2 */
 export const ConfirmButton = styled.button`
   display: flex;
   padding: 0.75rem 1.5rem;
   justify-content: center;
   align-items: center;
-  gap: 0.625rem;
 
   border-radius: 0.5rem;
   border: none;
   background: ${COLORS.evergreen};
 
-  font-family: "Google Sans", sans-serif;
-  font-size: 0.875rem;
-  font-weight: 500;
   color: ${COLORS.white};
+
+  font-size: var(--font-subtitle-2);
+  line-height: var(--lh-subtitle-2);
+  font-weight: 500;
 
   cursor: pointer;
 

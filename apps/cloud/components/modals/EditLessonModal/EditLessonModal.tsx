@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getSupabaseBrowserClient } from "@/api/supabase/browser";
 import {
   ActionRow,
@@ -50,7 +50,7 @@ interface Props {
 
 export default function EditLessonModal({ isOpen, onClose, lesson }: Props) {
   const supabase = getSupabaseBrowserClient();
-
+  const villageDropdownRef = useRef<HTMLDivElement>(null);
   const [title, setTitle] = useState(lesson.name);
   const [description, setDescription] = useState(lesson.description ?? "");
   const [groups, setGroups] = useState<Group[]>([]);
@@ -114,6 +114,26 @@ export default function EditLessonModal({ isOpen, onClose, lesson }: Props) {
 
     void loadModalData();
   }, [isOpen, lesson.id, supabase]);
+  useEffect(() => {
+    if (!isOpen || !isVillageDropdownOpen) {
+      return;
+    }
+
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        villageDropdownRef.current &&
+        !villageDropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsVillageDropdownOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isOpen, isVillageDropdownOpen]);
 
   if (!isOpen) {
     return null;
@@ -248,7 +268,7 @@ export default function EditLessonModal({ isOpen, onClose, lesson }: Props) {
         </ModalHeader>
 
         <FieldSection>
-          <FieldLabel htmlFor="lesson-title">Title</FieldLabel>
+          <FieldLabel htmlFor="lesson-title">Name</FieldLabel>
           <EditTextInput
             id="lesson-title"
             value={title}
@@ -272,9 +292,11 @@ export default function EditLessonModal({ isOpen, onClose, lesson }: Props) {
 
         <FieldSection>
           <AssignedVillageRow>
-            <FieldLabel style={{ marginBottom: 0 }}>Classrooms</FieldLabel>
+            <FieldLabel style={{ marginBottom: 0 }}>
+              Assigned Classrooms
+            </FieldLabel>
 
-            <VillageDropdownWrapper>
+            <VillageDropdownWrapper ref={villageDropdownRef}>
               <VillageSelectTrigger
                 type="button"
                 onClick={() => setIsVillageDropdownOpen(prev => !prev)}
@@ -348,7 +370,7 @@ export default function EditLessonModal({ isOpen, onClose, lesson }: Props) {
         </FieldSection>
 
         {showVillageError && selectedGroupIds.length === 0 && (
-          <ErrorText>At least one village is required.</ErrorText>
+          <ErrorText>At least one classroom is required.</ErrorText>
         )}
 
         <ActionRow>

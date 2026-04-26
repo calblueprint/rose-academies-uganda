@@ -1,26 +1,37 @@
 import styled from "styled-components";
+import COLORS from "@/styles/colors";
 
 export const PageWrapper = styled.main`
-  padding: 1.44rem 7.25rem;
-  background: var(--gray-10, #fafafa);
   min-height: 100dvh;
-`;
-
-export const PageTitle = styled.h1`
-  color: #000;
-
-  /* Heading 2 */
-  font-family: var(--font-gilroy);
-  font-size: 36px;
-  font-style: normal;
-  font-weight: 400;
-  line-height: normal;
+  background: ${COLORS.gray10};
+  padding: 1.38rem 0 0 0;
 `;
 
 export const Content = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  align-self: stretch;
+  gap: 1rem;
+
   width: 100%;
-  max-width: 1440px;
+  max-width: 67.5rem;
   margin: 0 auto;
+`;
+
+export const PageHeader = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+`;
+
+export const PageTitle = styled.h1`
+  color: ${COLORS.gray100};
+
+  font-size: var(--font-h3);
+  line-height: var(--lh-h3);
+  font-weight: 400;
 `;
 
 export const PageSubtitle = styled.p`
@@ -29,44 +40,38 @@ export const PageSubtitle = styled.p`
   -webkit-line-clamp: 1;
 
   overflow: hidden;
-  color: var(--gray-60, #808582);
+  color: ${COLORS.gray60};
   text-overflow: ellipsis;
 
-  /* Heading 5 */
-  font-family: var(--font-gilroy);
-  font-size: 20px;
-  font-style: normal;
+  font-size: var(--font-subtitle-1);
+  line-height: var(--lh-subtitle-1);
   font-weight: 400;
-  line-height: 25px; /* 125% */
-  padding-top: 1rem;
-  padding-bottom: 1.5rem;
+`;
+
+export const SyncCardsRow = styled.div`
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  gap: 1.25rem;
+  align-items: stretch;
+
+  width: 100%;
 `;
 
 export const SectionTitle = styled.h2`
   margin: 1.25rem 0 1rem;
-  font-family: var(--font-gilroy);
-  font-size: 20px;
-  font-style: normal;
-  font-weight: 400;
   padding: 0;
+
+  color: ${COLORS.gray100};
+
+  font-size: 1.5rem;
+  line-height: normal;
+  font-weight: 400;
 `;
 
 export const LessonsStack = styled.div`
   display: flex;
   flex-direction: column;
   gap: 0.9rem;
-`;
-
-export const SyncCardsRow = styled.div`
-  display: grid;
-  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
-  gap: 2rem;
-  align-items: stretch;
-  width: 100%;
-
-  @media (max-width: 1080px) {
-    grid-template-columns: 1fr;
-  }
 `;
 
 export const SyncButtonWrapper = styled.div`

@@ -1,8 +1,9 @@
 import styled from "styled-components";
 import COLORS from "@/styles/colors";
+import { Body, H6, Subtitle2 } from "@/styles/text";
 
 const FILE_TABLE_COLUMNS =
-  "1.75rem 1.5rem minmax(0, 1.35fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 0.75fr)";
+  "1rem 1rem minmax(0, 1.35fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 0.75fr)";
 
 export const TableSection = styled.section`
   display: flex;
@@ -18,7 +19,7 @@ export const TableCard = styled.div`
   align-items: flex-start;
   align-self: stretch;
   border-radius: 0.75rem;
-  background: var(--white, #fff);
+  background: ${COLORS.white};
   box-shadow:
     0 738.424px 207.295px 0 rgba(145, 145, 145, 0),
     0 472.344px 188.731px 0 rgba(145, 145, 145, 0.01),
@@ -27,11 +28,10 @@ export const TableCard = styled.div`
     0 29.908px 64.973px 0 rgba(145, 145, 145, 0.1);
 `;
 
-export const StatusText = styled.p`
-  margin: 0;
+export const StatusText = styled(Body).attrs({
+  $color: COLORS.gray60,
+})`
   padding: 0 1.125rem;
-  font-size: 0.875rem;
-  color: ${COLORS.gray60};
 `;
 
 export const StyledTable = styled.table`
@@ -47,26 +47,24 @@ export const TableHead = styled.thead`
     grid-template-columns: ${FILE_TABLE_COLUMNS};
     align-items: center;
     padding: 1.125rem 1.80481rem 1.125rem 1.03131rem;
-    background: var(--white, #fff);
+    background: ${COLORS.white};
+    column-gap: 1rem;
   }
 `;
 
 export const HeaderCell = styled.th<{ $align?: "left" | "right" | "center" }>`
   text-align: ${({ $align = "left" }) => $align};
-  font-family: inherit;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: ${COLORS.gray60};
   padding: 0;
 `;
+
+export const HeaderText = styled(H6).attrs({
+  $color: COLORS.gray100,
+})``;
 
 export const SortButton = styled.button`
   border: none;
   background: transparent;
   padding: 0;
-  font: inherit;
-  font-weight: 600;
-  color: ${COLORS.gray60};
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -86,8 +84,9 @@ export const TableBody = styled.tbody`
     min-height: 3.48338rem;
     padding: 1.03131rem 1.80481rem 1.03131rem 1.03131rem;
     position: relative;
-    background: var(--white, #fff);
+    background: ${COLORS.white};
     transition: background-color 0.15s ease;
+    column-gap: 1rem;
   }
 
   tr::before,
@@ -97,7 +96,7 @@ export const TableBody = styled.tbody`
     left: 1.03131rem;
     right: 1.80481rem;
     height: 1px;
-    background: #e5e7eb;
+    background: ${COLORS.gray40};
   }
 
   tr::before {
@@ -109,18 +108,21 @@ export const TableBody = styled.tbody`
   }
 
   tr:hover {
-    background: #f4f5f7;
+    background: ${COLORS.whiteSmoke};
   }
 `;
 
 export const BodyCell = styled.td<{ $align?: "left" | "right" | "center" }>`
   padding: 0;
   text-align: ${({ $align = "left" }) => $align};
-  font-family: inherit;
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 20px;
-  color: ${COLORS.veryDarkBlue};
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`;
+
+export const BodyText = styled(Body).attrs({
+  $color: COLORS.veryDarkBlue,
+})`
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -130,23 +132,23 @@ export const FileNameContainer = styled.div`
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  margin-left: 0.5rem;
   min-width: 0;
 `;
 
-export const FileNameText = styled.span`
+export const FileNameText = styled(Body).attrs({
+  $color: COLORS.gray100,
+})`
   display: block;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-weight: 500;
 `;
 
 export const Checkbox = styled.input`
   width: 1rem;
   height: 1rem;
-  accent-color: #808582;
+  accent-color: ${COLORS.gray60};
   cursor: pointer;
 `;
 
@@ -182,20 +184,19 @@ export const DragHandle = styled.button`
 export const FooterRow = styled.div`
   display: grid;
   grid-template-columns: ${FILE_TABLE_COLUMNS};
-  padding: 1.03131rem;
+  padding: 1.03131rem 2.5rem 1.03131rem 1.5rem;
   align-items: center;
   align-self: stretch;
-  background: var(--white, #fff);
+  background: ${COLORS.white};
 `;
 
-export const FooterText = styled.p<{ $column?: "selection" | "size" }>`
+export const FooterText = styled(Subtitle2).attrs({
+  $color: COLORS.gray60,
+})<{ $column?: "selection" | "size" }>`
   grid-column: ${({ $column = "selection" }) =>
     $column === "size" ? "6" : "1 / span 3"};
-  transform: ${({ $column = "selection" }) =>
-    $column === "size" ? "translateX(-1.25rem)" : "none"};
-  margin: 0;
-  font-size: 0.9375rem;
-  color: ${COLORS.gray60};
+  justify-self: ${({ $column = "selection" }) =>
+    $column === "size" ? "end" : "start"};
 `;
 
 export const FooterStrong = styled.span`
@@ -212,12 +213,9 @@ export const TopControls = styled.div`
   align-self: stretch;
 `;
 
-export const Title = styled.h2`
-  margin: 0;
-  font-size: 1rem;
-  font-weight: 600;
-  color: ${COLORS.veryDarkBlue};
-`;
+export const Title = styled(H6).attrs({
+  $color: COLORS.veryDarkBlue,
+})``;
 
 export const ButtonGroup = styled.div`
   display: flex;
@@ -229,9 +227,6 @@ export const ActionButton = styled.button`
   border: none;
   background: transparent;
   padding: 0;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: ${COLORS.gray60};
   cursor: pointer;
 
   &:disabled {
@@ -245,8 +240,6 @@ export const EmptyState = styled.div`
   align-self: stretch;
 `;
 
-export const EmptyText = styled.p`
-  margin: 0;
-  font-size: 0.9375rem;
-  color: ${COLORS.gray60};
-`;
+export const EmptyText = styled(Body).attrs({
+  $color: COLORS.gray60,
+})``;

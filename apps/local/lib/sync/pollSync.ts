@@ -47,6 +47,24 @@ async function pollForRequestedSync() {
     const pendingRun = data as PendingSyncRun;
     console.log("[PI] Found requested sync:", pendingRun.id);
 
+    const { data: claimedRun, error: claimError } = await supabase
+      .from("sync_runs")
+      .update({ status: "in_progress" })
+      .eq("id", pendingRun.id)
+      .eq("status", "requested")
+      .select("id")
+      .maybeSingle();
+
+    if (claimError) {
+      console.error("[PI] Failed to claim sync run:", claimError);
+      return;
+    }
+
+    if (!claimedRun) {
+      console.log("[PI] Sync run was already claimed:", pendingRun.id);
+      return;
+    }
+
     const syncUrl = new URL("/api/sync", LOCAL_APP_ORIGIN);
     syncUrl.searchParams.set("syncRunId", String(pendingRun.id));
 

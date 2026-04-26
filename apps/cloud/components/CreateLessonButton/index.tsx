@@ -12,7 +12,7 @@ export default function CreateButton({ onClick }: Props) {
   return (
     <Button type="button" onClick={onClick}>
       {IconSvgs.plus}
-      <Label>Create</Label>
+      <Label>Create Lesson</Label>
     </Button>
   );
 }

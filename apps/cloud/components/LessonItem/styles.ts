@@ -1,8 +1,10 @@
 import styled from "styled-components";
+import COLORS from "@/styles/colors";
+import { Body, H4 } from "@/styles/text";
 
 export const LessonWrapper = styled.div`
   border-radius: 1rem;
-  background: var(--white, #fff);
+  background: ${COLORS.white};
   overflow: hidden;
   box-shadow:
     0 22px 6px 0 rgba(170, 170, 170, 0),
@@ -42,17 +44,17 @@ export const LessonIcon = styled.div`
   flex-shrink: 0;
 `;
 
-export const LessonName = styled.h2`
-  font-family: var(--font-gilroy);
-  font-size: 1.25rem;
-  font-weight: 500;
-  line-height: 1.125rem;
+export const LessonName = styled(H4).attrs({
+  $fontWeight: 400,
+})`
+  font-size: 22px;
+  line-height: 125%;
 `;
 
 export const FilesContainer = styled.div`
   padding: 0.75rem 1.75rem 1.25rem;
-  border-top: 1px solid var(--gray, #e5e5e5);
-  background: #fff;
+  border-top: 1px solid ${COLORS.gray40};
+  background: ${COLORS.white};
 `;
 
 export const FileRow = styled.div`
@@ -61,7 +63,7 @@ export const FileRow = styled.div`
   justify-content: space-between;
   padding: 0.75rem 1rem;
   border-radius: 0.5rem;
-  background: var(--gray-10, #fafafa);
+  background: ${COLORS.gray10};
   margin-top: 0.5rem;
   cursor: pointer;
 `;
@@ -72,12 +74,9 @@ export const FileLeft = styled.div`
   gap: 0.75rem;
 `;
 
-export const FileName = styled.span`
-  font-family: var(--font-gilroy);
-  color: var(--gray-80, #4b4a49);
-  font-size: 14px;
-  font-style: normal;
-  font-weight: 400;
+export const FileName = styled(Body).attrs({
+  $color: COLORS.gray80,
+})`
   line-height: 150%;
 `;
 
@@ -98,25 +97,27 @@ export const ActionButton = styled.button<{ $variant: "remove" | "restore" }>`
   cursor: pointer;
 
   font: inherit;
-  color: var(--gray-80, #4b4a49);
+  color: ${COLORS.gray80};
 
   background: ${({ $variant }) =>
-    $variant === "remove"
-      ? "var(--gray-30, #DFE3E9)"
-      : "var(--gray-20, #F4F5F7)"};
+    $variant === "remove" ? COLORS.gray10 : COLORS.gray10};
 
   padding: ${({ $variant }) =>
     $variant === "remove" ? "0.27469rem 0.824rem" : "0.5rem 0.75rem"};
-
+  &:hover:not(:disabled),
+  &:focus-visible:not(:disabled),
+  &:active:not(:disabled) {
+    background: var(--gray-30, #dfe3e9);
+  }
   &:disabled {
     opacity: 0.7;
     cursor: not-allowed;
   }
 `;
 
-export const ActionLabel = styled.span`
-  font-family: var(--font-gilroy);
-  font-size: 0.875rem;
-  font-weight: 500;
+export const ActionLabel = styled(Body).attrs({
+  $fontWeight: 500,
+  $color: COLORS.gray80,
+})`
   line-height: 1;
 `;

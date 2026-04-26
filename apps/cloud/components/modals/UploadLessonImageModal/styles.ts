@@ -24,11 +24,12 @@ export {
 } from "@/components/modals/CreateLessonModal/styles";
 
 export const ModalTitle = styled.h2`
-  font-family: var(--font-gilroy);
-  font-size: 1.625rem;
-  font-weight: 600;
-  color: ${COLORS.veryDarkBlue};
+  color: ${COLORS.gray100};
   margin: 0;
+
+  font-size: 1.5rem;
+  font-weight: 500;
+  line-height: normal;
 `;
 
 export const TabRow = styled.div`
@@ -44,15 +45,18 @@ export const Tab = styled.button<{ $active: boolean }>`
   padding: 0.5rem;
   border: none;
   border-radius: 6px;
-  font-family: var(--font-gilroy);
-  font-size: 0.9375rem;
+
+  font-size: var(--font-subtitle-2);
+  line-height: var(--lh-subtitle-2);
   font-weight: 500;
+
   cursor: pointer;
   transition:
     background 0.15s,
     color 0.15s;
+
   background: ${({ $active }) => ($active ? COLORS.white : "transparent")};
-  color: ${({ $active }) => ($active ? COLORS.veryDarkBlue : COLORS.lightGrey)};
+  color: ${({ $active }) => ($active ? COLORS.gray100 : COLORS.gray60)};
   box-shadow: ${({ $active }) =>
     $active ? "0 1px 3px rgba(0,0,0,0.1)" : "none"};
 
@@ -63,9 +67,9 @@ export const Tab = styled.button<{ $active: boolean }>`
 `;
 
 export const ComingSoonText = styled.p`
-  font-family: var(--font-gilroy);
-  font-size: 0.9375rem;
-  color: ${COLORS.lightGrey};
+  font-size: var(--font-subtitle-2);
+  line-height: var(--lh-subtitle-2);
+  color: ${COLORS.gray60};
   text-align: center;
   margin: 2rem 0;
 `;
@@ -75,10 +79,12 @@ export const SaveButton = styled.button`
   background: ${COLORS.evergreen};
   border: none;
   border-radius: 8px;
-  font-family: var(--font-gilroy);
-  font-size: 0.9375rem;
+
+  font-size: var(--font-subtitle-2);
+  line-height: var(--lh-subtitle-2);
   font-weight: 500;
   color: ${COLORS.white};
+
   cursor: pointer;
   transition: opacity 0.15s;
 

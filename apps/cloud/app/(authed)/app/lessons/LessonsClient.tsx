@@ -30,7 +30,10 @@ type LessonsClientLesson = {
   id: number;
   name: string;
   image_path: string | null;
+  villages?: string[];
 };
+
+type LessonsClientVariant = "dashboard" | "offline" | "archive";
 
 type LessonsClientProps = {
   initialLessons: LessonsClientLesson[];
@@ -44,6 +47,7 @@ type LessonsClientProps = {
   listAction?: "remove" | "restore";
   deviceId?: string;
   layout?: "page" | "embedded";
+  variant?: LessonsClientVariant;
 };
 
 export default function LessonsClient({
@@ -58,6 +62,7 @@ export default function LessonsClient({
   listAction,
   deviceId,
   layout = "page",
+  variant = "dashboard",
 }: LessonsClientProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [view, setView] = useState<"grid" | "list">(defaultView);
@@ -146,10 +151,13 @@ export default function LessonsClient({
   }
 
   return (
-    <PageContainer $layout={layout}>
-      <Header>
+    <PageContainer $layout={layout} $variant={variant}>
+      <Header $variant={variant}>
         <HeaderText>
-          <Title $layout={layout}>{title}</Title>
+          <Title $layout={layout} $variant={variant}>
+            {title}
+          </Title>
+
           {description && <Description>{description}</Description>}
         </HeaderText>
 
@@ -198,7 +206,7 @@ export default function LessonsClient({
       />
 
       {(showSearchBar || showViewToggle) && (
-        <SearchBarRow>
+        <SearchBarRow $variant={variant}>
           {showSearchBar && (
             <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
           )}
@@ -228,7 +236,7 @@ export default function LessonsClient({
       )}
 
       {view === "grid" ? (
-        <LessonsGrid>
+        <LessonsGrid $variant={variant}>
           {filteredLessons.map(lesson => (
             <div key={lesson.id}>
               <CardWrapper>
@@ -237,13 +245,14 @@ export default function LessonsClient({
                   lessonName={lesson.name}
                   lessonImage={lesson.image_path}
                   status={lessonStatuses[lesson.id]}
+                  villages={lesson.villages}
                 />
               </CardWrapper>
             </div>
           ))}
         </LessonsGrid>
       ) : (
-        <LessonsList>
+        <LessonsList $variant={variant}>
           {filteredLessons.map(lesson => (
             <LessonItem
               key={lesson.id}
@@ -253,6 +262,7 @@ export default function LessonsClient({
               action={listAction}
               onAction={handleListAction}
               isActionLoading={loadingLessonId === lesson.id}
+              showIcon={variant !== "offline"}
             />
           ))}
         </LessonsList>

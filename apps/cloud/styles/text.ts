@@ -49,6 +49,13 @@ export const H5 = styled.h5<TextProps>`
   font-weight: ${({ $fontWeight }) => $fontWeight || 400};
 `;
 
+export const H6 = styled.h6<TextProps>`
+  ${TextStyles}
+  font-size: var(--font-h6);
+  line-height: var(--lh-h6);
+  font-weight: ${({ $fontWeight }) => $fontWeight || 400};
+`;
+
 /* Subtitles */
 
 export const Subtitle1 = styled.p<TextProps>`

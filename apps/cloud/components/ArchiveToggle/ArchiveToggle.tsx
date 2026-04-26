@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { getSupabaseBrowserClient } from "@/api/supabase/browser";
 import ConfirmationModal from "@/components/modals/ConfirmationModal/ConfirmationModal";
-import { ArchiveButton } from "./styles";
+import { ArchiveButton, ArchiveButtonText } from "./styles";
 
 type ArchiveToggleProps = {
   lesson_Id: number;
@@ -60,7 +60,9 @@ export default function ArchiveToggle({
           />
         </svg>
 
-        {isArchived ? "Restore" : "Archive"}
+        <ArchiveButtonText>
+          {isArchived ? "Restore" : "Archive"}
+        </ArchiveButtonText>
       </ArchiveButton>
 
       <ConfirmationModal

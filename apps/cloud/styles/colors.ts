@@ -11,6 +11,8 @@ const COLORS = {
   gray10: "#FAFAFA",
   gray40: "#D9D9D9",
   gray60: "#808582",
+  gray80: "#4B4A49",
+  gray100: "#000",
   lightGreen: "#F9FAF3",
   activeGreen: "#1F5A2A",
   rose10: "#FCEFEF",
@@ -18,8 +20,11 @@ const COLORS = {
   rose11: "#F393A5",
   rose100: "#AF2028",
   whiteSmoke: "#F4F5F7",
-  orange: "#D97708",
+  orange100: "#D97708",
+  orange20: "#FFF6EA",
   lightLightGreen: "#248F5D",
+  green10: "#E9F4E9",
+  green20: "#DEE3D1",
 };
 
 export default COLORS;

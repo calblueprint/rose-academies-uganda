@@ -46,6 +46,7 @@ export type Lesson = {
   image_path: string | null;
   group_id: number;
   is_archived: boolean;
+  Groups?: Pick<Group, "name"> | null;
 };
 
 /**

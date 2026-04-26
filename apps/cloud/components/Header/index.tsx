@@ -11,6 +11,7 @@ import {
   DropdownMenu,
   DropdownWrapper,
   Header as HeaderBar,
+  HeaderInner,
   HeaderRight,
   LogoAndTitle,
   LogoContainer,
@@ -56,58 +57,68 @@ export default function Header({ displayName }: { displayName: string }) {
 
   return (
     <HeaderBar>
-      <LogoAndTitle>
-        <LogoContainer>
-          <Image src={RoseLogo} alt="Rose Academies Logo" unoptimized />
-          <TitleWrapper>
-            <Title>Rose Academies-Uganda</Title>
-            <Subtitle>Educator Dashboard</Subtitle>
-          </TitleWrapper>
-        </LogoContainer>
-      </LogoAndTitle>
-
-      <Nav>
-        {[
-          { label: "Lessons", href: "/app/lessons" },
-          { label: "Sync", href: "/app/offline-library" },
-          { label: "Archive", href: "/app/archived" },
-        ].map(tab => (
-          <NavTab
-            key={tab.label}
-            $active={pathname === tab.href}
+      <HeaderInner>
+        <LogoAndTitle>
+          <LogoContainer
             onClick={() => {
-              router.push(tab.href);
+              router.push("/app/lessons");
             }}
+            aria-label="Go to lesson dashboard"
+            title="Go to lesson dashboard"
           >
-            {tab.label}
-          </NavTab>
-        ))}
-      </Nav>
+            <Image src={RoseLogo} alt="Rose Academies Logo" unoptimized />
+            <TitleWrapper>
+              <Title>Rose Academies-Uganda</Title>
+              <Subtitle>Educator Dashboard</Subtitle>
+            </TitleWrapper>
+          </LogoContainer>
+        </LogoAndTitle>
 
-      <HeaderRight>
-        <DropdownWrapper ref={dropdownRef}>
-          <ProfileButton onClick={() => setDropdownOpen(prev => !prev)}>
-            <UserImg>{initials}</UserImg>
-            <UserName>{displayName}</UserName>
-          </ProfileButton>
+        <Nav>
+          {[
+            { label: "Lessons", href: "/app/lessons" },
+            { label: "Sync", href: "/app/offline-library" },
+            { label: "Archive", href: "/app/archived" },
+          ].map(tab => (
+            <NavTab
+              key={tab.label}
+              $active={pathname === tab.href}
+              onClick={() => {
+                router.push(tab.href);
+              }}
+            >
+              {tab.label}
+            </NavTab>
+          ))}
+        </Nav>
 
-          {dropdownOpen && (
-            <DropdownMenu>
-              <DropdownItem onClick={() => console.log("Clicked Settings")}>
-                Settings
-              </DropdownItem>
-              <DropdownItem onClick={() => console.log("Clicked Information")}>
-                Information
-              </DropdownItem>
-              <DropdownDivider />
+        <HeaderRight>
+          <DropdownWrapper ref={dropdownRef}>
+            <ProfileButton onClick={() => setDropdownOpen(prev => !prev)}>
+              <UserImg>{initials}</UserImg>
+              <UserName>{displayName}</UserName>
+            </ProfileButton>
 
-              <form action={signOut}>
-                <DropdownItem type="submit">Sign Out</DropdownItem>
-              </form>
-            </DropdownMenu>
-          )}
-        </DropdownWrapper>
-      </HeaderRight>
+            {dropdownOpen && (
+              <DropdownMenu>
+                <DropdownItem onClick={() => console.log("Clicked Settings")}>
+                  Settings
+                </DropdownItem>
+                <DropdownItem
+                  onClick={() => console.log("Clicked Information")}
+                >
+                  Information
+                </DropdownItem>
+                <DropdownDivider />
+
+                <form action={signOut}>
+                  <DropdownItem type="submit">Sign Out</DropdownItem>
+                </form>
+              </DropdownMenu>
+            )}
+          </DropdownWrapper>
+        </HeaderRight>
+      </HeaderInner>
     </HeaderBar>
   );
 }

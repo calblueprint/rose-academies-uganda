@@ -34,9 +34,12 @@ import {
   ModalTitle,
   OfflineLabel,
   OfflineRow,
+  OfflineSupportingText,
+  OfflineTextColumn,
   Overlay,
   ProgressFill,
   ProgressTrack,
+  RequiredAsterisk,
   TextArea,
   TextInput,
   ToggleThumb,
@@ -93,12 +96,18 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
   const supabase = getSupabaseBrowserClient();
   const router = useRouter();
   const hasFiles = files.length > 0;
+  const hasClassroom = selectedGroupIds.length > 0;
+  const canSendToSync = hasFiles && hasClassroom;
+  const villageDropdownRef = useRef<HTMLDivElement>(null);
+
+  const [shouldFlashSyncRequirements, setShouldFlashSyncRequirements] =
+    useState(false);
 
   useEffect(() => {
-    if (!hasFiles && sendToOffline) {
+    if (!canSendToSync && sendToOffline) {
       setSendToOffline(false);
     }
-  }, [hasFiles, sendToOffline]);
+  }, [canSendToSync, sendToOffline]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -128,7 +137,35 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
     fetchGroups();
   }, [isOpen, supabase]);
 
+  useEffect(() => {
+    if (!isOpen || !isVillageDropdownOpen) return;
+
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        villageDropdownRef.current &&
+        !villageDropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsVillageDropdownOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isOpen, isVillageDropdownOpen]);
+
   if (!isOpen) return null;
+
+  if (!isOpen) return null;
+
+  function flashSyncRequirements() {
+    setShouldFlashSyncRequirements(true);
+
+    window.setTimeout(() => {
+      setShouldFlashSyncRequirements(false);
+    }, 1000);
+  }
 
   function handleToggleGroup(groupId: number) {
     setSelectedGroupIds(prev =>
@@ -341,7 +378,9 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
         </ModalHeader>
 
         <FieldSection>
-          <FieldLabel htmlFor="lesson-title">Title</FieldLabel>
+          <FieldLabel htmlFor="lesson-title">
+            Name <RequiredAsterisk>*</RequiredAsterisk>
+          </FieldLabel>
           <TextInput
             id="lesson-title"
             placeholder="Lesson title"
@@ -356,18 +395,33 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
         </FieldSection>
 
         <FieldSection>
+          <FieldLabel htmlFor="lesson-description">Description</FieldLabel>
+          <TextArea
+            id="lesson-description"
+            placeholder="Brief description of the lesson"
+            value={description}
+            onChange={e => setDescription(e.target.value)}
+            disabled={isSubmitting}
+            rows={4}
+          />
+        </FieldSection>
+
+        <FieldSection>
           <AssignedVillageRow>
-            <FieldLabel style={{ marginBottom: 0 }}>
-              Assigned Village
-            </FieldLabel>
+            <FieldLabel style={{ marginBottom: 0 }}>Classroom</FieldLabel>
 
             <VillageDropdownWrapper>
               <VillageSelectTrigger
                 type="button"
+                $flashError={shouldFlashSyncRequirements && !hasClassroom}
                 onClick={() => setIsVillageDropdownOpen(prev => !prev)}
                 disabled={isSubmitting}
               >
-                <VillageSelectTriggerText>Select</VillageSelectTriggerText>
+                <VillageSelectTriggerText>
+                  {selectedGroupIds.length > 0
+                    ? `${selectedGroupIds.length} selected`
+                    : "Select"}
+                </VillageSelectTriggerText>
 
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -431,22 +485,11 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
         </FieldSection>
 
         <FieldSection>
-          <FieldLabel htmlFor="lesson-description">Description</FieldLabel>
-          <TextArea
-            id="lesson-description"
-            placeholder="Brief description of the lesson"
-            value={description}
-            onChange={e => setDescription(e.target.value)}
-            disabled={isSubmitting}
-            rows={4}
-          />
-        </FieldSection>
-
-        <FieldSection>
           <FieldLabel>Upload Files</FieldLabel>
 
           <DropZone
             $isDragging={isDragging}
+            $flashError={shouldFlashSyncRequirements && !hasFiles}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
@@ -572,22 +615,28 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
         </FieldSection>
 
         <OfflineRow>
-          <OfflineLabel>Send Lesson to Offline Library?</OfflineLabel>
+          <OfflineTextColumn>
+            <OfflineLabel>Send lesson to sync</OfflineLabel>
+            <OfflineSupportingText $flashError={shouldFlashSyncRequirements}>
+              Add a file and select classroom to sync
+            </OfflineSupportingText>
+          </OfflineTextColumn>
+
           <ToggleWrapper>
             <HiddenCheckbox
               type="checkbox"
               id="offline-toggle"
               checked={sendToOffline}
-              onChange={e => setSendToOffline(e.target.checked)}
-              disabled={!hasFiles}
-            />
-            <ToggleTrack
-              htmlFor="offline-toggle"
-              $checked={sendToOffline}
-              style={{
-                pointerEvents: hasFiles ? "auto" : "none",
+              onChange={e => {
+                if (e.target.checked && !canSendToSync) {
+                  flashSyncRequirements();
+                  return;
+                }
+
+                setSendToOffline(e.target.checked);
               }}
-            >
+            />
+            <ToggleTrack htmlFor="offline-toggle" $checked={sendToOffline}>
               <ToggleThumb $checked={sendToOffline} />
             </ToggleTrack>
           </ToggleWrapper>

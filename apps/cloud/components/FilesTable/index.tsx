@@ -160,9 +160,7 @@ function SortableRow({ row, canDrag }: SortableRowProps) {
             <style.BodyCell key={cell.id}>
               <style.FileNameContainer>
                 <FileTypeBadge fileName={row.original.name} />
-                <style.FileNameText>
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </style.FileNameText>
+                <style.FileNameText>{row.original.name}</style.FileNameText>
               </style.FileNameContainer>
             </style.BodyCell>
           );
@@ -170,7 +168,9 @@ function SortableRow({ row, canDrag }: SortableRowProps) {
 
         return (
           <style.BodyCell key={cell.id}>
-            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+            <style.BodyText>
+              {flexRender(cell.column.columnDef.cell, cell.getContext())}
+            </style.BodyText>
           </style.BodyCell>
         );
       })}
@@ -213,9 +213,7 @@ function StaticRow({ row }: StaticRowProps) {
             <style.BodyCell key={cell.id}>
               <style.FileNameContainer>
                 <FileTypeBadge fileName={row.original.name} />
-                <style.FileNameText>
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </style.FileNameText>
+                <style.FileNameText>{row.original.name}</style.FileNameText>
               </style.FileNameContainer>
             </style.BodyCell>
           );
@@ -223,7 +221,9 @@ function StaticRow({ row }: StaticRowProps) {
 
         return (
           <style.BodyCell key={cell.id}>
-            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+            <style.BodyText>
+              {flexRender(cell.column.columnDef.cell, cell.getContext())}
+            </style.BodyText>
           </style.BodyCell>
         );
       })}
@@ -284,21 +284,27 @@ function TableMarkup({
                       onClick={header.column.getToggleSortingHandler()}
                       disabled={isInteractiveDisabled}
                     >
+                      <style.HeaderText>
+                        {flexRender(
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
+                      </style.HeaderText>
+                      <style.HeaderText as="span">
+                        {sortDirection === "asc"
+                          ? "↑"
+                          : sortDirection === "desc"
+                            ? "↓"
+                            : ""}
+                      </style.HeaderText>
+                    </style.SortButton>
+                  ) : (
+                    <style.HeaderText>
                       {flexRender(
                         header.column.columnDef.header,
                         header.getContext(),
                       )}
-                      {sortDirection === "asc"
-                        ? "↑"
-                        : sortDirection === "desc"
-                          ? "↓"
-                          : ""}
-                    </style.SortButton>
-                  ) : (
-                    flexRender(
-                      header.column.columnDef.header,
-                      header.getContext(),
-                    )
+                    </style.HeaderText>
                   )}
                 </style.HeaderCell>
               );

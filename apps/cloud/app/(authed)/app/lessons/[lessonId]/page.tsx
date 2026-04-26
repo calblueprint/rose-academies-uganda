@@ -65,6 +65,7 @@ export default async function LessonDetailPage({ params }: PageProps) {
   }
 
   const deviceId = await getCurrentDeviceId({ userId: user.id });
+  if (!deviceId) return null;
 
   const { data: offlineRows, error: offlineError } = await supabase
     .from("DeviceLessons")

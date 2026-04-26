@@ -4,7 +4,7 @@ import { useState } from "react";
 import supabase from "@/api/supabase/client";
 import ConfirmationModal from "@/components/modals/ConfirmationModal/ConfirmationModal";
 import { IconSvgs } from "@/lib/icons";
-import { SyncButton } from "./styles";
+import { SyncButton, SyncButtonText } from "./styles";
 
 function OfflineToggle({
   deviceId,
@@ -101,7 +101,7 @@ function OfflineToggle({
         }
       >
         {IconSvgs.sync}
-        {syncLabel[syncButtonKey]}
+        <SyncButtonText>{syncLabel[syncButtonKey]}</SyncButtonText>
       </SyncButton>
 
       <ConfirmationModal

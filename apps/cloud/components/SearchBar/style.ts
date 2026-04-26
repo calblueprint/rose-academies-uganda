@@ -1,5 +1,6 @@
 import styled from "styled-components";
 import COLORS from "@/styles/colors";
+import { Subtitle2 } from "@/styles/text";
 
 export const SearchBarContainer = styled.div`
   display: flex;
@@ -19,26 +20,25 @@ export const SearchBarField = styled.div`
   justify-content: space-between;
   align-items: center;
   border-radius: 16px;
-  border-top: 0.437px solid var(--gray, #d9d9d9);
-  border-right: 0.873px solid var(--gray, #d9d9d9);
-  border-bottom: 1.31px solid var(--gray, #d9d9d9);
-  border-left: 0.873px solid var(--gray, #d9d9d9);
-  background: var(--white, #fff);
+  border-top: 0.437px solid ${COLORS.gray40};
+  border-right: 0.873px solid ${COLORS.gray40};
+  border-bottom: 1.31px solid ${COLORS.gray40};
+  border-left: 0.873px solid ${COLORS.gray40};
+  background: ${COLORS.white};
 `;
 
-export const SearchInput = styled.input`
+export const SearchInput = styled(Subtitle2).attrs({
+  as: "input",
+  $color: COLORS.gray60,
+  $fontWeight: 500,
+})`
   width: 100%;
   min-width: 0;
   overflow: hidden;
-  color: ${COLORS.gray60};
   text-overflow: ellipsis;
-  font-family: var(--font-gilroy);
-  font-size: 0.875rem;
-  font-style: normal;
-  font-weight: 500;
-  line-height: 2rem;
   border: none;
   outline: none;
+  background: transparent;
 `;
 
 export const ClearButton = styled.button`
@@ -48,6 +48,6 @@ export const ClearButton = styled.button`
   justify-content: center;
   line-height: 0;
   aspect-ratio: 1 / 1;
-  fill: var(--Gray, #808582);
+  fill: ${COLORS.gray60};
   cursor: pointer;
 `;

@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { getSupabaseBrowserClient } from "@/api/supabase/browser";
 import { uploadLessonImage } from "@/api/supabase/images";
 import { getCurrentUserOrThrow } from "@/lib/getCurrentUser";
+import { PRESET_IMAGES } from "@/lib/lessonPresets";
 import {
   ActionRow,
   BrowseButton,
@@ -38,17 +39,6 @@ interface Props {
 
 const ACCEPTED_TYPES = ["image/png", "image/jpeg"];
 const ACCEPTED_EXT = ".png, .jpg";
-
-const PRESET_IMAGES = [
-  "/placeholders/preset-0.svg",
-  "/placeholders/preset-1.svg",
-  "/placeholders/preset-2.svg",
-  "/placeholders/preset-3.svg",
-  "/placeholders/preset-4.svg",
-  "/placeholders/preset-5.svg",
-  "/placeholders/preset-6.svg",
-  "/placeholders/preset-7.svg",
-];
 
 // ============================================================
 // Tab icons

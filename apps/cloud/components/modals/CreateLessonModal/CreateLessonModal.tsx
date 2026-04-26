@@ -7,6 +7,7 @@ import { uploadFile } from "@/api/supabase/files";
 import FileTypeBadge from "@/components/FileTypeBadge";
 import { DataContext } from "@/context/DataContext";
 import { getCurrentUserOrThrow } from "@/lib/getCurrentUser";
+import { randomPresetImage } from "@/lib/lessonPresets";
 import {
   ActionRow,
   AssignedVillageRow,
@@ -267,7 +268,7 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
           name: trimmedTitle,
           description: description.trim() || null,
           group_id: fallbackGroupId,
-          image_path: null,
+          image_path: randomPresetImage(),
           user_id: user.id,
         })
         .select()

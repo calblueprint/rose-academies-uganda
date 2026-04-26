@@ -14,6 +14,7 @@ export const VillageTag = styled.span`
 
   background-color: ${COLORS.green20};
   color: ${COLORS.evergreen};
+  white-space: nowrap;
 `;
 
 export const TagGroup = styled.div`

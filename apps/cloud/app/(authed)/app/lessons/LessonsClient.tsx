@@ -29,6 +29,7 @@ type LessonsClientLesson = {
   id: number;
   name: string;
   image_path: string | null;
+  villages?: string[];
 };
 
 type LessonsClientVariant = "dashboard" | "offline" | "archive";
@@ -185,6 +186,7 @@ export default function LessonsClient({
                   lessonName={lesson.name}
                   lessonImage={lesson.image_path}
                   status={lessonStatuses[lesson.id]}
+                  villages={lesson.villages}
                 />
               </CardWrapper>
             </div>

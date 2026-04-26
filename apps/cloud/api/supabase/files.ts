@@ -2,7 +2,7 @@ import type { LocalFile } from "@/types/schema";
 import { getSupabaseBrowserClient } from "@/api/supabase/browser";
 import { getCurrentUserOrThrow } from "@/lib/getCurrentUser";
 
-async function hashFile(file: File): Promise<string> {
+export async function hashFile(file: File): Promise<string> {
   const buffer = await file.arrayBuffer();
   const hashBuffer = await crypto.subtle.digest("SHA-256", buffer);
   const hashArray = Array.from(new Uint8Array(hashBuffer));

@@ -12,6 +12,7 @@ import { IconSvgs } from "@/lib/icons";
 import {
   CardWrapper,
   Description,
+  EditImageButton,
   GridToggle,
   Header,
   HeaderText,
@@ -144,6 +145,14 @@ export default function LessonsClient({
         isOpen={imageModalLessonId !== null}
         onClose={() => setImageModalLessonId(null)}
         lessonId={imageModalLessonId ?? 0}
+        onImageUpdated={(lessonId, imagePath) => {
+          setLessons(prev =>
+            prev.map(l =>
+              l.id === lessonId ? { ...l, image_path: imagePath } : l,
+            ),
+          );
+          setImageModalLessonId(null);
+        }}
       />
 
       {(showSearchBar || showViewToggle) && (
@@ -188,6 +197,30 @@ export default function LessonsClient({
                   status={lessonStatuses[lesson.id]}
                   villages={lesson.villages}
                 />
+                <EditImageButton
+                  type="button"
+                  aria-label="Edit lesson cover image"
+                  onClick={e => {
+                    e.stopPropagation();
+                    setImageModalLessonId(lesson.id);
+                  }}
+                >
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M12 20H21M3 20H4.675C5.16 20 5.40 19.97 5.63 19.92C5.85 19.86 6.06 19.77 6.25 19.65C6.46 19.51 6.64 19.33 7.01 18.96L19.5 6.5C20.33 5.67 20.33 4.33 19.5 3.5C18.67 2.67 17.33 2.67 16.5 3.5L4 16C3.63 16.37 3.45 16.55 3.31 16.76C3.18 16.95 3.09 17.16 3.04 17.38C2.98 17.61 2.98 17.85 2.98 18.34L3 20Z"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </EditImageButton>
               </CardWrapper>
             </div>
           ))}

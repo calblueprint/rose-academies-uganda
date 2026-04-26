@@ -1,7 +1,7 @@
 "use client";
 
 /* eslint-disable react-hooks/incompatible-library */
-import { useEffect, useMemo, useState } from "react";
+import { MouseEvent, useEffect, useMemo, useState } from "react";
 import {
   closestCenter,
   DndContext,
@@ -39,6 +39,8 @@ export type FileRow = {
   createdAt: string;
   updatedAt: string;
   order: number;
+  storagePath?: string | null;
+  mimeType?: string | null;
 };
 
 type FilesTableProps = {
@@ -50,6 +52,7 @@ type FilesTableProps = {
   isReordering: boolean;
   selectedFileIds: string[];
   onSelectionChange: (fileIds: string[]) => void;
+  onRowClick?: (file: FileRow) => void;
 };
 
 function formatBytes(bytes: number) {
@@ -105,9 +108,10 @@ function haveSameIds(a: string[], b: string[]) {
 type SortableRowProps = {
   row: Row<FileRow>;
   canDrag: boolean;
+  onRowClick?: (file: FileRow) => void;
 };
 
-function SortableRow({ row, canDrag }: SortableRowProps) {
+function SortableRow({ row, canDrag, onRowClick }: SortableRowProps) {
   const {
     attributes,
     listeners,
@@ -127,8 +131,21 @@ function SortableRow({ row, canDrag }: SortableRowProps) {
     opacity: isDragging ? 0.7 : 1,
   };
 
+  function handleRowClick(event: MouseEvent<HTMLTableRowElement>) {
+    const target = event.target as HTMLElement;
+    const interactiveElement = target.closest(
+      'button, input, a, [role="button"], [data-prevent-row-click="true"]',
+    );
+
+    if (interactiveElement || isDragging || !onRowClick) {
+      return;
+    }
+
+    onRowClick(row.original);
+  }
+
   return (
-    <tr ref={setNodeRef} style={rowStyle}>
+    <tr ref={setNodeRef} style={rowStyle} onClick={handleRowClick}>
       {row.getVisibleCells().map(cell => {
         if (cell.column.id === "select") {
           return (
@@ -180,11 +197,25 @@ function SortableRow({ row, canDrag }: SortableRowProps) {
 
 type StaticRowProps = {
   row: Row<FileRow>;
+  onRowClick?: (file: FileRow) => void;
 };
 
-function StaticRow({ row }: StaticRowProps) {
+function StaticRow({ row, onRowClick }: StaticRowProps) {
+  function handleRowClick(event: MouseEvent<HTMLTableRowElement>) {
+    const target = event.target as HTMLElement;
+    const interactiveElement = target.closest(
+      'button, input, a, [role="button"], [data-prevent-row-click="true"]',
+    );
+
+    if (interactiveElement || !onRowClick) {
+      return;
+    }
+
+    onRowClick(row.original);
+  }
+
   return (
-    <tr>
+    <tr onClick={handleRowClick}>
       {row.getVisibleCells().map(cell => {
         if (cell.column.id === "select") {
           return (
@@ -237,6 +268,7 @@ type TableMarkupProps = {
   isInteractiveDisabled: boolean;
   isMounted: boolean;
   canDrag: boolean;
+  onRowClick?: (file: FileRow) => void;
 };
 
 function TableMarkup({
@@ -245,6 +277,7 @@ function TableMarkup({
   isInteractiveDisabled,
   isMounted,
   canDrag,
+  onRowClick,
 }: TableMarkupProps) {
   return (
     <style.StyledTable>
@@ -316,9 +349,16 @@ function TableMarkup({
       <style.TableBody>
         {isMounted
           ? renderedRows.map(row => (
-              <SortableRow key={row.id} row={row} canDrag={canDrag} />
+              <SortableRow
+                key={row.id}
+                row={row}
+                canDrag={canDrag}
+                onRowClick={onRowClick}
+              />
             ))
-          : renderedRows.map(row => <StaticRow key={row.id} row={row} />)}
+          : renderedRows.map(row => (
+              <StaticRow key={row.id} row={row} onRowClick={onRowClick} />
+            ))}
       </style.TableBody>
     </style.StyledTable>
   );
@@ -332,6 +372,7 @@ export default function FilesTable({
   isReordering,
   selectedFileIds,
   onSelectionChange,
+  onRowClick,
 }: FilesTableProps) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
@@ -552,6 +593,7 @@ export default function FilesTable({
                 isInteractiveDisabled={isInteractiveDisabled}
                 isMounted={true}
                 canDrag={isManualOrderMode}
+                onRowClick={onRowClick}
               />
             </SortableContext>
           </DndContext>
@@ -562,6 +604,7 @@ export default function FilesTable({
             isInteractiveDisabled={isInteractiveDisabled}
             isMounted={false}
             canDrag={false}
+            onRowClick={onRowClick}
           />
         )}
 

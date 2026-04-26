@@ -22,6 +22,8 @@ type LessonFile = {
   createdAt: string | null;
   updatedAt: string | null;
   order: number;
+  storagePath: string | null;
+  mimeType: string | null;
 };
 
 type LessonFileRow = {
@@ -32,6 +34,8 @@ type LessonFileRow = {
     name: string;
     size_bytes: number | null;
     created_at: string | null;
+    storage_path: string | null;
+    mime_type: string | null;
   } | null;
 };
 
@@ -105,7 +109,9 @@ export default async function LessonDetailPage({ params }: PageProps) {
 
   const { data: lessonFileRows, error: filesError } = await supabase
     .from("LessonFiles")
-    .select("file_id, display_order, Files(id, name, size_bytes, created_at)")
+    .select(
+      "file_id, display_order, Files(id, name, size_bytes, created_at, storage_path, mime_type)",
+    )
     .eq("lesson_id", numericLessonId)
     .order("display_order", { ascending: true })
     .returns<LessonFileRow[]>();
@@ -130,6 +136,8 @@ export default async function LessonDetailPage({ params }: PageProps) {
         createdAt: row.Files.created_at,
         updatedAt: row.Files.created_at,
         order: row.display_order,
+        storagePath: row.Files.storage_path,
+        mimeType: row.Files.mime_type,
       })) ?? [];
 
   const isOffline = !!offlineRows && offlineRows.length > 0;

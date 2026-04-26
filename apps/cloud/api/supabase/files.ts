@@ -45,6 +45,19 @@ export async function uploadFile(
 
     if (error) throw new Error(error.message);
 
+    if (!existingFile.size_bytes) {
+      const { data: updatedFile, error: updateError } = await supabase
+        .from("Files")
+        .update({ size_bytes: file.size })
+        .eq("id", existingFile.id)
+        .select()
+        .single();
+
+      if (updateError) throw new Error(updateError.message);
+
+      return updatedFile as LocalFile;
+    }
+
     return existingFile as LocalFile;
   }
 

@@ -18,7 +18,7 @@ type Lesson = {
 type LessonFile = {
   id: string;
   name: string;
-  sizeBytes: number | null;
+  sizeBytes: number;
   createdAt: string | null;
   updatedAt: string | null;
   order: number;
@@ -126,7 +126,7 @@ export default async function LessonDetailPage({ params }: PageProps) {
       .map(row => ({
         id: String(row.Files.id),
         name: row.Files.name,
-        sizeBytes: row.Files.size_bytes,
+        sizeBytes: row.Files.size_bytes ?? 0,
         createdAt: row.Files.created_at,
         updatedAt: row.Files.created_at,
         order: row.display_order,

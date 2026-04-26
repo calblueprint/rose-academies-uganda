@@ -1,7 +1,9 @@
 import { redirect } from "next/navigation";
 import { getSupabaseServerClientReadOnly } from "@/api/supabase/server-readonly";
 import Header from "@/components/Header";
+import MissingDevicePage from "@/components/MissingDevicePage";
 import { DataContextProvider } from "@/context/DataContext";
+import { getCurrentDeviceId } from "@/lib/getCurrentUserDevice";
 
 export default async function AuthedLayout({
   children,
@@ -18,6 +20,8 @@ export default async function AuthedLayout({
     redirect("/login");
   }
 
+  const deviceId = await getCurrentDeviceId({ userId: user.id });
+
   const { data, error } = await supabase
     .from("Profiles")
     .select("display_name")
@@ -33,7 +37,7 @@ export default async function AuthedLayout({
   return (
     <DataContextProvider>
       <Header displayName={displayName} />
-      {children}
+      {deviceId ? children : <MissingDevicePage />}
     </DataContextProvider>
   );
 }

@@ -13,7 +13,7 @@ export default async function LessonsPage() {
 
   const { data: lessons, error } = await supabase
     .from("Lessons")
-    .select("id, name, description, image_path, group_id, is_archived")
+    .select("id, name, description, image_path, group_id, is_archived, created_at, updated_at")
     .order("id", { ascending: true })
     .eq("is_archived", false)
     .eq("user_id", user.id);
@@ -44,6 +44,7 @@ export default async function LessonsPage() {
       initialLessons={lessons ?? []}
       lessonStatuses={lessonStatuses}
       variant="dashboard"
+      showSortButton
     />
   );
 }

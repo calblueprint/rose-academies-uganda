@@ -2,6 +2,7 @@
 
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { getSupabaseBrowserClient } from "@/api/supabase/browser";
 import { uploadFile } from "@/api/supabase/files";
 import FileTypeBadge from "@/components/FileTypeBadge";
 import { DataContext } from "@/context/DataContext";
@@ -140,6 +141,12 @@ export default function UploadFilesModal({ isOpen, onClose, lessonId }: Props) {
           ),
         );
       }
+
+      const supabase = getSupabaseBrowserClient();
+      await supabase
+        .from("Lessons")
+        .update({ updated_at: new Date().toISOString() })
+        .eq("id", lessonId);
 
       await data.refresh();
       router.refresh();

@@ -201,6 +201,7 @@ export default function LessonsClient({
               action={listAction}
               onAction={handleListAction}
               isActionLoading={loadingLessonId === lesson.id}
+              showIcon={variant !== "offline"}
             />
           ))}
         </LessonsList>

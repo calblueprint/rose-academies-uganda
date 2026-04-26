@@ -4,13 +4,7 @@ import React from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import StatusPill from "../StatusPill";
-import {
-  Card,
-  ImageFrame,
-  ImagePlaceholder,
-  Title,
-  Titleholder,
-} from "./styles";
+import { Card, ImageFrame, Title, Titleholder } from "./styles";
 
 export default function LessonCard({
   lessonId,
@@ -27,8 +21,8 @@ export default function LessonCard({
 
   return (
     <Card onClick={() => router.push(`/app/lessons/${lessonId}`)}>
-      <ImageFrame>
-        {lessonImage ? (
+      {lessonImage ? (
+        <ImageFrame>
           <Image
             src={lessonImage}
             alt={lessonName}
@@ -36,10 +30,8 @@ export default function LessonCard({
             sizes="21.875rem"
             style={{ objectFit: "cover" }}
           />
-        ) : (
-          <ImagePlaceholder />
-        )}
-      </ImageFrame>
+        </ImageFrame>
+      ) : null}
 
       <Titleholder>
         <Title>{lessonName}</Title>

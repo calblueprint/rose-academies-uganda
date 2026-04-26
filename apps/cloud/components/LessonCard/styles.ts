@@ -27,11 +27,11 @@ export const ImageFrame = styled.div`
   overflow: hidden;
 `;
 
-export const ImagePlaceholder = styled.div`
-  width: 100%;
-  height: 100%;
-  background-color: ${COLORS.evergreen};
-`;
+// export const ImagePlaceholder = styled.div`
+//   width: 100%;
+//   height: 100%;
+//   background-color: ${COLORS.evergreen};
+// `;
 
 export const Titleholder = styled.div`
   display: flex;

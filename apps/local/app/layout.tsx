@@ -125,7 +125,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" style={{ colorScheme: "light" }}>
       <body className={gilroy.variable}>
         <StyledComponentsRegistry>
           <HeaderWrapper />

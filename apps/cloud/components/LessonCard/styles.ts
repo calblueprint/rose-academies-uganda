@@ -27,11 +27,11 @@ export const ImageFrame = styled.div`
   overflow: hidden;
 `;
 
-export const ImagePlaceholder = styled.div`
-  width: 100%;
-  height: 100%;
-  background-color: ${COLORS.evergreen};
-`;
+// export const ImagePlaceholder = styled.div`
+//   width: 100%;
+//   height: 100%;
+//   background-color: ${COLORS.evergreen};
+// `;
 
 export const Titleholder = styled.div`
   display: flex;
@@ -49,3 +49,12 @@ export const Title = styled(Subtitle1).attrs({
   $color: COLORS.black,
   $fontWeight: 500,
 })``;
+
+export const TagRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: nowrap;
+  width: 100%;
+  overflow-x: hidden;
+`;

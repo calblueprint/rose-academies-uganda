@@ -3,32 +3,28 @@
 import React from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import StatusPill from "../StatusPill";
-import {
-  Card,
-  ImageFrame,
-  ImagePlaceholder,
-  Title,
-  Titleholder,
-} from "./styles";
+import VillageTags from "../VillageTags";
+import { Card, ImageFrame, TagRow, Title, Titleholder } from "./styles";
 
 export default function LessonCard({
   lessonId,
   lessonName,
   lessonImage,
   status,
+  villages = [],
 }: {
   lessonId: number;
   lessonName: string;
   lessonImage: string | null;
   status?: "available" | "pending";
+  villages?: string[];
 }) {
   const router = useRouter();
 
   return (
     <Card onClick={() => router.push(`/app/lessons/${lessonId}`)}>
-      <ImageFrame>
-        {lessonImage ? (
+      {lessonImage ? (
+        <ImageFrame>
           <Image
             src={lessonImage}
             alt={lessonName}
@@ -36,14 +32,16 @@ export default function LessonCard({
             sizes="21.875rem"
             style={{ objectFit: "cover" }}
           />
-        ) : (
-          <ImagePlaceholder />
-        )}
-      </ImageFrame>
+        </ImageFrame>
+      ) : null}
 
       <Titleholder>
         <Title>{lessonName}</Title>
-        {status ? <StatusPill status={status} /> : null}
+        {(status || villages.length > 0) && (
+          <TagRow>
+            {villages.length > 0 ? <VillageTags villages={villages} /> : null}
+          </TagRow>
+        )}
       </Titleholder>
     </Card>
   );

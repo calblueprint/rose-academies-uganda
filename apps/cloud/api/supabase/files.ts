@@ -9,6 +9,13 @@ async function hashFile(file: File): Promise<string> {
   return hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
 }
 
+function buildStorageObjectPath(userId: string, fileName: string): string {
+  const normalizedFileName = fileName || "unnamed-file";
+  const safeFileName = normalizedFileName.replace(/\s+/g, "_");
+
+  return `${userId}/${safeFileName}`;
+}
+
 export async function uploadFile(
   lessonId: number,
   file: File,
@@ -41,13 +48,17 @@ export async function uploadFile(
     return existingFile as LocalFile;
   }
 
-  const objectPath = `${user.id}/${file.name}`;
+  const objectPath = buildStorageObjectPath(user.id, file.name);
 
   const { error: storageError } = await supabase.storage
     .from("files")
     .upload(objectPath, file, { upsert: true });
 
-  if (storageError) throw new Error(storageError.message);
+  if (storageError) {
+    throw new Error(
+      `Storage upload failed for key "${objectPath}": ${storageError.message}`,
+    );
+  }
 
   const { data: pub } = supabase.storage.from("files").getPublicUrl(objectPath);
 

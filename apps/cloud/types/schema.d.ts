@@ -48,6 +48,7 @@ export type Lesson = {
   is_archived: boolean;
   created_at: string;
   updated_at: string;
+  Groups?: Pick<Group, "name"> | null;
 };
 
 /**

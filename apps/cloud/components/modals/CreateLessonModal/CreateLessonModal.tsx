@@ -98,6 +98,7 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
   const hasFiles = files.length > 0;
   const hasClassroom = selectedGroupIds.length > 0;
   const canSendToSync = hasFiles && hasClassroom;
+  const villageDropdownRef = useRef<HTMLDivElement>(null);
 
   const [shouldFlashSyncRequirements, setShouldFlashSyncRequirements] =
     useState(false);
@@ -135,6 +136,24 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
 
     fetchGroups();
   }, [isOpen, supabase]);
+
+  useEffect(() => {
+    if (!isOpen || !isVillageDropdownOpen) return;
+
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        villageDropdownRef.current &&
+        !villageDropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsVillageDropdownOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isOpen, isVillageDropdownOpen]);
 
   if (!isOpen) return null;
 
@@ -389,7 +408,7 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
           <AssignedVillageRow>
             <FieldLabel style={{ marginBottom: 0 }}>Classroom</FieldLabel>
 
-            <VillageDropdownWrapper>
+            <VillageDropdownWrapper ref={villageDropdownRef}>
               <VillageSelectTrigger
                 type="button"
                 $flashError={shouldFlashSyncRequirements && !hasClassroom}

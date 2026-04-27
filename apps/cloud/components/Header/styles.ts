@@ -29,19 +29,28 @@ export const LogoAndTitle = styled.div`
   gap: 0.4375rem;
 `;
 
-export const LogoContainer = styled.div`
+export const LogoContainer = styled.button`
   display: flex;
   align-items: center;
   gap: 0.75rem;
 
   font-size: 1.25rem;
   font-weight: 600;
-  color: ${COLORS.veryDarkBlue};
-
+  padding: 0;
+  background: none;
+  order: none;
+  cursor: pointer;
+  text-align: left;
   img {
     height: 2.5rem;
     width: auto;
   }
+  all: unset;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  text-align: left;
 `;
 
 export const HeaderRight = styled.div`

@@ -9,7 +9,7 @@ import StyledComponentsRegistry from "@/lib/registry";
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" style={{ colorScheme: "light" }}>
       <body>
         <StyledComponentsRegistry>{children}</StyledComponentsRegistry>
       </body>

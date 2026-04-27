@@ -59,7 +59,13 @@ export default function Header({ displayName }: { displayName: string }) {
     <HeaderBar>
       <HeaderInner>
         <LogoAndTitle>
-          <LogoContainer>
+          <LogoContainer
+            onClick={() => {
+              router.push("/app/lessons");
+            }}
+            aria-label="Go to lesson dashboard"
+            title="Go to lesson dashboard"
+          >
             <Image src={RoseLogo} alt="Rose Academies Logo" unoptimized />
             <TitleWrapper>
               <Title>Rose Academies-Uganda</Title>

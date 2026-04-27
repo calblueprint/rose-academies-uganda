@@ -1,7 +1,7 @@
 "use client";
 
+import type { LocalFile } from "@/types/schema";
 import React, { useContext, useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
 import { uploadFile } from "@/api/supabase/files";
 import FileTypeBadge from "@/components/FileTypeBadge";
 import { DataContext } from "@/context/DataContext";
@@ -42,6 +42,7 @@ interface Props {
   isOpen: boolean;
   onClose: () => void;
   lessonId: number;
+  onFilesUploaded: (files: LocalFile[]) => void;
 }
 
 function formatBytes(bytes: number): string {
@@ -50,7 +51,12 @@ function formatBytes(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-export default function UploadFilesModal({ isOpen, onClose, lessonId }: Props) {
+export default function UploadFilesModal({
+  isOpen,
+  onClose,
+  lessonId,
+  onFilesUploaded,
+}: Props) {
   const [files, setFiles] = useState<FileEntry[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
@@ -58,7 +64,6 @@ export default function UploadFilesModal({ isOpen, onClose, lessonId }: Props) {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const data = useContext(DataContext);
-  const router = useRouter();
 
   useEffect(() => {
     if (!isOpen) return;
@@ -124,6 +129,7 @@ export default function UploadFilesModal({ isOpen, onClose, lessonId }: Props) {
 
     try {
       const snapshot = [...files];
+      const uploaded: LocalFile[] = [];
 
       for (let i = 0; i < snapshot.length; i++) {
         setFiles(prev =>
@@ -132,7 +138,8 @@ export default function UploadFilesModal({ isOpen, onClose, lessonId }: Props) {
           ),
         );
 
-        await uploadFile(lessonId, snapshot[i].file, i);
+        const result = await uploadFile(lessonId, snapshot[i].file, i);
+        uploaded.push(result);
 
         setFiles(prev =>
           prev.map((entry, idx) =>
@@ -141,8 +148,8 @@ export default function UploadFilesModal({ isOpen, onClose, lessonId }: Props) {
         );
       }
 
+      onFilesUploaded(uploaded);
       await data.refresh();
-      router.refresh();
 
       await new Promise(resolve => setTimeout(resolve, 800));
 

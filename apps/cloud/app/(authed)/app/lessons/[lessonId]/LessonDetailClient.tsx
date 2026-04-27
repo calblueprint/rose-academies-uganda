@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import type { LocalFile } from "@/types/schema";
+import { useCallback, useMemo, useState, useTransition } from "react";
 import ArchiveToggle from "@/components/ArchiveToggle/ArchiveToggle";
 import DeleteSelectedFilesButton from "@/components/DeleteSelectedFilesButton";
 import EditLessonButton from "@/components/EditLessonButton";
@@ -81,6 +82,21 @@ export default function LessonDetailClient({
   const [tableFiles, setTableFiles] = useState<FileRow[]>(
     [...initialTableFiles].sort((a, b) => a.order - b.order),
   );
+
+  const handleFilesUploaded = useCallback((uploaded: LocalFile[]) => {
+    setTableFiles(prev => {
+      const nextOrder = prev.length;
+      const newRows: FileRow[] = uploaded.map((f, i) => ({
+        id: String(f.id),
+        name: f.name,
+        sizeBytes: f.size_bytes,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        order: nextOrder + i,
+      }));
+      return [...prev, ...newRows];
+    });
+  }, []);
 
   async function handleDeleteFiles(fileIds: string[]) {
     if (fileIds.length === 0) return;
@@ -177,7 +193,10 @@ export default function LessonDetailClient({
               selectedFileIds.length === 0 || isDeleting || isReordering
             }
           />
-          <UploadFilesButton lessonId={lesson.id} />
+          <UploadFilesButton
+            lessonId={lesson.id}
+            onFilesUploadedAction={handleFilesUploaded}
+          />
         </SearchBarRow>
 
         {deleteError && <p>{deleteError}</p>}

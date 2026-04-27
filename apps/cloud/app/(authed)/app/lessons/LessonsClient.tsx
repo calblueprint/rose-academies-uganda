@@ -83,7 +83,7 @@ export default function LessonsClient({
   >(null);
   const [lessons, setLessons] = useState(initialLessons);
   const [loadingLessonId, setLoadingLessonId] = useState<number | null>(null);
-  const [sortBy, setSortBy] = useState<SortOptionValue | null>(null);
+  const [sortBy, setSortBy] = useState<SortOptionValue>("updated_desc");
 
   const filteredLessons = useMemo(() => {
     const filtered = lessons.filter(lesson =>

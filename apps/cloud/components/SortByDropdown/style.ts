@@ -16,13 +16,8 @@ export const SortButton = styled.button<{ $active: boolean }>`
   cursor: pointer;
   white-space: nowrap;
 
-  border: 1px solid ${COLORS.gray40};
-
-  ${({ $active }) =>
-    $active &&
-    `
-      box-shadow: 0 0 0 1px ${COLORS.evergreen};
-    `}
+  border: 1px solid
+    ${({ $active }) => ($active ? COLORS.evergreen : COLORS.gray40)};
 `;
 
 export const SortButtonLabel = styled.span`
@@ -37,10 +32,18 @@ export const SortDropdown = styled.div`
   position: absolute;
   top: calc(100% + 0.5rem);
   right: 0;
-  min-width: 14rem;
+
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+
   background: ${COLORS.white};
-  border: 1px solid ${COLORS.gray40};
-  border-radius: 0.75rem;
+
+  border-radius: 0.5rem;
+  border-right: 0.5px solid ${COLORS.gray40};
+  border-left: 0.5px solid ${COLORS.gray40};
+  border-bottom: 1.5px solid ${COLORS.gray40};
+
   box-shadow: 0 0.25rem 1rem rgba(0, 0, 0, 0.08);
   padding: 0.5rem;
   z-index: 10;
@@ -52,12 +55,15 @@ export const SortOption = styled.button<{ $active: boolean }>`
   background: ${({ $active }) => ($active ? COLORS.gray10 : COLORS.white)};
   border-radius: 0.5rem;
   padding: 0.625rem 0.75rem;
+
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
+
   cursor: pointer;
   text-align: left;
+  white-space: nowrap;
 
   font-size: var(--font-subtitle-3);
   line-height: var(--lh-subtitle-3);

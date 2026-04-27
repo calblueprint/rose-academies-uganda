@@ -16,8 +16,8 @@ export type SortOptionValue =
   | "created_asc";
 
 type SortByDropdownProps = {
-  value: SortOptionValue | null;
-  onChange: (value: SortOptionValue | null) => void;
+  value: SortOptionValue;
+  onChange: (value: SortOptionValue) => void;
 };
 
 const SORT_OPTIONS: { label: string; value: SortOptionValue }[] = [
@@ -44,7 +44,6 @@ export default function SortByDropdown({
     }
 
     document.addEventListener("mousedown", handleClickOutside);
-
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isOpen]);
 
@@ -52,7 +51,7 @@ export default function SortByDropdown({
     <SortButtonWrapper ref={sortRef}>
       <SortButton
         type="button"
-        $active={!!value}
+        $active={value !== "updated_desc"}
         onClick={() => setIsOpen(prev => !prev)}
       >
         <SortButtonLabel>Sort By</SortButtonLabel>
@@ -69,7 +68,7 @@ export default function SortByDropdown({
         >
           <path
             d="M4.5 6.75L9 11.25L13.5 6.75"
-            stroke={value ? "#1E4240" : "#808582"}
+            stroke={value !== "updated_desc" ? "#1E4240" : "#808582"}
             strokeWidth="1.5"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -85,7 +84,7 @@ export default function SortByDropdown({
               type="button"
               $active={value === option.value}
               onClick={() => {
-                onChange(value === option.value ? null : option.value);
+                onChange(option.value);
                 setIsOpen(false);
               }}
             >

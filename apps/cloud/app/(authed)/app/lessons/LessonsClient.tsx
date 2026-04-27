@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import supabase from "@/api/supabase/client";
 import CreateButton from "@/components/CreateLessonButton";
 import LessonCard from "@/components/LessonCard";
@@ -9,6 +9,7 @@ import ConfirmationModal from "@/components/modals/ConfirmationModal/Confirmatio
 import CreateLessonModal from "@/components/modals/CreateLessonModal/CreateLessonModal";
 import UploadLessonImageModal from "@/components/modals/UploadLessonImageModal/UploadLessonImageModal";
 import SearchBar from "@/components/SearchBar";
+import SortByDropdown, { SortOptionValue } from "@/components/SortByDropdown";
 import { IconSvgs } from "@/lib/icons";
 import {
   CardWrapper,
@@ -20,18 +21,11 @@ import {
   LessonsList,
   PageContainer,
   SearchBarRow,
-  SortButton,
-  SortButtonLabel,
-  SortButtonWrapper,
-  SortDropdown,
-  SortOption,
   Title,
   ToggleDivider,
   ToggleText,
   ViewToggleButton,
 } from "./style";
-
-type SortKey = "updated_at" | "created_at";
 
 type LessonsClientLesson = {
   id: number;
@@ -89,20 +83,7 @@ export default function LessonsClient({
   >(null);
   const [lessons, setLessons] = useState(initialLessons);
   const [loadingLessonId, setLoadingLessonId] = useState<number | null>(null);
-  const [sortBy, setSortBy] = useState<SortKey | null>(null);
-  const [sortDropdownOpen, setSortDropdownOpen] = useState(false);
-  const sortRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!sortDropdownOpen) return;
-    function handleClickOutside(e: MouseEvent) {
-      if (sortRef.current && !sortRef.current.contains(e.target as Node)) {
-        setSortDropdownOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [sortDropdownOpen]);
+  const [sortBy, setSortBy] = useState<SortOptionValue | null>(null);
 
   const filteredLessons = useMemo(() => {
     const filtered = lessons.filter(lesson =>
@@ -112,12 +93,54 @@ export default function LessonsClient({
     if (!sortBy) return filtered;
 
     return [...filtered].sort((a, b) => {
-      const aVal = sortBy === "updated_at" ? a.updated_at : a.created_at;
-      const bVal = sortBy === "updated_at" ? b.updated_at : b.created_at;
-      if (!aVal && !bVal) return 0;
-      if (!aVal) return 1;
-      if (!bVal) return -1;
-      return new Date(bVal).getTime() - new Date(aVal).getTime();
+      const getDateValue = (date?: string) =>
+        date ? new Date(date).getTime() : null;
+
+      if (sortBy === "updated_desc") {
+        const aVal = getDateValue(a.updated_at);
+        const bVal = getDateValue(b.updated_at);
+
+        if (aVal === null && bVal === null) return 0;
+        if (aVal === null) return 1;
+        if (bVal === null) return -1;
+
+        return bVal - aVal;
+      }
+
+      if (sortBy === "updated_asc") {
+        const aVal = getDateValue(a.updated_at);
+        const bVal = getDateValue(b.updated_at);
+
+        if (aVal === null && bVal === null) return 0;
+        if (aVal === null) return 1;
+        if (bVal === null) return -1;
+
+        return aVal - bVal;
+      }
+
+      if (sortBy === "created_desc") {
+        const aVal = getDateValue(a.created_at);
+        const bVal = getDateValue(b.created_at);
+
+        if (aVal === null && bVal === null) return 0;
+        if (aVal === null) return 1;
+        if (bVal === null) return -1;
+
+        return bVal - aVal;
+      }
+
+      if (sortBy === "created_asc") {
+        const aVal = getDateValue(a.created_at);
+        const bVal = getDateValue(b.created_at);
+
+        if (aVal === null && bVal === null) return 0;
+        if (aVal === null) return 1;
+        if (bVal === null) return -1;
+
+        return aVal - bVal;
+      }
+
+      return 0;
     });
   }, [lessons, searchTerm, sortBy]);
 
@@ -246,81 +269,7 @@ export default function LessonsClient({
           )}
 
           {showSortButton && (
-            <SortButtonWrapper ref={sortRef}>
-              <SortButton
-                type="button"
-                onClick={() => setSortDropdownOpen(prev => !prev)}
-              >
-                <SortButtonLabel $active={!!sortBy}>
-                  {sortBy === "updated_at"
-                    ? "Recently Updated"
-                    : sortBy === "created_at"
-                      ? "Recently Created"
-                      : "Sort By"}
-                </SortButtonLabel>
-                <svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 18 18"
-                  fill="none"
-                  style={{
-                    transform: sortDropdownOpen
-                      ? "rotate(180deg)"
-                      : "rotate(0deg)",
-                    transition: "transform 0.2s ease",
-                  }}
-                >
-                  <path
-                    d="M4.5 6.75L9 11.25L13.5 6.75"
-                    stroke={sortBy ? "#1E4240" : "#808582"}
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </SortButton>
-
-              {sortDropdownOpen && (
-                <SortDropdown>
-                  {(
-                    [
-                      { label: "Recently Updated", value: "updated_at" },
-                      { label: "Recently Created", value: "created_at" },
-                    ] as { label: string; value: SortKey }[]
-                  ).map(option => (
-                    <SortOption
-                      key={option.value}
-                      type="button"
-                      $active={sortBy === option.value}
-                      onClick={() => {
-                        setSortBy(prev =>
-                          prev === option.value ? null : option.value,
-                        );
-                        setSortDropdownOpen(false);
-                      }}
-                    >
-                      {option.label}
-                      {sortBy === option.value && (
-                        <svg
-                          width="14"
-                          height="10"
-                          viewBox="0 0 14 10"
-                          fill="none"
-                        >
-                          <path
-                            d="M1 5L5 9L13 1"
-                            stroke="#1E4240"
-                            strokeWidth="1.5"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
-                      )}
-                    </SortOption>
-                  ))}
-                </SortDropdown>
-              )}
-            </SortButtonWrapper>
+            <SortByDropdown value={sortBy} onChange={setSortBy} />
           )}
 
           {showViewToggle && (

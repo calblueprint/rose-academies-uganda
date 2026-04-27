@@ -1,9 +1,10 @@
 "use client";
 
 import type { LocalFile } from "@/types/schema";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { uploadFile } from "@/api/supabase/files";
 import FileTypeBadge from "@/components/FileTypeBadge";
+import { DataContext } from "@/context/DataContext";
 import {
   ActionRow,
   BrowseButton,
@@ -62,6 +63,7 @@ export default function UploadFilesModal({
   const [error, setError] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const data = useContext(DataContext);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -147,6 +149,7 @@ export default function UploadFilesModal({
       }
 
       onFilesUploaded(uploaded);
+      await data.refresh();
 
       await new Promise(resolve => setTimeout(resolve, 800));
 

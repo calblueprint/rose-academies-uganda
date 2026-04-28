@@ -1,4 +1,5 @@
 import type { FileRow } from "./index";
+import { MouseEvent } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { flexRender, Row } from "@tanstack/react-table";
@@ -9,9 +10,26 @@ import * as style from "./styles";
 type SortableRowProps = {
   row: Row<FileRow>;
   canDrag: boolean;
+  onRowClick?: (file: FileRow) => void;
 };
 
-export function SortableRow({ row, canDrag }: SortableRowProps) {
+type StaticRowProps = {
+  row: Row<FileRow>;
+  onRowClick?: (file: FileRow) => void;
+};
+
+// Rows are clickable for previews, but table controls should keep their own behavior.
+function shouldIgnoreRowClick(event: MouseEvent<HTMLTableRowElement>) {
+  const target = event.target as HTMLElement;
+
+  return Boolean(
+    target.closest(
+      'button, input, a, [role="button"], [data-prevent-row-click="true"]',
+    ),
+  );
+}
+
+export function SortableRow({ row, canDrag, onRowClick }: SortableRowProps) {
   const {
     attributes,
     listeners,
@@ -31,8 +49,16 @@ export function SortableRow({ row, canDrag }: SortableRowProps) {
     opacity: isDragging ? 0.7 : 1,
   };
 
+  function handleRowClick(event: MouseEvent<HTMLTableRowElement>) {
+    if (shouldIgnoreRowClick(event) || isDragging || !onRowClick) {
+      return;
+    }
+
+    onRowClick(row.original);
+  }
+
   return (
-    <tr ref={setNodeRef} style={rowStyle}>
+    <tr ref={setNodeRef} style={rowStyle} onClick={handleRowClick}>
       {row.getVisibleCells().map(cell => {
         if (cell.column.id === "select") {
           return (
@@ -82,13 +108,17 @@ export function SortableRow({ row, canDrag }: SortableRowProps) {
   );
 }
 
-type StaticRowProps = {
-  row: Row<FileRow>;
-};
+export function StaticRow({ row, onRowClick }: StaticRowProps) {
+  function handleRowClick(event: MouseEvent<HTMLTableRowElement>) {
+    if (shouldIgnoreRowClick(event) || !onRowClick) {
+      return;
+    }
 
-export function StaticRow({ row }: StaticRowProps) {
+    onRowClick(row.original);
+  }
+
   return (
-    <tr>
+    <tr onClick={handleRowClick}>
       {row.getVisibleCells().map(cell => {
         if (cell.column.id === "select") {
           return (

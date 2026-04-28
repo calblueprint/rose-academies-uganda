@@ -3,20 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { getSupabaseBrowserClient } from "@/api/supabase/browser";
-import {
-  ArchiveButton,
-  ArchiveButtonText,
-  ButtonRow,
-  CancelButton,
-  CancelButtonText,
-  ConfirmButton,
-  ConfirmButtonText,
-  ModalBackdrop,
-  ModalContainer,
-  ModalHeader,
-  ModalText,
-  ModalTitle,
-} from "./styles";
+import ConfirmationModal from "@/components/modals/ConfirmationModal/ConfirmationModal";
+import { ArchiveButton, ArchiveButtonText } from "./styles";
 
 type ArchiveToggleProps = {
   lesson_Id: number;
@@ -77,35 +65,18 @@ export default function ArchiveToggle({
         </ArchiveButtonText>
       </ArchiveButton>
 
-      {isOpen && (
-        <ModalBackdrop onClick={() => setIsOpen(false)}>
-          <ModalContainer onClick={e => e.stopPropagation()}>
-            <ModalHeader>
-              <ModalTitle>
-                {isArchived ? "Restore Lesson" : "Archive Lesson"}
-              </ModalTitle>
-            </ModalHeader>
-
-            <ModalText>
-              {isArchived
-                ? "This lesson will be restored to the Lesson Dashboard and Sync Lessons pages."
-                : "This lesson will be removed from the Lesson Dashboard and Sync Lessons pages. You can restore it through the Archive page."}
-            </ModalText>
-
-            <ButtonRow>
-              <CancelButton type="button" onClick={() => setIsOpen(false)}>
-                <CancelButtonText>Cancel</CancelButtonText>
-              </CancelButton>
-
-              <ConfirmButton type="button" onClick={handleConfirm}>
-                <ConfirmButtonText>
-                  {isArchived ? "Restore Lesson" : "Archive Lesson"}
-                </ConfirmButtonText>
-              </ConfirmButton>
-            </ButtonRow>
-          </ModalContainer>
-        </ModalBackdrop>
-      )}
+      <ConfirmationModal
+        isOpen={isOpen}
+        title={isArchived ? "Restore Lesson" : "Archive Lesson"}
+        description={
+          isArchived
+            ? "This lesson will be restored to the Lesson Dashboard and Sync Lessons pages."
+            : "This lesson will be removed from the Lesson Dashboard and Sync Lessons pages. You can restore it through the Archive page."
+        }
+        confirmText={isArchived ? "Restore Lesson" : "Archive Lesson"}
+        onCancel={() => setIsOpen(false)}
+        onConfirm={handleConfirm}
+      />
     </>
   );
 }

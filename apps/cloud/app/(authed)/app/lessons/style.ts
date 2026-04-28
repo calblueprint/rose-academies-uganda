@@ -125,6 +125,7 @@ export const LessonsList = styled.div<VariantProps>`
 
 export const SearchBarRow = styled.div<VariantProps>`
   display: flex;
+  align-items: center;
   gap: 1.14rem;
   padding: 0.75rem 0rem;
   width: 100%;
@@ -176,6 +177,69 @@ export const GridToggle = styled.div<ToggleProps>`
       $active
         ? "var(--evergreen-100, #1E4240)"
         : "var(--gray-40, var(--gray, #D9D9D9))"};
+  }
+`;
+
+export const SortButtonWrapper = styled.div`
+  position: relative;
+  flex-shrink: 0;
+`;
+
+export const SortButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 44px;
+  padding: 10px 16px;
+  border-radius: 16px;
+  border-top: 0.437px solid ${COLORS.gray40};
+  border-right: 0.873px solid ${COLORS.gray40};
+  border-bottom: 1.31px solid ${COLORS.gray40};
+  border-left: 0.873px solid ${COLORS.gray40};
+  background: ${COLORS.white};
+  cursor: pointer;
+  white-space: nowrap;
+`;
+
+export const SortButtonLabel = styled.span<{ $active: boolean }>`
+  font-family: var(--font-gilroy);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: normal;
+  color: ${({ $active }) => ($active ? COLORS.evergreen : COLORS.gray60)};
+`;
+
+export const SortDropdown = styled.div`
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 100;
+  background: ${COLORS.white};
+  border: 0.873px solid ${COLORS.gray40};
+  border-radius: 12px;
+  padding: 4px;
+  min-width: 11rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+`;
+
+export const SortOption = styled.button<{ $active: boolean }>`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.625rem 0.875rem;
+  border: none;
+  background: ${({ $active }) => ($active ? COLORS.gray10 : "transparent")};
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: var(--font-gilroy);
+  font-size: 14px;
+  font-weight: ${({ $active }) => ($active ? "500" : "400")};
+  color: ${({ $active }) => ($active ? COLORS.evergreen : COLORS.gray80)};
+  text-align: left;
+
+  &:hover {
+    background: ${COLORS.gray10};
   }
 `;
 

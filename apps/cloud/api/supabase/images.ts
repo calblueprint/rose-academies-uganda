@@ -23,7 +23,7 @@ export async function uploadLessonImage(
 
   const { error: updateError } = await supabase
     .from("Lessons")
-    .update({ image_path: publicUrl })
+    .update({ image_path: publicUrl, updated_at: new Date().toISOString() })
     .eq("id", lessonId)
     .eq("user_id", user.id);
 

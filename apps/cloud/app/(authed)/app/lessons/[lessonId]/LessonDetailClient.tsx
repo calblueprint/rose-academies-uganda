@@ -180,15 +180,15 @@ export default function LessonDetailClient({
 
         <SearchBarRow>
           <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
-          <DeleteSelectedFilesButton
-            selectedCount={selectedFileIds.length}
-            onClick={() => {
-              void handleDeleteFiles(selectedFileIds);
-            }}
-            disabled={
-              selectedFileIds.length === 0 || isDeleting || isReordering
-            }
-          />
+          {selectedFileIds.length > 0 && (
+            <DeleteSelectedFilesButton
+              selectedCount={selectedFileIds.length}
+              onClick={() => {
+                void handleDeleteFiles(selectedFileIds);
+              }}
+              disabled={isDeleting || isReordering}
+            />
+          )}
           <UploadFilesButton lessonId={lesson.id} />
         </SearchBarRow>
 

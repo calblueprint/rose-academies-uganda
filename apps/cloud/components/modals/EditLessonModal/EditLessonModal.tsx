@@ -191,6 +191,7 @@ export default function EditLessonModal({ isOpen, onClose, lesson }: Props) {
           name: title.trim(),
           description: description.trim() || null,
           group_id: fallbackGroupId,
+          updated_at: new Date().toISOString(),
         })
         .eq("id", lesson.id);
 

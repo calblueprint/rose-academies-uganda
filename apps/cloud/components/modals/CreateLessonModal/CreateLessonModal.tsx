@@ -157,8 +157,6 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
 
   if (!isOpen) return null;
 
-  if (!isOpen) return null;
-
   function flashSyncRequirements() {
     setShouldFlashSyncRequirements(true);
 
@@ -410,7 +408,7 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
           <AssignedVillageRow>
             <FieldLabel style={{ marginBottom: 0 }}>Classroom</FieldLabel>
 
-            <VillageDropdownWrapper>
+            <VillageDropdownWrapper ref={villageDropdownRef}>
               <VillageSelectTrigger
                 type="button"
                 $flashError={shouldFlashSyncRequirements && !hasClassroom}

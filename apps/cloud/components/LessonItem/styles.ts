@@ -100,11 +100,15 @@ export const ActionButton = styled.button<{ $variant: "remove" | "restore" }>`
   color: ${COLORS.gray80};
 
   background: ${({ $variant }) =>
-    $variant === "remove" ? COLORS.gray40 : COLORS.gray10};
+    $variant === "remove" ? COLORS.gray10 : COLORS.gray10};
 
   padding: ${({ $variant }) =>
     $variant === "remove" ? "0.27469rem 0.824rem" : "0.5rem 0.75rem"};
-
+  &:hover:not(:disabled),
+  &:focus-visible:not(:disabled),
+  &:active:not(:disabled) {
+    background: var(--gray-30, #dfe3e9);
+  }
   &:disabled {
     opacity: 0.7;
     cursor: not-allowed;

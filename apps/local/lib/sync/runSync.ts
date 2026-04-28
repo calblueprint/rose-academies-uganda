@@ -483,6 +483,75 @@ export async function runSync({ syncRunId }: RunSyncOptions = {}) {
 
     const syncPayload = await fetchAssignedSyncData();
 
+    // Get all lesson IDs currently stored locally in SQLite
+    const existingLessons = db
+      .prepare<[], { id: number }>("SELECT id FROM lessons")
+      .all();
+
+    // Create a set of lesson IDs that SHOULD exist after sync (from Supabase)
+    const newLessonIds = new Set(syncPayload.lessons.map(l => l.id));
+
+    // Find lessons that exist locally but are NOT in the new sync payload
+    const lessonsToDelete = existingLessons.filter(
+      l => !newLessonIds.has(l.id),
+    );
+
+    const lessonIdsToDelete = lessonsToDelete.map(l => l.id);
+
+    const filesToDelete = db
+      .prepare<number[], { id: number; local_path: string | null }>(
+        `
+    SELECT f.id, f.local_path
+    FROM files f
+    JOIN lesson_files lf ON lf.file_id = f.id
+    WHERE lf.lesson_id IN (${lessonIdsToDelete.map(() => "?").join(",")})
+    `,
+      )
+      .all(...lessonIdsToDelete);
+
+    // Delete the actual file contents from disk
+    for (const file of filesToDelete) {
+      if (file.local_path && fs.existsSync(file.local_path)) {
+        console.log("[SYNC] Deleting file:", file.local_path);
+        fs.unlinkSync(file.local_path);
+      }
+    }
+
+    if (lessonIdsToDelete.length > 0) {
+      const placeholders = lessonIdsToDelete.map(() => "?").join(",");
+
+      // Get file IDs BEFORE deleting mappings
+      const fileIdsToDelete = db
+        .prepare<number[], { file_id: number }>(
+          `SELECT DISTINCT file_id FROM lesson_files WHERE lesson_id IN (${placeholders})`,
+        )
+        .all(...lessonIdsToDelete)
+        .map(r => r.file_id);
+
+      // Delete lesson-file mappings
+      db.prepare(
+        `DELETE FROM lesson_files WHERE lesson_id IN (${placeholders})`,
+      ).run(...lessonIdsToDelete);
+
+      // Break foreign key from files → lessons
+      db.prepare(
+        `UPDATE files SET lesson_id = NULL WHERE lesson_id IN (${placeholders})`,
+      ).run(...lessonIdsToDelete);
+
+      // Delete files using cached IDs
+      if (fileIdsToDelete.length > 0) {
+        const filePlaceholders = fileIdsToDelete.map(() => "?").join(",");
+        db.prepare(`DELETE FROM files WHERE id IN (${filePlaceholders})`).run(
+          ...fileIdsToDelete,
+        );
+      }
+
+      // Delete lessons
+      db.prepare(`DELETE FROM lessons WHERE id IN (${placeholders})`).run(
+        ...lessonIdsToDelete,
+      );
+    }
+
     await downloadFiles(
       syncPayload.files,
       syncPayload.lessons,

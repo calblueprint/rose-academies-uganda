@@ -5,6 +5,8 @@ import { useCallback, useMemo, useState, useTransition } from "react";
 import ArchiveToggle from "@/components/ArchiveToggle/ArchiveToggle";
 import DeleteSelectedFilesButton from "@/components/DeleteSelectedFilesButton";
 import EditLessonButton from "@/components/EditLessonButton";
+import FilePreview from "@/components/FilePreview";
+import FilePreviewModal from "@/components/FilePreviewModal";
 import FilesTable, { FileRow } from "@/components/FilesTable";
 import LessonHeader from "@/components/LessonHeader";
 import OfflineToggle from "@/components/OfflineToggle";
@@ -29,6 +31,8 @@ type LessonFile = {
   createdAt: string | null;
   updatedAt: string | null;
   order: number;
+  storagePath: string | null;
+  mimeType: string | null;
 };
 
 type Lesson = {
@@ -58,6 +62,8 @@ export default function LessonDetailClient({
   const [isOffline, setIsOffline] = useState(initialIsOffline);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedFileIds, setSelectedFileIds] = useState<string[]>([]);
+  const [selectedPreviewFile, setSelectedPreviewFile] =
+    useState<FileRow | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [reorderError, setReorderError] = useState<string | null>(null);
   const [isDeleting, startDeleteTransition] = useTransition();
@@ -75,6 +81,8 @@ export default function LessonDetailClient({
           file.createdAt ??
           new Date(2026, 0, 1).toISOString(),
         order: file.order,
+        storagePath: file.storagePath,
+        mimeType: file.mimeType,
       })),
     [files],
   );
@@ -120,6 +128,10 @@ export default function LessonDetailClient({
         );
 
         setSelectedFileIds([]);
+
+        if (selectedPreviewFile && fileIds.includes(selectedPreviewFile.id)) {
+          setSelectedPreviewFile(null);
+        }
       } catch (error) {
         setDeleteError(
           error instanceof Error ? error.message : "Failed to delete files",
@@ -184,15 +196,15 @@ export default function LessonDetailClient({
 
         <SearchBarRow>
           <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+
           <DeleteSelectedFilesButton
             selectedCount={selectedFileIds.length}
             onClick={() => {
               void handleDeleteFiles(selectedFileIds);
             }}
-            disabled={
-              selectedFileIds.length === 0 || isDeleting || isReordering
-            }
+            disabled={selectedFileIds.length === 0 || isDeleting || isReordering}
           />
+
           <UploadFilesButton
             lessonId={lesson.id}
             onFilesUploadedAction={handleFilesUploaded}
@@ -211,8 +223,15 @@ export default function LessonDetailClient({
           isReordering={isReordering}
           selectedFileIds={selectedFileIds}
           onSelectionChange={setSelectedFileIds}
+          onRowClick={setSelectedPreviewFile}
         />
       </LessonInformation>
+
+      {selectedPreviewFile && (
+        <FilePreviewModal onClose={() => setSelectedPreviewFile(null)}>
+          <FilePreview file={selectedPreviewFile} />
+        </FilePreviewModal>
+      )}
     </PageContainer>
   );
 }

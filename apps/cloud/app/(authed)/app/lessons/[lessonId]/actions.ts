@@ -38,6 +38,11 @@ export async function deleteLessonFilesAction({
     throw new Error(error.message);
   }
 
+  await supabase
+    .from("Lessons")
+    .update({ updated_at: new Date().toISOString() })
+    .eq("id", lessonId);
+
   return { success: true };
 }
 

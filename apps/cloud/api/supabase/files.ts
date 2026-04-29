@@ -2,7 +2,7 @@ import type { LocalFile } from "@/types/schema";
 import { getSupabaseBrowserClient } from "@/api/supabase/browser";
 import { getCurrentUserOrThrow } from "@/lib/getCurrentUser";
 
-async function hashFile(file: File): Promise<string> {
+export async function hashFile(file: File): Promise<string> {
   const buffer = await file.arrayBuffer();
   const hashBuffer = await crypto.subtle.digest("SHA-256", buffer);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
@@ -44,6 +44,19 @@ export async function uploadFile(
     });
 
     if (error) throw new Error(error.message);
+
+    if (!existingFile.size_bytes) {
+      const { data: updatedFile, error: updateError } = await supabase
+        .from("Files")
+        .update({ size_bytes: file.size })
+        .eq("id", existingFile.id)
+        .select()
+        .single();
+
+      if (updateError) throw new Error(updateError.message);
+
+      return updatedFile as LocalFile;
+    }
 
     return existingFile as LocalFile;
   }

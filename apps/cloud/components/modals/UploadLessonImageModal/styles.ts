@@ -34,44 +34,63 @@ export const ModalTitle = styled.h2`
 
 export const TabRow = styled.div`
   display: flex;
-  background: ${COLORS.gray10};
-  border-radius: 8px;
-  padding: 3px;
-  gap: 2px;
+  background: ${COLORS.whiteSmoke};
+  border-radius: 3.5rem;
+  padding: 3px 4px;
+  gap: 4px;
 `;
 
 export const Tab = styled.button<{ $active: boolean }>`
   flex: 1;
-  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
   border: none;
-  border-radius: 6px;
+  border-radius: 3.5rem;
 
-  font-size: var(--font-subtitle-2);
-  line-height: var(--lh-subtitle-2);
+  font-family: var(--font-gilroy);
+  font-size: 14px;
   font-weight: 500;
+  white-space: nowrap;
 
   cursor: pointer;
   transition:
     background 0.15s,
-    color 0.15s;
+    color 0.15s,
+    box-shadow 0.15s;
 
-  background: ${({ $active }) => ($active ? COLORS.white : "transparent")};
-  color: ${({ $active }) => ($active ? COLORS.gray100 : COLORS.gray60)};
+  background: ${({ $active }) => ($active ? COLORS.evergreen : "transparent")};
+  color: ${({ $active }) => ($active ? COLORS.white : COLORS.gray100)};
   box-shadow: ${({ $active }) =>
-    $active ? "0 1px 3px rgba(0,0,0,0.1)" : "none"};
-
-  &:disabled {
-    cursor: not-allowed;
-    opacity: 0.5;
-  }
+    $active ? "0px 4px 10px rgba(179,179,179,0.49)" : "none"};
 `;
 
-export const ComingSoonText = styled.p`
-  font-size: var(--font-subtitle-2);
-  line-height: var(--lh-subtitle-2);
-  color: ${COLORS.gray60};
-  text-align: center;
-  margin: 2rem 0;
+export const PresetGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+`;
+
+export const PresetCard = styled.button<{ $selected: boolean }>`
+  position: relative;
+  background: ${COLORS.evergreen};
+  border-radius: 10px;
+  overflow: hidden;
+  border: 3px solid
+    ${({ $selected }) => ($selected ? COLORS.orange100 : "transparent")};
+  cursor: pointer;
+  padding: 0;
+  aspect-ratio: 256 / 120;
+  transition: border-color 0.15s;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
 `;
 
 export const SaveButton = styled.button`

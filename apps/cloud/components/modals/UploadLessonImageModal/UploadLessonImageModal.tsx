@@ -1,23 +1,24 @@
 "use client";
 
-import React, { useContext, useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import React, { useEffect, useRef, useState } from "react";
+import { getSupabaseBrowserClient } from "@/api/supabase/browser";
 import { uploadLessonImage } from "@/api/supabase/images";
-import { DataContext } from "@/context/DataContext";
+import { getCurrentUserOrThrow } from "@/lib/getCurrentUser";
+import { PRESET_IMAGES } from "@/lib/lessonPresets";
 import {
   ActionRow,
   BrowseButton,
   CancelButton,
   CloseButton,
-  ComingSoonText,
   DropZone,
   DropZoneSubtext,
   DropZoneText,
   ErrorText,
   ModalCard,
   ModalHeader,
-  ModalTitle,
   Overlay,
+  PresetCard,
+  PresetGrid,
   SaveButton,
   Tab,
   TabRow,
@@ -33,10 +34,59 @@ interface Props {
   isOpen: boolean;
   onClose: () => void;
   lessonId: number;
+  onImageUpdated?: (lessonId: number, imagePath: string) => void;
 }
 
 const ACCEPTED_TYPES = ["image/png", "image/jpeg"];
 const ACCEPTED_EXT = ".png, .jpg";
+
+// ============================================================
+// Tab icons
+// ============================================================
+
+function SelectIcon({ color }: { color: string }) {
+  return (
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+      <rect
+        x="2"
+        y="3"
+        width="14"
+        height="12"
+        rx="1.5"
+        stroke={color}
+        strokeWidth="1.4"
+      />
+      <circle cx="6.5" cy="7.5" r="1.5" stroke={color} strokeWidth="1.4" />
+      <path
+        d="M2 12.5L5.5 9.5L8 11.5L11 8.5L16 12.5"
+        stroke={color}
+        strokeWidth="1.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function UploadIcon({ color }: { color: string }) {
+  return (
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+      <path
+        d="M9 12V4M9 4L6 7M9 4L12 7"
+        stroke={color}
+        strokeWidth="1.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M3 14H15"
+        stroke={color}
+        strokeWidth="1.4"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
 
 // ============================================================
 // Component
@@ -46,23 +96,21 @@ export default function UploadLessonImageModal({
   isOpen,
   onClose,
   lessonId,
+  onImageUpdated,
 }: Props) {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<ActiveTab>("upload");
+  const [activeTab, setActiveTab] = useState<ActiveTab>("select");
+  const [selectedPreset, setSelectedPreset] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const data = useContext(DataContext);
-  const router = useRouter();
 
   useEffect(() => {
     return () => {
-      if (previewUrl) {
-        URL.revokeObjectURL(previewUrl);
-      }
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
     };
   }, [previewUrl]);
 
@@ -77,10 +125,7 @@ export default function UploadLessonImageModal({
   if (!isOpen) return null;
 
   function clearSelectedFile() {
-    if (previewUrl) {
-      URL.revokeObjectURL(previewUrl);
-    }
-
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
     setFile(null);
     setPreviewUrl(null);
     setError(null);
@@ -91,14 +136,9 @@ export default function UploadLessonImageModal({
       setError("Only .png and .jpg files are accepted.");
       return;
     }
-
-    if (previewUrl) {
-      URL.revokeObjectURL(previewUrl);
-    }
-
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
     setError(null);
     setFile(f);
-
     setPreviewUrl(URL.createObjectURL(f));
   }
 
@@ -122,66 +162,124 @@ export default function UploadLessonImageModal({
   function handleClose() {
     if (isSubmitting) return;
     clearSelectedFile();
-    setActiveTab("upload");
+    setSelectedPreset(null);
+    setActiveTab("select");
     onClose();
   }
 
   async function handleSubmit() {
-    if (!file || isSubmitting) return;
-
+    if (isSubmitting) return;
     setIsSubmitting(true);
     setError(null);
 
     try {
-      await uploadLessonImage(lessonId, file);
-      await data.refresh();
-      router.refresh();
+      let newImagePath: string;
 
+      if (activeTab === "select") {
+        if (!selectedPreset) return;
+        const supabase = getSupabaseBrowserClient();
+        const user = await getCurrentUserOrThrow();
+        const { error: updateError } = await supabase
+          .from("Lessons")
+          .update({
+            image_path: selectedPreset,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", lessonId)
+          .eq("user_id", user.id);
+        if (updateError) throw updateError;
+        newImagePath = selectedPreset;
+      } else {
+        if (!file) return;
+        newImagePath = await uploadLessonImage(lessonId, file);
+      }
+
+      onImageUpdated?.(lessonId, newImagePath);
       clearSelectedFile();
-      setIsSubmitting(false);
+      setSelectedPreset(null);
       onClose();
     } catch (err) {
-      console.error("Failed to upload image:", err);
-      setError("Failed to upload image. Please try again.");
+      console.error("Failed to save image:", err);
+      setError("Failed to save image. Please try again.");
+    } finally {
       setIsSubmitting(false);
     }
   }
+
+  const canSave = activeTab === "select" ? !!selectedPreset : !!file;
 
   return (
     <Overlay onClick={handleClose}>
       <ModalCard onClick={e => e.stopPropagation()}>
         <ModalHeader>
-          <ModalTitle>Upload Lesson Cover</ModalTitle>
+          <h2
+            style={{
+              margin: 0,
+              fontSize: "1.5rem",
+              fontWeight: 500,
+              lineHeight: "normal",
+            }}
+          >
+            Select Lesson Graphic
+          </h2>
 
           <CloseButton
             type="button"
             onClick={handleClose}
             disabled={isSubmitting}
           >
-            <svg width="16" height="16">
-              <path d="M12 4L4 12M4 4L12 12" />
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M12 4L4 12M4 4L12 12"
+                stroke="currentColor"
+                strokeWidth="1.75"
+                strokeLinecap="round"
+              />
             </svg>
           </CloseButton>
         </ModalHeader>
 
         <TabRow>
           <Tab
+            type="button"
             $active={activeTab === "select"}
             onClick={() => setActiveTab("select")}
           >
+            <SelectIcon color={activeTab === "select" ? "#fff" : "#000"} />
             Select Image
           </Tab>
-
           <Tab
+            type="button"
             $active={activeTab === "upload"}
             onClick={() => setActiveTab("upload")}
           >
+            <UploadIcon color={activeTab === "upload" ? "#fff" : "#000"} />
             Upload Image
           </Tab>
         </TabRow>
 
         {activeTab === "select" ? (
-          <ComingSoonText>Preset images coming soon.</ComingSoonText>
+          <PresetGrid>
+            {PRESET_IMAGES.map(src => (
+              <PresetCard
+                key={src}
+                type="button"
+                $selected={selectedPreset === src}
+                onClick={() =>
+                  setSelectedPreset(prev => (prev === src ? null : src))
+                }
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={src} alt="" />
+              </PresetCard>
+            ))}
+          </PresetGrid>
         ) : (
           <DropZone
             $isDragging={isDragging}
@@ -189,34 +287,49 @@ export default function UploadLessonImageModal({
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
             onClick={() => !isSubmitting && fileInputRef.current?.click()}
-            style={
-              previewUrl
-                ? {
-                    padding: 0,
-                    overflow: "hidden",
-                  }
-                : undefined
-            }
+            style={previewUrl ? { padding: 0, overflow: "hidden" } : undefined}
           >
             {previewUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={previewUrl}
                 alt="Preview"
-                style={{
-                  display: "block",
-                  width: "100%",
-                  height: "auto",
-                }}
+                style={{ display: "block", width: "100%", height: "auto" }}
               />
             ) : (
               <>
-                <svg width="36" height="30">
-                  <path d="..." />
+                <svg
+                  width="36"
+                  height="30"
+                  viewBox="0 0 36 30"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M28.5 12.33C27.46 7.8 23.42 4.5 18.6 4.5C14.73 4.5 11.34 6.66 9.66 9.81C5.94 10.23 3 13.35 3 17.25C3 21.39 6.36 24.75 10.5 24.75H28.2C31.68 24.75 34.5 21.93 34.5 18.45C34.5 15.12 31.98 12.42 28.5 12.33Z"
+                    stroke="#4B4A49"
+                    strokeWidth="1.6"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M22.5 20.25L18 15.75L13.5 20.25"
+                    stroke="#4B4A49"
+                    strokeWidth="1.6"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M18 15.75V28.5"
+                    stroke="#4B4A49"
+                    strokeWidth="1.6"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
                 </svg>
 
                 <DropZoneText>
-                  Choose a file or drag & drop it here
+                  Choose a file or drag &amp; drop it here
                 </DropZoneText>
 
                 <DropZoneSubtext>
@@ -253,13 +366,19 @@ export default function UploadLessonImageModal({
         {error && <ErrorText>{error}</ErrorText>}
 
         <ActionRow>
-          <CancelButton onClick={handleClose}>Cancel</CancelButton>
-
+          <CancelButton type="button" onClick={handleClose}>
+            Cancel
+          </CancelButton>
           <SaveButton
+            type="button"
             onClick={handleSubmit}
-            disabled={!file || isSubmitting || activeTab === "select"}
+            disabled={!canSave || isSubmitting}
           >
-            {isSubmitting ? "Uploading..." : "Save Image"}
+            {isSubmitting
+              ? "Saving..."
+              : activeTab === "select"
+                ? "Select Image"
+                : "Save Image"}
           </SaveButton>
         </ActionRow>
       </ModalCard>

@@ -202,7 +202,9 @@ export default function LessonDetailClient({
             onClick={() => {
               void handleDeleteFiles(selectedFileIds);
             }}
-            disabled={selectedFileIds.length === 0 || isDeleting || isReordering}
+            disabled={
+              selectedFileIds.length === 0 || isDeleting || isReordering
+            }
           />
 
           <UploadFilesButton

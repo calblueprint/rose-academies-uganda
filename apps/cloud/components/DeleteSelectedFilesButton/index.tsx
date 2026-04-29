@@ -34,6 +34,9 @@ export default function DeleteSelectedFilesButton({
   onClick,
   disabled,
 }: DeleteSelectedFilesButtonProps) {
+  if (selectedCount === 0) {
+    return null;
+  }
   const isActive = selectedCount > 0;
 
   const label =

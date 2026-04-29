@@ -3,7 +3,7 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getSupabaseBrowserClient } from "@/api/supabase/browser";
-import { uploadFile } from "@/api/supabase/files";
+import { hashFile, uploadFile } from "@/api/supabase/files";
 import FileTypeBadge from "@/components/FileTypeBadge";
 import { DataContext } from "@/context/DataContext";
 import {
@@ -124,6 +124,29 @@ export default function UploadFilesModal({ isOpen, onClose, lessonId }: Props) {
     setError(null);
 
     try {
+      const existingHashesInLesson = new Set(
+        data.files.filter(f => f.lesson_id === lessonId).map(f => f.hash),
+      );
+
+      const hashes = await Promise.all(
+        files.map(entry => hashFile(entry.file)),
+      );
+
+      const duplicateNames = files
+        .filter((_, i) => existingHashesInLesson.has(hashes[i]))
+        .map(entry => entry.file.name);
+
+      if (duplicateNames.length > 0) {
+        const names = duplicateNames.join(", ");
+        setError(
+          duplicateNames.length === 1
+            ? `"${names}" is already in this lesson.`
+            : `These files are already in this lesson: ${names}`,
+        );
+        setIsSubmitting(false);
+        return;
+      }
+
       const snapshot = [...files];
 
       for (let i = 0; i < snapshot.length; i++) {

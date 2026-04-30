@@ -98,6 +98,8 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
   const router = useRouter();
   const hasFiles = files.length > 0;
   const hasClassroom = selectedGroupIds.length > 0;
+  // Lessons need both files and a classroom before they can be sent to sync;
+  // otherwise the Pi would receive content that cannot be shown usefully.
   const canSendToSync = hasFiles && hasClassroom;
   const villageDropdownRef = useRef<HTMLDivElement>(null);
 
@@ -258,6 +260,8 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
       }
 
       const deviceId = device.id as string;
+      // Lessons still keep one group_id for older queries, while LessonGroups
+      // stores the full multi-classroom assignment set.
       const fallbackGroupId = selectedGroupIds[0] ?? 1;
 
       const { data: lesson, error: lessonError } = await supabase
@@ -311,6 +315,8 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
             "Cannot send lesson to offline library without files.",
           );
         }
+        // DeviceLessons is the assignment queue consumed by the Pi sync process.
+        // A pending row means the lesson should be downloaded on the next sync.
         const { error: deviceLessonError } = await supabase
           .from("DeviceLessons")
           .upsert(

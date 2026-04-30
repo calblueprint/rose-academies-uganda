@@ -20,12 +20,17 @@ type StorageResponse = {
   };
 };
 
+// The Pi uploads these storage fields to the devices table after sync. The
+// cloud dashboard reads that cached row instead of calling the Pi directly,
+// because the Pi may not be reachable from the public internet.
 export default function PiStorageBar({ userId }: { userId: string }) {
   const [storage, setStorage] = useState<StorageResponse | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadStorage() {
+      // Each teacher is linked to one device, so user_id scopes the storage
+      // lookup to the Raspberry Pi that this dashboard controls.
       const { data, error } = await supabase
         .from("devices")
         .select("total_kb, used_kb, available_kb, use_percent")

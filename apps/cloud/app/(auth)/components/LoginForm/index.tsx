@@ -20,6 +20,8 @@ export default function LoginForm() {
     const result = await loginWithEmailPassword({ email, password });
 
     if (result?.error) {
+      // Supabase can return detailed auth errors, but the UI intentionally
+      // shows one generic message so we do not reveal which field was valid.
       setErrorMessage("Invalid email or password");
       setIsSubmitting(false);
     }

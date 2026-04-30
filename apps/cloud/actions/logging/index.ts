@@ -1,6 +1,6 @@
 import { serverError, serverInfo, serverLog, serverWarn } from "./wrappers";
 
-// create logger class for abstraction
+// This is simply a Logger class that uses the server-side logging functions from "./wrappers".
 class Logger {
   static async log(message: string) {
     await serverLog(message);

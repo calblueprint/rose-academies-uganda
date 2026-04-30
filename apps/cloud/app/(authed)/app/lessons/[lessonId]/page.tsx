@@ -71,6 +71,8 @@ export default async function LessonDetailPage({ params }: PageProps) {
   const deviceId = await getCurrentDeviceId({ userId: user.id });
   if (!deviceId) return null;
 
+  // A lesson is considered "offline" for this page only when the current Pi has
+  // a DeviceLessons row for it.
   const { data: offlineRows, error: offlineError } = await supabase
     .from("DeviceLessons")
     .select("lesson_id")
@@ -129,6 +131,8 @@ export default async function LessonDetailPage({ params }: PageProps) {
           Files: NonNullable<LessonFileRow["Files"]>;
         } => row.Files !== null,
       )
+      // LessonFiles is the ordered join table, while Files contains the actual
+      // metadata needed by the detail page.
       .map(row => ({
         id: String(row.Files.id),
         name: row.Files.name,

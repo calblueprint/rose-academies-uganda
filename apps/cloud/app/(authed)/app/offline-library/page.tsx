@@ -50,6 +50,8 @@ export default async function OfflineLibraryPage() {
   const deviceId = await getCurrentDeviceId({ userId: user.id });
   if (!deviceId) return null;
 
+  // The offline library is derived from DeviceLessons, not every lesson owned
+  // by the user, because it represents what this specific Pi should sync.
   const { data } = await supabase
     .from("DeviceLessons")
     .select("lesson_id, status, Lessons(id, name, image_path)")
@@ -63,6 +65,8 @@ export default async function OfflineLibraryPage() {
 
   const deviceLessonRows = (data as DeviceLessonRow[]) ?? [];
 
+  // Supabase can return joined Lessons as an object or array depending on the
+  // generated relationship shape, so normalize it before passing to the client.
   const lessons = deviceLessonRows.reduce<
     { id: number; name: string; image_path: string | null }[]
   >((acc, row) => {

@@ -53,7 +53,7 @@ export default function Header({ displayName }: { displayName: string }) {
   }, []);
 
   // Keeps only the first and last word so multi-part names like "Mary Jane Watson"
-  // produce "MW" instead of three characters. Unicode-aware so non-Latin names work.
+  // produce "MW" instead of three characters.
   const initials =
     displayName
       .trim()

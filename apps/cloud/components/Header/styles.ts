@@ -1,3 +1,7 @@
+// Styled-components for the Header. Each export corresponds to one structural
+// piece of the nav bar: the outer shell, the centred content row, the logo
+// block, the nav tabs, and the profile dropdown.
+
 import styled from "styled-components";
 import COLORS from "@/styles/colors";
 
@@ -29,6 +33,8 @@ export const LogoAndTitle = styled.div`
   gap: 0.4375rem;
 `;
 
+// `all: unset` strips default button appearance so the logo renders as plain
+// text + image while still being keyboard-focusable and semantically a button.
 export const LogoContainer = styled.button`
   display: flex;
   align-items: center;
@@ -83,12 +89,15 @@ export const Subtitle = styled.h3`
   font-weight: 400;
 `;
 
+// height: 100% lets the active tab's bottom border sit flush with the header edge.
 export const Nav = styled.nav`
   display: flex;
   align-items: stretch;
   height: 100%;
 `;
 
+// $active uses the transient prop convention ($ prefix) so styled-components does
+// not forward it to the DOM as an HTML attribute.
 export const NavTab = styled.button<{ $active?: boolean }>`
   height: 100%;
   display: flex;
@@ -133,6 +142,8 @@ export const UserName = styled.span`
   color: ${COLORS.black};
 `;
 
+// position: relative anchors the absolutely-positioned DropdownMenu to this
+// wrapper rather than a distant ancestor in the page layout.
 export const DropdownWrapper = styled.div`
   position: relative;
   display: flex;

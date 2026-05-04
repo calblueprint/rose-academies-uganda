@@ -165,6 +165,8 @@ async function fetchAssignedSyncData(): Promise<SyncPayload> {
     );
   }
 
+  // We fetch from LessonFiles which gives us a set of lesson_id and file_id pairs instead of tying a file row to a lesson_id directly.
+  // We use a LessonFiles table to save storage since the same file can appear in multiple lessons without being duplicated or downloaded multiple times.
   const { data: lessonFilesData, error: lessonFilesError } = await supabase
     .from("LessonFiles")
     .select("lesson_id, file_id")

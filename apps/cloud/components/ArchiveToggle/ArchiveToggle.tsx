@@ -7,10 +7,14 @@ import ConfirmationModal from "@/components/modals/ConfirmationModal/Confirmatio
 import { ArchiveButton, ArchiveButtonText } from "./styles";
 
 type ArchiveToggleProps = {
+  // `Lessons.id` row to update.
   lesson_Id: number;
+  // Current `Lessons.is_archived` for that lesson.
   isArchived: boolean;
 };
 
+// Used on a single lesson page. "Archive" sets the lesson's `is_archived` flag in the DB
+// instead of deleting the lesson; "Restore" clears that flag. The lesson row stays.
 export default function ArchiveToggle({
   lesson_Id,
   isArchived,
@@ -20,6 +24,7 @@ export default function ArchiveToggle({
   const [isOpen, setIsOpen] = useState(false);
 
   async function handleConfirm() {
+    // Uses `Lessons.id` to target this row only; updates `Lessons.is_archived`.
     const { error } = await supabase
       .from("Lessons")
       .update({ is_archived: !isArchived })
@@ -38,6 +43,7 @@ export default function ArchiveToggle({
       <ArchiveButton
         type="button"
         onClick={e => {
+          // Avoid activating a parent link/card when this sits inside clickable layout.
           e.stopPropagation();
           setIsOpen(true);
         }}

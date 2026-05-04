@@ -1,4 +1,8 @@
-import type { CloudSyncRunId, SyncRunStatus } from "@/lib/sync/types";
+import type {
+  CloudSyncRunId,
+  SyncRunStatus,
+  SyncStage,
+} from "@/lib/sync/types";
 import supabase from "@/api/supabase/client";
 
 // Cloud-initiated syncs create a sync_runs row in Supabase before the Pi starts
@@ -8,6 +12,7 @@ export async function updateCloudSyncRun(
   syncRunId: CloudSyncRunId,
   payload: {
     status: SyncRunStatus;
+    stage?: SyncStage | null;
     started_at?: string;
     completed_at?: string;
     error_message?: string | null;

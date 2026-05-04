@@ -69,6 +69,7 @@ export async function runSync({ syncRunId }: RunSyncOptions = {}) {
     if (syncRunId !== undefined) {
       await updateCloudSyncRun(syncRunId, {
         status: "in_progress",
+        stage: "preparing",
         started_at: startedAt,
         error_message: null,
       });
@@ -82,6 +83,13 @@ export async function runSync({ syncRunId }: RunSyncOptions = {}) {
 
     pruneLocalLessons(db, syncPayload.lessons);
 
+    if (syncRunId !== undefined) {
+      await updateCloudSyncRun(syncRunId, {
+        status: "in_progress",
+        stage: "downloading_files",
+      });
+    }
+
     await downloadFiles(
       syncPayload.files,
       syncPayload.lessons,
@@ -89,6 +97,13 @@ export async function runSync({ syncRunId }: RunSyncOptions = {}) {
       stagingDir,
       BUCKET,
     );
+
+    if (syncRunId !== undefined) {
+      await updateCloudSyncRun(syncRunId, {
+        status: "in_progress",
+        stage: "finalizing",
+      });
+    }
 
     insertIntoSQLite(
       db,
@@ -119,6 +134,7 @@ export async function runSync({ syncRunId }: RunSyncOptions = {}) {
     if (syncRunId !== undefined) {
       await updateCloudSyncRun(syncRunId, {
         status: "success",
+        stage: null,
         completed_at: finishedAt,
         error_message: null,
       });
@@ -156,6 +172,7 @@ export async function runSync({ syncRunId }: RunSyncOptions = {}) {
       try {
         await updateCloudSyncRun(syncRunId, {
           status: "failed",
+          stage: null,
           completed_at: new Date().toISOString(),
           error_message: errorMessage,
         });

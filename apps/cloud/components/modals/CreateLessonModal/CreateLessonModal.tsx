@@ -63,6 +63,7 @@ interface FileEntry {
   status: FileStatus;
 }
 
+// Villages in the product map to `Groups` rows (id + display name).
 interface Group {
   id: number;
   name: string;
@@ -88,18 +89,23 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
   const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [titleError, setTitleError] = useState<string | null>(null);
+
+  // Villages: all options from `Groups`, and which group ids are selected for this lesson.
   const [groups, setGroups] = useState<Group[]>([]);
   const [selectedGroupIds, setSelectedGroupIds] = useState<number[]>([]);
   const [isVillageDropdownOpen, setIsVillageDropdownOpen] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  // Bounds the village dropdown for click-outside-to-close.
+  const villageDropdownRef = useRef<HTMLDivElement>(null);
+
   const data = useContext(DataContext);
   const supabase = getSupabaseBrowserClient();
   const router = useRouter();
   const hasFiles = files.length > 0;
+  // “Classroom” in the UI — at least one village (`Groups.id`) must be selected for sync.
   const hasClassroom = selectedGroupIds.length > 0;
   const canSendToSync = hasFiles && hasClassroom;
-  const villageDropdownRef = useRef<HTMLDivElement>(null);
 
   const [shouldFlashSyncRequirements, setShouldFlashSyncRequirements] =
     useState(false);
@@ -118,6 +124,7 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
     };
   }, [isOpen]);
 
+  // Load every village (`Groups`) when the modal opens so the picker is complete and sorted by name.
   useEffect(() => {
     if (!isOpen) return;
 
@@ -138,6 +145,7 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
     fetchGroups();
   }, [isOpen, supabase]);
 
+  // Village dropdown: dismiss on outside click without closing the whole modal.
   useEffect(() => {
     if (!isOpen || !isVillageDropdownOpen) return;
 
@@ -158,6 +166,7 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
 
   if (!isOpen) return null;
 
+  // Highlights the classroom when user enables sync without a village selected.
   function flashSyncRequirements() {
     setShouldFlashSyncRequirements(true);
 
@@ -166,6 +175,7 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
     }, 1000);
   }
 
+  // Multi-select villages: each checkbox toggles membership in `selectedGroupIds`.
   function handleToggleGroup(groupId: number) {
     setSelectedGroupIds(prev =>
       prev.includes(groupId)
@@ -210,7 +220,7 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
     setFiles([]);
     setSendToOffline(false);
     setError(null);
-    setSelectedGroupIds([]);
+    setSelectedGroupIds([]); // clear village selection
     setIsVillageDropdownOpen(false);
     setTitleError(null);
   }
@@ -258,6 +268,9 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
       }
 
       const deviceId = device.id as string;
+
+      // Kept for schema/sync
+      // Multi-group assignment uses LessonGroups below.
       const fallbackGroupId = selectedGroupIds[0] ?? 1;
 
       const { data: lesson, error: lessonError } = await supabase
@@ -274,6 +287,7 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
 
       if (lessonError) throw lessonError;
 
+      // Insert one LessonGroups row per selected village for this lesson.
       if (selectedGroupIds.length > 0) {
         const lessonGroupRows = selectedGroupIds.map(groupId => ({
           lesson_id: lesson.id,
@@ -405,11 +419,13 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
           />
         </FieldSection>
 
+        {/* Villages: label is “Classroom”; options are `groups` from `Groups`; selection is `selectedGroupIds`. */}
         <FieldSection>
           <AssignedVillageRow>
             <FieldLabel style={{ marginBottom: 0 }}>Classroom</FieldLabel>
 
             <VillageDropdownWrapper ref={villageDropdownRef}>
+              {/* Summary + open/close; flashes when sync is toggled without a village. */}
               <VillageSelectTrigger
                 type="button"
                 $flashError={shouldFlashSyncRequirements && !hasClassroom}

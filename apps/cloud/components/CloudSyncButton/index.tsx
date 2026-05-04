@@ -28,6 +28,7 @@ export default function CloudSyncButton({ userId }: { userId: string }) {
   const waitForSyncRunCompletion = async (syncRunId: string) => {
     const startedAt = Date.now();
 
+    // The cloud app only requests sync; the Pi reports progress and the final result by updating this sync_runs row.
     while (Date.now() - startedAt < POLL_TIMEOUT_MS) {
       console.log("[CLOUD] Polling sync run:", syncRunId);
 

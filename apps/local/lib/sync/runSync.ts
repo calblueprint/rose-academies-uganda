@@ -302,6 +302,8 @@ function insertIntoSQLite(
     }
   });
 
+  // We replace LessonFiles on every sync because this join table is the source
+  // of truth for which lessons each shared file belongs to.
   db.prepare("DELETE FROM lesson_files").run();
   insertLessonFiles(lessonFiles);
 }
@@ -459,6 +461,8 @@ export async function runSync({ syncRunId }: RunSyncOptions = {}) {
 
   try {
     fs.mkdirSync(LOCAL_DIR, { recursive: true });
+    // We download into a staging folder first so a failed sync does not leave
+    // partially downloaded files mixed into the live rose-files directory.
     stagingDir = fs.mkdtempSync(path.join(os.tmpdir(), "rose-sync-"));
 
     const DB_PATH = path.join(process.cwd(), "rose-academies-uganda.db");
@@ -484,6 +488,8 @@ export async function runSync({ syncRunId }: RunSyncOptions = {}) {
     const syncPayload = await fetchAssignedSyncData();
 
     // Get all lesson IDs currently stored locally in SQLite
+    // compare local lessons against the new Supabase payload so lessons
+    // removed from the device assignment are also removed from the Pi.
     const existingLessons = db
       .prepare<[], { id: number }>("SELECT id FROM lessons")
       .all();
@@ -521,6 +527,8 @@ export async function runSync({ syncRunId }: RunSyncOptions = {}) {
       const placeholders = lessonIdsToDelete.map(() => "?").join(",");
 
       // Get file IDs BEFORE deleting mappings
+      // LessonFiles is the reliable source for these IDs because files can be
+      // shared across lessons instead of belonging to a single lesson_id.
       const fileIdsToDelete = db
         .prepare<number[], { file_id: number }>(
           `SELECT DISTINCT file_id FROM lesson_files WHERE lesson_id IN (${placeholders})`,
@@ -534,6 +542,8 @@ export async function runSync({ syncRunId }: RunSyncOptions = {}) {
       ).run(...lessonIdsToDelete);
 
       // Break foreign key from files → lessons
+      // The old lesson_id column still exists for compatibility, so clearing it
+      // prevents references to lessons that are about to be deleted.
       db.prepare(
         `UPDATE files SET lesson_id = NULL WHERE lesson_id IN (${placeholders})`,
       ).run(...lessonIdsToDelete);
@@ -586,6 +596,8 @@ export async function runSync({ syncRunId }: RunSyncOptions = {}) {
         rose_files_kb: storage.directories.roseFilesKb,
         repo_kb: storage.directories.repoKb,
         sync_requested_at: new Date().toISOString(),
+        // We set last_synced_at only after files and metadata finish syncing so
+        // the cloud dashboard does not show success for incomplete local data.
         last_synced_at: finishedAt,
       });
     } catch (err) {

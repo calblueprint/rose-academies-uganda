@@ -7,12 +7,6 @@ export const HeaderBox = styled.div`
   align-items: center;
 `;
 
-export const LessonInformation = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-`;
-
 export const HeaderButtons = styled.div`
   display: flex;
   align-items: center;
@@ -24,8 +18,17 @@ export const PageContainer = styled.div`
   flex-direction: column;
   width: 100%;
   min-height: 100vh;
-  padding: 1.44rem 7.25rem;
   background: ${COLORS.gray10};
+`;
+
+export const LessonInformation = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  max-width: 67.5rem;
+  margin: 0 auto;
+  padding-top: 1.44rem;
 `;
 
 export const LessonTitle = styled.h1`

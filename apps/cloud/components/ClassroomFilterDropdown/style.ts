@@ -3,6 +3,7 @@ import COLORS from "@/styles/colors";
 
 export const SortButtonWrapper = styled.div`
   position: relative;
+  flex-shrink: 0;
 `;
 
 export const SortButton = styled.button<{ $active: boolean }>`
@@ -12,13 +13,21 @@ export const SortButton = styled.button<{ $active: boolean }>`
   justify-content: center;
   align-items: center;
   gap: 0.625rem;
+
   border-radius: 1rem;
+
+  border-top: 0.5px solid
+    ${({ $active }) => ($active ? COLORS.evergreen : COLORS.gray40)};
+  border-right: 1px solid
+    ${({ $active }) => ($active ? COLORS.evergreen : COLORS.gray40)};
+  border-bottom: 1.5px solid
+    ${({ $active }) => ($active ? COLORS.evergreen : COLORS.gray40)};
+  border-left: 1px solid
+    ${({ $active }) => ($active ? COLORS.evergreen : COLORS.gray40)};
+
   background: ${COLORS.white};
   cursor: pointer;
   white-space: nowrap;
-
-  border: 1px solid
-    ${({ $active }) => ($active ? COLORS.evergreen : COLORS.gray40)};
 `;
 
 export const SortButtonLabel = styled.span<{ $active: boolean }>`
@@ -74,4 +83,8 @@ export const SortOption = styled.button<{ $active: boolean }>`
   &:hover {
     background: ${COLORS.gray10};
   }
+`;
+
+export const ClassroomCheckbox = styled.input`
+  cursor: pointer;
 `;

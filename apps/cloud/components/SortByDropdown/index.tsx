@@ -54,7 +54,9 @@ export default function SortByDropdown({
         $active={value !== "updated_desc"}
         onClick={() => setIsOpen(prev => !prev)}
       >
-        <SortButtonLabel>Sort By</SortButtonLabel>
+        <SortButtonLabel $active={value !== "updated_desc"}>
+          Sort By
+        </SortButtonLabel>
 
         <svg
           width="18"

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import supabase from "@/api/supabase/client";
+import ClassroomFilterDropdown from "@/components/ClassroomFilterDropdown";
 import CreateButton from "@/components/CreateLessonButton";
 import LessonCard from "@/components/LessonCard";
 import LessonItem from "@/components/LessonItem";
@@ -85,6 +86,7 @@ export default function LessonsClient({
   const [loadingLessonId, setLoadingLessonId] = useState<number | null>(null);
 
   const [sortBy, setSortBy] = useState<SortOptionValue>("updated_desc");
+  const [selectedClassrooms, setSelectedClassrooms] = useState<string[]>([]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -105,10 +107,28 @@ export default function LessonsClient({
     }
   }
 
+  const availableClassrooms = useMemo(() => {
+    const classroomSet = new Set<string>();
+
+    lessons.forEach(lesson => {
+      lesson.villages?.forEach(village => classroomSet.add(village));
+    });
+
+    return [...classroomSet].sort((a, b) => a.localeCompare(b));
+  }, [lessons]);
+
   const filteredLessons = useMemo(() => {
-    const filtered = lessons.filter(lesson =>
-      lesson.name.toLowerCase().includes(searchTerm.toLowerCase()),
-    );
+    const filtered = lessons.filter(lesson => {
+      const matchesSearch = lesson.name
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase());
+
+      const matchesClassroom =
+        selectedClassrooms.length === 0 ||
+        lesson.villages?.some(village => selectedClassrooms.includes(village));
+
+      return matchesSearch && matchesClassroom;
+    });
 
     if (!sortBy) return filtered;
 
@@ -162,7 +182,7 @@ export default function LessonsClient({
 
       return 0;
     });
-  }, [lessons, searchTerm, sortBy]);
+  }, [lessons, searchTerm, sortBy, selectedClassrooms]);
 
   async function handleListAction(lessonId: number) {
     if (!listAction) return;
@@ -286,6 +306,14 @@ export default function LessonsClient({
         <SearchBarRow $variant={variant}>
           {showSearchBar && (
             <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+          )}
+
+          {showSortButton && availableClassrooms.length > 0 && (
+            <ClassroomFilterDropdown
+              classrooms={availableClassrooms}
+              selectedClassrooms={selectedClassrooms}
+              onChange={setSelectedClassrooms}
+            />
           )}
 
           {showSortButton && (

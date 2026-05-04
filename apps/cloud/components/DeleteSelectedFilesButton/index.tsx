@@ -34,6 +34,8 @@ export default function DeleteSelectedFilesButton({
   onClick,
   disabled,
 }: DeleteSelectedFilesButtonProps) {
+  // We hide this destructive action until files are selected so the toolbar
+  // only shows bulk deletion when it can actually run.
   if (selectedCount === 0) {
     return null;
   }

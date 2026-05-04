@@ -61,6 +61,7 @@ export default async function OfflineLibraryPage() {
     .eq("id", deviceId)
     .single();
 
+  // read last_synced_at from the device row because the Pi updates it only after lesson data, files, and storage stats have all finished syncing.
   const deviceLessonRows = (data as DeviceLessonRow[]) ?? [];
 
   const lessons = deviceLessonRows.reduce<

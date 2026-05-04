@@ -4,6 +4,9 @@ type GetCurrentDeviceIdOptions = {
   userId?: string;
 };
 
+// Device-scoped features need the Raspberry Pi assigned to the current teacher.
+// Accepting userId lets server pages reuse an already-fetched auth user instead
+// of asking Supabase auth for the same user twice.
 export async function getCurrentDeviceId(
   options: GetCurrentDeviceIdOptions = {},
 ) {
@@ -17,6 +20,8 @@ export async function getCurrentDeviceId(
     throw new Error("User not authenticated");
   }
 
+  // The devices table connects a cloud user to the Pi that should receive their
+  // offline lesson assignments.
   const { data: device, error } = await supabase
     .from("devices")
     .select("id")

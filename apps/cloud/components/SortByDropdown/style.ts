@@ -3,16 +3,18 @@ import COLORS from "@/styles/colors";
 
 export const SortButtonWrapper = styled.div`
   position: relative;
+  margin: 0.5rem;
 `;
 
 export const SortButton = styled.button<{ $active: boolean }>`
-  height: 2.5rem;
-  padding: 0 1rem;
-  border-radius: 999px;
-  background: ${COLORS.white};
   display: flex;
+  height: 2.75rem;
+  padding: 0.625rem 1rem;
+  justify-content: center;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.625rem;
+  border-radius: 1rem;
+  background: ${COLORS.white};
   cursor: pointer;
   white-space: nowrap;
 

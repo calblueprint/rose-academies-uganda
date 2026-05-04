@@ -126,7 +126,7 @@ export const LessonsList = styled.div<VariantProps>`
 export const SearchBarRow = styled.div<VariantProps>`
   display: flex;
   align-items: center;
-  gap: 1.14rem;
+  gap: 0.5rem;
   padding: 0.75rem 0rem;
   width: 100%;
 `;

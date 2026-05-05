@@ -15,6 +15,7 @@ import {
   insertIntoSQLite,
   startLocalSyncRun,
 } from "@/lib/sync/sqliteStore";
+import { updateLastSyncedAt } from "@/lib/sync/updateLastSynced";
 
 const BUCKET = "lesson-files";
 const LOCAL_DIR =
@@ -128,7 +129,8 @@ export async function runSync({ syncRunId }: RunSyncOptions = {}) {
 
     finishedAt = new Date().toISOString();
 
-    await reportDeviceStorage(DEVICE_ID, finishedAt);
+    await updateLastSyncedAt(DEVICE_ID, finishedAt);
+    await reportDeviceStorage(DEVICE_ID);
     finishLocalSyncRun(db, runId, finishedAt, "success");
 
     if (syncRunId !== undefined) {

@@ -1,5 +1,6 @@
 import { getSupabaseServerClientReadOnly } from "@/api/supabase/server-readonly";
 import LessonsClient from "@/app/(authed)/app/lessons/LessonsClient";
+import CloudSyncButton from "@/components/CloudSyncButton";
 import StorageAndSync from "@/components/StorageAndSync";
 import SyncSummaryCard from "@/components/SyncSummaryCard";
 import { getCurrentDeviceId } from "@/lib/getCurrentUserDevice";
@@ -103,8 +104,6 @@ export default async function OfflineLibraryPage() {
     { availableCount: 0, pendingCount: 0 },
   );
 
-  const lastSyncedLabel = formatLastSynced(deviceData?.last_synced_at ?? null);
-
   return (
     <PageWrapper>
       <Content>
@@ -116,9 +115,9 @@ export default async function OfflineLibraryPage() {
         </PageHeader>
 
         <SyncCardsRow>
-          <StorageAndSync userId={user.id} />
+          <CloudSyncButton userId={user.id} />
           <SyncSummaryCard
-            lastSynced={lastSyncedLabel}
+            userId={user.id}
             availableCount={availableCount}
             pendingCount={pendingCount}
           />

@@ -48,3 +48,19 @@ export type SyncPayload = {
   files: FileRow[];
   lessonFiles: LessonFileRow[];
 };
+
+// These are the different options for syncing progress
+// stages, used for reporting sync progress to the cloud app.
+export type SyncStage =
+  | "waiting_for_device"
+  | "preparing"
+  | "downloading_files"
+  | "finalizing";
+
+// The UI messages that go along with the stage.
+export const SYNC_STAGE_MESSAGES: Record<SyncStage, string> = {
+  waiting_for_device: "Waiting for device",
+  preparing: "Preparing offline content…",
+  downloading_files: "Downloading lesson files…",
+  finalizing: "Finalizing sync…",
+};

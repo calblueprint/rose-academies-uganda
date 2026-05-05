@@ -53,8 +53,17 @@ export const SyncCardsRow = styled.div`
   grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
   gap: 1.25rem;
   align-items: stretch;
+  justify-items: stretch;
 
   width: 100%;
+
+  > :first-child {
+    justify-self: start;
+  }
+
+  > :last-child {
+    justify-self: end;
+  }
 `;
 
 export const SectionTitle = styled.h2`

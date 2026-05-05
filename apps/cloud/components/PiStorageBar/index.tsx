@@ -58,7 +58,6 @@ export default function PiStorageBar({ userId }: { userId: string }) {
   if (errorMessage) {
     return (
       <Content>
-        <Title>Raspberry Pi</Title>
         <StatusText>{errorMessage}</StatusText>
       </Content>
     );
@@ -67,7 +66,6 @@ export default function PiStorageBar({ userId }: { userId: string }) {
   if (!storage) {
     return (
       <Content>
-        <Title>Raspberry Pi</Title>
         <StatusText>Loading storage...</StatusText>
       </Content>
     );
@@ -79,8 +77,6 @@ export default function PiStorageBar({ userId }: { userId: string }) {
 
   return (
     <Content>
-      <Title>Raspberry Pi</Title>
-
       <ProgressBar>
         <ProgressFill percent={percent} />
       </ProgressBar>

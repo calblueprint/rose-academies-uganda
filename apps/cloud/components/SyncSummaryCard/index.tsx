@@ -1,12 +1,10 @@
+import PiStorageBar from "@/components/PiStorageBar";
 import COLORS from "@/styles/colors";
 import {
-  BottomRow,
   Card,
   Content,
-  Divider,
   Dot,
   Label,
-  LastSyncedValue,
   LeftGroup,
   Row,
   Title,
@@ -15,13 +13,13 @@ import {
 } from "./styles";
 
 interface SyncSummaryCardProps {
-  lastSynced: string;
+  userId: string;
   availableCount: number;
   pendingCount: number;
 }
 
 export default function SyncSummaryCard({
-  lastSynced,
+  userId,
   availableCount,
   pendingCount,
 }: SyncSummaryCardProps) {
@@ -31,10 +29,12 @@ export default function SyncSummaryCard({
         <TopSection>
           <Title>Sync Summary</Title>
 
+          <PiStorageBar userId={userId} />
+
           <Row>
             <LeftGroup>
               <Dot $color={COLORS.lightLightGreen} />
-              <Label>Available Offline</Label>
+              <Label>Synced</Label>
             </LeftGroup>
             <Value>{availableCount}</Value>
           </Row>
@@ -47,13 +47,6 @@ export default function SyncSummaryCard({
             <Value>{pendingCount}</Value>
           </Row>
         </TopSection>
-
-        <Divider />
-
-        <BottomRow>
-          <Label>Last Synced</Label>
-          <LastSyncedValue>{lastSynced}</LastSyncedValue>
-        </BottomRow>
       </Content>
     </Card>
   );

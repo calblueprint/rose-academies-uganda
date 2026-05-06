@@ -3,10 +3,31 @@
 import React from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { IconSvgs } from "@/lib/icons";
 import VillageTags from "../VillageTags";
-import { Card, ImageFrame, TagRow, Title, Titleholder } from "./styles";
+import {
+  Card,
+  ImageFrame,
+  StatusIconCircle,
+  TagRow,
+  Title,
+  Titleholder,
+  TitleRow,
+} from "./styles";
 
 const FALLBACK_LESSON_IMAGE = "/placeholders/preset-0.jpg";
+
+function LessonStatusIcon({ status }: { status?: "available" | "pending" }) {
+  if (!status) return null;
+
+  return (
+    <StatusIconCircle $status={status} aria-label={status}>
+      {status === "available"
+        ? IconSvgs.lessonAvailable
+        : IconSvgs.lessonPending}
+    </StatusIconCircle>
+  );
+}
 
 export default function LessonCard({
   lessonId,
@@ -36,10 +57,14 @@ export default function LessonCard({
       </ImageFrame>
 
       <Titleholder>
-        <Title>{lessonName}</Title>
-        {(status || villages.length > 0) && (
+        <TitleRow>
+          <Title>{lessonName}</Title>
+          <LessonStatusIcon status={status} />
+        </TitleRow>
+
+        {villages.length > 0 && (
           <TagRow>
-            {villages.length > 0 ? <VillageTags villages={villages} /> : null}
+            <VillageTags villages={villages} />
           </TagRow>
         )}
       </Titleholder>

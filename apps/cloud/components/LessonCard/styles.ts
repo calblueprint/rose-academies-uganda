@@ -43,11 +43,38 @@ export const Titleholder = styled.div`
   box-sizing: border-box;
 `;
 
+export const TitleRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  width: 100%;
+`;
+
 export const Title = styled(H5).attrs({
   $color: COLORS.black,
   $fontWeight: 400,
 })`
   margin: 0;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+`;
+
+export const StatusIconCircle = styled.div<{
+  $status: "available" | "pending";
+}>`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  flex-shrink: 0;
+  border-radius: 50%;
+
+  background: ${({ $status }) =>
+    $status === "available" ? COLORS.green10 : COLORS.orange20};
 `;
 
 export const TagRow = styled.div`

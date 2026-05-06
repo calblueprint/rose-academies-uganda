@@ -43,10 +43,10 @@ export default function PiStorageBar({ userId }: { userId: string }) {
 
       setStorage({
         disk: {
-          totalKb: data.total_kb,
-          usedKb: data.used_kb,
-          availableKb: data.available_kb,
-          usePercent: data.use_percent,
+          totalKb: data.total_kb ?? 0,
+          usedKb: data.used_kb ?? 0,
+          availableKb: data.available_kb ?? 0,
+          usePercent: data.use_percent ?? 0,
         },
       });
     }
@@ -72,7 +72,10 @@ export default function PiStorageBar({ userId }: { userId: string }) {
 
   const totalGb = Math.round(storage.disk.totalKb / 1024 / 1024);
   const usedGb = Math.round(storage.disk.usedKb / 1024 / 1024);
-  const percent = Math.round((usedGb / totalGb) * 100);
+  const percent =
+    storage.disk.totalKb > 0
+      ? Math.round((storage.disk.usedKb / storage.disk.totalKb) * 100)
+      : 0;
 
   return (
     <Content>

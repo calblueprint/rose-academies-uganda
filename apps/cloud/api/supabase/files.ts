@@ -16,6 +16,21 @@ function buildStorageObjectPath(userId: string, fileName: string): string {
   return `${userId}/${safeFileName}`;
 }
 
+/**
+ * Uploads a file and associates it with a lesson.
+ *
+ * Flow:
+ * 1. Compute file hash (for deduplication)
+ * 2. Check if file already exists for this user
+ * 3. If it exists:
+ *    - Reuse existing file record
+ *    - Just create a LessonFiles link
+ * 4. If it does NOT exist:
+ *    - Upload file to storage
+ *    - Insert file metadata into DB
+ *    - Link file to lesson
+ */
+
 export async function uploadFile(
   lessonId: number,
   file: File,
@@ -27,6 +42,7 @@ export async function uploadFile(
 
   const hash = await hashFile(file);
 
+  // Check if this exact file (same hash) already exists for the user
   const { data: existingFile, error: existingFileError } = await supabase
     .from("Files")
     .select("*")
@@ -36,6 +52,11 @@ export async function uploadFile(
 
   if (existingFileError) throw new Error(existingFileError.message);
 
+  /**
+   * CASE 1: File already exists
+   * - Do not upload again
+   * - Just link it to the lesson
+   */
   if (existingFile) {
     const { error } = await supabase.from("LessonFiles").insert({
       lesson_id: lessonId,
@@ -61,6 +82,12 @@ export async function uploadFile(
     return existingFile as LocalFile;
   }
 
+  /**
+   * CASE 2: File does NOT exist
+   * - Upload to storage
+   * - Create DB record
+   * - Link to lesson
+   */
   const objectPath = buildStorageObjectPath(user.id, file.name);
 
   const { error: storageError } = await supabase.storage

@@ -17,6 +17,8 @@ export const VillageTag = styled.span<{
   justify-content: center;
   align-items: center;
 
+  flex-shrink: 0;
+
   border-radius: ${({ $variant }) =>
     $variant === "card" ? "0.25rem" : "1.25rem"};
   background-color: ${({ $variant }) =>
@@ -39,5 +41,6 @@ export const VillageTag = styled.span<{
 export const TagGroup = styled.div`
   display: flex;
   gap: 0.75rem;
+  flex-wrap: nowrap;
   overflow: hidden;
 `;

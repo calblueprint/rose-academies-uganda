@@ -80,8 +80,31 @@ export const StatusIconCircle = styled.div<{
 export const TagRow = styled.div`
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.75rem;
   flex-wrap: nowrap;
   width: 100%;
   overflow: hidden;
+`;
+
+export const MoreTag = styled.span`
+  display: inline-flex;
+  width: fit-content;
+  min-height: 1.4375rem;
+  padding: 0.25rem 0.75rem;
+  box-sizing: border-box;
+
+  justify-content: center;
+  align-items: center;
+
+  flex-shrink: 0;
+
+  border-radius: 0.25rem;
+  background-color: ${COLORS.stem};
+
+  color: ${COLORS.gray100};
+  font-size: var(--font-subtitle-3);
+  line-height: var(--lh-subtitle-3);
+  font-weight: 400;
+
+  white-space: nowrap;
 `;

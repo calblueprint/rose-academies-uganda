@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import supabase from "@/api/supabase/client";
 import ClassroomFilterDropdown from "@/components/ClassroomFilterDropdown";
 import CreateButton from "@/components/CreateLessonButton";
@@ -70,6 +71,8 @@ export default function LessonsClient({
   variant = "dashboard",
   showSortButton = false,
 }: LessonsClientProps) {
+  const router = useRouter();
+
   const [searchTerm, setSearchTerm] = useState("");
   const [view, setView] = useState<"grid" | "list">(defaultView);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -94,6 +97,7 @@ export default function LessonsClient({
     const saved = localStorage.getItem(
       "lessonsSortBy",
     ) as SortOptionValue | null;
+
     if (saved) {
       setSortBy(saved);
     }
@@ -194,25 +198,28 @@ export default function LessonsClient({
 
     if (listAction === "remove") {
       setRemoveConfirmLessonId(lessonId);
-      return;
     }
   }
 
   async function handleRestoreConfirm() {
     if (restoreConfirmLessonId === null) return;
 
-    setLoadingLessonId(restoreConfirmLessonId);
+    const lessonIdToRestore = restoreConfirmLessonId;
+
+    setLoadingLessonId(lessonIdToRestore);
 
     try {
       const { error } = await supabase
         .from("Lessons")
         .update({ is_archived: false })
-        .eq("id", restoreConfirmLessonId);
+        .eq("id", lessonIdToRestore);
 
       if (error) throw error;
 
-      setLessons(prev => prev.filter(l => l.id !== restoreConfirmLessonId));
+      setLessons(prev => prev.filter(l => l.id !== lessonIdToRestore));
       setRestoreConfirmLessonId(null);
+
+      router.refresh();
     } catch (err) {
       console.error(err);
     } finally {
@@ -222,24 +229,29 @@ export default function LessonsClient({
 
   async function handleRemoveConfirm() {
     if (removeConfirmLessonId === null) return;
+
     if (!deviceId) {
       console.error(new Error("Missing deviceId"));
       return;
     }
 
-    setLoadingLessonId(removeConfirmLessonId);
+    const lessonIdToRemove = removeConfirmLessonId;
+
+    setLoadingLessonId(lessonIdToRemove);
 
     try {
       const { error } = await supabase
         .from("DeviceLessons")
         .delete()
-        .eq("lesson_id", removeConfirmLessonId)
+        .eq("lesson_id", lessonIdToRemove)
         .eq("device_id", deviceId);
 
       if (error) throw error;
 
-      setLessons(prev => prev.filter(l => l.id !== removeConfirmLessonId));
+      setLessons(prev => prev.filter(l => l.id !== lessonIdToRemove));
       setRemoveConfirmLessonId(null);
+
+      router.refresh();
     } catch (err) {
       console.error(err);
     } finally {

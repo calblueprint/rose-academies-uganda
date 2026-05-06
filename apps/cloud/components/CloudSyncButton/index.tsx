@@ -3,6 +3,7 @@
 import type { ModalVariant } from "@/components/SyncModal/styles";
 import type { SyncRunStatus, SyncStage } from "./syncStages";
 import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import supabase from "@/api/supabase/client";
 import SyncModal from "@/components/SyncModal";
 import { IconSvgs } from "@/lib/icons";
@@ -49,6 +50,8 @@ function formatLastSynced(lastSyncedAt: string | null) {
 }
 
 export default function CloudSyncButton({ userId }: { userId: string }) {
+  const router = useRouter();
+
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncStage, setSyncStage] = useState<SyncStage | null>(null);
   const [device, setDevice] = useState<DeviceRow | null>(null);
@@ -153,6 +156,7 @@ export default function CloudSyncButton({ userId }: { userId: string }) {
       const completedRun = await waitForSyncRunCompletion(
         (data as { id: string }).id,
       );
+
       console.log("[CLOUD] Sync completed:", completedRun);
 
       await minLoadingTime;
@@ -164,6 +168,10 @@ export default function CloudSyncButton({ userId }: { userId: string }) {
         setLastSyncedAt(completedRun.completed_at ?? new Date().toISOString());
         setSyncStage(null);
         setModalVariant("success");
+
+        // Re-run the server page so SyncSummaryCard and LessonsClient receive
+        // fresh DeviceLessons data after the Pi updates lesson statuses.
+        router.refresh();
       } else {
         console.error("Sync failed:", completedRun.error_message);
         setSyncStage(null);

@@ -36,14 +36,6 @@ export const LessonRight = styled.div`
   flex-shrink: 0;
 `;
 
-export const LessonIcon = styled.div`
-  width: 2.75rem;
-  height: 2.75rem;
-  border-radius: 0.375rem;
-  background: #9adbe8;
-  flex-shrink: 0;
-`;
-
 export const LessonName = styled(H4).attrs({
   $fontWeight: 400,
 })`

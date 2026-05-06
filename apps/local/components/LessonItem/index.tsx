@@ -11,7 +11,6 @@ import {
   FileRow,
   FilesContainer,
   LessonHeader,
-  LessonIcon,
   LessonLeft,
   LessonName,
   LessonRight,
@@ -38,7 +37,6 @@ export default function LessonItem({
     <LessonWrapper>
       <LessonHeader onClick={() => setOpened(prev => !prev)}>
         <LessonLeft>
-          <LessonIcon />
           <LessonName>{lessonName}</LessonName>
         </LessonLeft>
 

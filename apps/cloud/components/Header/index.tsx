@@ -6,7 +6,6 @@ import { usePathname, useRouter } from "next/navigation";
 import { signOut } from "@/actions/logout";
 import RoseLogo from "@/assets/images/rose-academies-logo.png";
 import {
-  DropdownDivider,
   DropdownItem,
   DropdownMenu,
   DropdownWrapper,
@@ -101,16 +100,6 @@ export default function Header({ displayName }: { displayName: string }) {
 
             {dropdownOpen && (
               <DropdownMenu>
-                <DropdownItem onClick={() => console.log("Clicked Settings")}>
-                  Settings
-                </DropdownItem>
-                <DropdownItem
-                  onClick={() => console.log("Clicked Information")}
-                >
-                  Information
-                </DropdownItem>
-                <DropdownDivider />
-
                 <form action={signOut}>
                   <DropdownItem type="submit">Sign Out</DropdownItem>
                 </form>

@@ -1,24 +1,36 @@
 import styled from "styled-components";
 import COLORS from "@/styles/colors";
-import { Subtitle3 } from "@/styles/text";
 
-export const VillageTag = styled(Subtitle3).attrs({
-  as: "span",
-  $color: COLORS.gray100,
-  $fontWeight: 400,
-})`
+type VillageTagVariant = "card" | "lessonPage";
+
+export const VillageTag = styled.span<{
+  $variant: VillageTagVariant;
+}>`
   display: inline-flex;
   width: fit-content;
-  max-width: 7.3125rem;
-  min-height: 1.4375rem;
+  max-width: ${({ $variant }) => ($variant === "card" ? "7.3125rem" : "none")};
+  min-height: ${({ $variant }) =>
+    $variant === "card" ? "1.4375rem" : "1.625rem"};
   padding: 0.25rem 0.75rem;
   box-sizing: border-box;
 
   justify-content: center;
   align-items: center;
 
-  border-radius: 0.25rem;
-  background-color: ${COLORS.stem};
+  border-radius: ${({ $variant }) =>
+    $variant === "card" ? "0.25rem" : "1.25rem"};
+  background-color: ${({ $variant }) =>
+    $variant === "card" ? COLORS.stem : COLORS.green20};
+
+  color: ${({ $variant }) =>
+    $variant === "card" ? COLORS.gray100 : COLORS.black};
+
+  font-size: ${({ $variant }) =>
+    $variant === "card" ? "var(--font-subtitle-3)" : "var(--font-body)"};
+  line-height: ${({ $variant }) =>
+    $variant === "card" ? "var(--lh-subtitle-3)" : "var(--lh-body)"};
+  font-weight: 400;
+
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

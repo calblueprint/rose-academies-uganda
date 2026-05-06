@@ -2,11 +2,21 @@
 
 import { TagGroup, VillageTag } from "./styles";
 
-export default function VillageTags({ villages }: { villages: string[] }) {
+type VillageTagsVariant = "card" | "lessonPage";
+
+export default function VillageTags({
+  villages,
+  variant = "card",
+}: {
+  villages: string[];
+  variant?: VillageTagsVariant;
+}) {
   return (
     <TagGroup>
       {villages.map(village => (
-        <VillageTag key={village}>{village}</VillageTag>
+        <VillageTag key={village} $variant={variant}>
+          {village}
+        </VillageTag>
       ))}
     </TagGroup>
   );

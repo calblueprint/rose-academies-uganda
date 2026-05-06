@@ -27,13 +27,6 @@ export const LessonRight = styled.div`
   gap: 0.75rem;
 `;
 
-export const LessonIcon = styled.div`
-  width: 2.75rem;
-  height: 2.75rem;
-  border-radius: 0.375rem;
-  background: #9adbe8;
-`;
-
 export const LessonName = styled.h2`
   font-family: var(--font-gilroy);
   font-size: 1.25rem;

@@ -54,3 +54,9 @@ export const SearchBarRow = styled.div`
   gap: 1.14rem;
   padding: 0.75rem 0rem;
 `;
+
+export const TitleRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+`;

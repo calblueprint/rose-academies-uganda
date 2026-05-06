@@ -1,7 +1,14 @@
 "use client";
 
 import type { LocalFile } from "@/types/schema";
-import { useCallback, useMemo, useState, useTransition } from "react";
+import {
+  Dispatch,
+  SetStateAction,
+  useCallback,
+  useMemo,
+  useState,
+  useTransition,
+} from "react";
 import ArchiveToggle from "@/components/ArchiveToggle/ArchiveToggle";
 import DeleteSelectedFilesButton from "@/components/DeleteSelectedFilesButton";
 import EditLessonButton from "@/components/EditLessonButton";
@@ -11,6 +18,7 @@ import FilesTable, { FileRow } from "@/components/FilesTable";
 import LessonHeader from "@/components/LessonHeader";
 import OfflineToggle from "@/components/OfflineToggle";
 import SearchBar from "@/components/SearchBar";
+import StatusPill from "@/components/StatusPill";
 import UploadFilesButton from "@/components/UploadFilesButton";
 import VillageTags from "@/components/VillageTags";
 import { deleteLessonFilesAction, reorderLessonFilesAction } from "./actions";
@@ -22,6 +30,7 @@ import {
   LessonTitle,
   PageContainer,
   SearchBarRow,
+  TitleRow,
 } from "./style";
 
 type LessonFile = {
@@ -44,10 +53,12 @@ type Lesson = {
   is_archived: boolean;
 };
 
+type LessonSyncStatus = "available" | "pending" | null;
+
 type LessonDetailClientProps = {
   lesson: Lesson;
   deviceId: string;
-  initialIsOffline: boolean;
+  initialSyncStatus: LessonSyncStatus;
   files: LessonFile[];
   villages: string[];
 };
@@ -55,11 +66,13 @@ type LessonDetailClientProps = {
 export default function LessonDetailClient({
   lesson,
   deviceId,
-  initialIsOffline,
+  initialSyncStatus,
   files,
   villages,
 }: LessonDetailClientProps) {
-  const [isOffline, setIsOffline] = useState(initialIsOffline);
+  const [syncStatus, setSyncStatus] =
+    useState<LessonSyncStatus>(initialSyncStatus);
+  const [isOffline, setIsOffline] = useState(initialSyncStatus !== null);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedFileIds, setSelectedFileIds] = useState<string[]>([]);
   const [selectedPreviewFile, setSelectedPreviewFile] =
@@ -68,6 +81,22 @@ export default function LessonDetailClient({
   const [reorderError, setReorderError] = useState<string | null>(null);
   const [isDeleting, startDeleteTransition] = useTransition();
   const [isReordering, startReorderTransition] = useTransition();
+
+  const updateOfflineState: Dispatch<SetStateAction<boolean>> = useCallback(
+    nextIsOffline => {
+      setIsOffline(previousIsOffline => {
+        const resolvedIsOffline =
+          typeof nextIsOffline === "function"
+            ? nextIsOffline(previousIsOffline)
+            : nextIsOffline;
+
+        setSyncStatus(resolvedIsOffline ? "pending" : null);
+
+        return resolvedIsOffline;
+      });
+    },
+    [],
+  );
 
   const initialTableFiles = useMemo<FileRow[]>(
     () =>
@@ -173,7 +202,11 @@ export default function LessonDetailClient({
         />
 
         <HeaderBox>
-          <LessonTitle>{lesson.name}</LessonTitle>
+          <TitleRow>
+            <LessonTitle>{lesson.name}</LessonTitle>
+            {syncStatus && <StatusPill status={syncStatus} />}
+          </TitleRow>
+
           <HeaderButtons>
             <ArchiveToggle
               lesson_Id={lesson.id}
@@ -183,7 +216,7 @@ export default function LessonDetailClient({
               deviceId={deviceId}
               lessonId={lesson.id}
               isOffline={isOffline}
-              setIsOffline={setIsOffline}
+              setIsOffline={updateOfflineState}
               hasFiles={tableFiles.length > 0}
             />
             <EditLessonButton lesson={lesson} />

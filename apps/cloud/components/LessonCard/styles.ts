@@ -1,6 +1,6 @@
 import styled from "styled-components";
 import COLORS from "@/styles/colors";
-import { Subtitle1 } from "@/styles/text";
+import { H5 } from "@/styles/text";
 
 export const Card = styled.div`
   display: flex;
@@ -35,17 +35,17 @@ export const Titleholder = styled.div`
   width: 100%;
   height: 5.5rem;
   flex-shrink: 0;
-  padding: 1.25rem;
+  padding: 0.75rem 1.25rem;
   align-items: flex-start;
-  gap: 0.57181rem;
+  gap: 0.5rem;
   background: ${COLORS.white};
   border-radius: 0 0 0.938rem 0.938rem;
   box-sizing: border-box;
 `;
 
-export const Title = styled(Subtitle1).attrs({
+export const Title = styled(H5).attrs({
   $color: COLORS.black,
-  $fontWeight: 500,
+  $fontWeight: 400,
 })`
   margin: 0;
 `;

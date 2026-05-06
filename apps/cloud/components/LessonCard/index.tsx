@@ -8,6 +8,7 @@ import VillageTags from "../VillageTags";
 import {
   Card,
   ImageFrame,
+  MoreTag,
   StatusIconCircle,
   TagRow,
   Title,
@@ -44,6 +45,9 @@ export default function LessonCard({
 }) {
   const router = useRouter();
 
+  const visibleVillages = villages.slice(0, 2);
+  const remainingVillageCount = villages.length - visibleVillages.length;
+
   return (
     <Card onClick={() => router.push(`/app/lessons/${lessonId}`)}>
       <ImageFrame>
@@ -64,7 +68,10 @@ export default function LessonCard({
 
         {villages.length > 0 && (
           <TagRow>
-            <VillageTags villages={villages} />
+            <VillageTags villages={visibleVillages} />
+            {remainingVillageCount > 0 && (
+              <MoreTag>+{remainingVillageCount}</MoreTag>
+            )}
           </TagRow>
         )}
       </Titleholder>

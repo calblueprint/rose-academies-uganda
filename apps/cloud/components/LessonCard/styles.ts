@@ -1,6 +1,6 @@
 import styled from "styled-components";
 import COLORS from "@/styles/colors";
-import { Subtitle1 } from "@/styles/text";
+import { H5 } from "@/styles/text";
 
 export const Card = styled.div`
   display: flex;
@@ -17,38 +17,65 @@ export const Card = styled.div`
   overflow: hidden;
   cursor: pointer;
   flex-shrink: 0;
+  background: ${COLORS.white};
 `;
 
 export const ImageFrame = styled.div`
   position: relative;
   width: 100%;
-  height: 9.205rem;
+  height: calc(15.625rem - 5.5rem);
   flex-shrink: 0;
   overflow: hidden;
+  background: ${COLORS.gray10};
 `;
-
-// export const ImagePlaceholder = styled.div`
-//   width: 100%;
-//   height: 100%;
-//   background-color: ${COLORS.evergreen};
-// `;
 
 export const Titleholder = styled.div`
   display: flex;
   flex-direction: column;
   width: 100%;
-  flex: 1;
-  padding: 0.97rem 1.26rem;
+  height: 5.5rem;
+  flex-shrink: 0;
+  padding: 0.75rem 1.25rem;
   align-items: flex-start;
-  gap: 0.57181rem;
+  gap: 0.5rem;
   background: ${COLORS.white};
   border-radius: 0 0 0.938rem 0.938rem;
+  box-sizing: border-box;
 `;
 
-export const Title = styled(Subtitle1).attrs({
+export const TitleRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  width: 100%;
+`;
+
+export const Title = styled(H5).attrs({
   $color: COLORS.black,
-  $fontWeight: 500,
-})``;
+  $fontWeight: 400,
+})`
+  margin: 0;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+`;
+
+export const StatusIconCircle = styled.div<{
+  $status: "available" | "pending";
+}>`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  flex-shrink: 0;
+  border-radius: 50%;
+
+  background: ${({ $status }) =>
+    $status === "available" ? COLORS.green10 : COLORS.orange20};
+`;
 
 export const TagRow = styled.div`
   display: flex;
@@ -56,5 +83,5 @@ export const TagRow = styled.div`
   gap: 0.5rem;
   flex-wrap: nowrap;
   width: 100%;
-  overflow-x: hidden;
+  overflow: hidden;
 `;

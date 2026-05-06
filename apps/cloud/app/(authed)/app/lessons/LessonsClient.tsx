@@ -92,6 +92,10 @@ export default function LessonsClient({
   const [selectedClassrooms, setSelectedClassrooms] = useState<string[]>([]);
 
   useEffect(() => {
+    setLessons(initialLessons);
+  }, [initialLessons]);
+
+  useEffect(() => {
     if (typeof window === "undefined") return;
 
     const saved = localStorage.getItem(

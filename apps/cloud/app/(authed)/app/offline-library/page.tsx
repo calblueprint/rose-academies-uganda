@@ -1,7 +1,6 @@
 import { getSupabaseServerClientReadOnly } from "@/api/supabase/server-readonly";
 import LessonsClient from "@/app/(authed)/app/lessons/LessonsClient";
 import CloudSyncButton from "@/components/CloudSyncButton";
-import StorageAndSync from "@/components/StorageAndSync";
 import SyncSummaryCard from "@/components/SyncSummaryCard";
 import { getCurrentDeviceId } from "@/lib/getCurrentUserDevice";
 import {
@@ -25,20 +24,6 @@ type DeviceLessonRow = {
   Lessons: DeviceLessonLessonRow | DeviceLessonLessonRow[] | null;
 };
 
-function formatLastSynced(lastSyncedAt: string | null) {
-  if (!lastSyncedAt) return "Not synced yet";
-
-  const date = new Date(lastSyncedAt);
-
-  return date.toLocaleString("en-US", {
-    month: "short",
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-  });
-}
-
 export default async function OfflineLibraryPage() {
   const supabase = await getSupabaseServerClientReadOnly();
 
@@ -57,12 +42,6 @@ export default async function OfflineLibraryPage() {
     .from("DeviceLessons")
     .select("lesson_id, status, Lessons(id, name, image_path)")
     .eq("device_id", deviceId);
-
-  const { data: deviceData } = await supabase
-    .from("devices")
-    .select("last_synced_at")
-    .eq("id", deviceId)
-    .single();
 
   const deviceLessonRows = (data as DeviceLessonRow[]) ?? [];
 

@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import RoseLogo from "@/assets/images/rose-academies-logo.png";
 import { DataContext } from "@/context/DataContext";
 import {
-  AdminLink,
   Card,
   CodeInput,
   CodeInputSection,

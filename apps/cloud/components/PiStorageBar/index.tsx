@@ -8,7 +8,6 @@ import {
   ProgressFill,
   StatusText,
   StorageInfo,
-  Title,
 } from "./styles";
 
 type StorageResponse = {

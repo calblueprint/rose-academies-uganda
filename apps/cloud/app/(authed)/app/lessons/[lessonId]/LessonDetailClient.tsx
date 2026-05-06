@@ -192,7 +192,7 @@ export default function LessonDetailClient({
 
         <LessonDescription>{lesson.description}</LessonDescription>
 
-        <VillageTags villages={villages} />
+        <VillageTags villages={villages} variant="lessonPage" />
 
         <SearchBarRow>
           <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />

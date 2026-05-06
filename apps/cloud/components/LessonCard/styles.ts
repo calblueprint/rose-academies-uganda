@@ -17,38 +17,38 @@ export const Card = styled.div`
   overflow: hidden;
   cursor: pointer;
   flex-shrink: 0;
+  background: ${COLORS.white};
 `;
 
 export const ImageFrame = styled.div`
   position: relative;
   width: 100%;
-  height: 9.205rem;
+  height: calc(15.625rem - 5.5rem);
   flex-shrink: 0;
   overflow: hidden;
+  background: ${COLORS.gray10};
 `;
-
-// export const ImagePlaceholder = styled.div`
-//   width: 100%;
-//   height: 100%;
-//   background-color: ${COLORS.evergreen};
-// `;
 
 export const Titleholder = styled.div`
   display: flex;
   flex-direction: column;
   width: 100%;
-  flex: 1;
-  padding: 0.97rem 1.26rem;
+  height: 5.5rem;
+  flex-shrink: 0;
+  padding: 1.25rem;
   align-items: flex-start;
   gap: 0.57181rem;
   background: ${COLORS.white};
   border-radius: 0 0 0.938rem 0.938rem;
+  box-sizing: border-box;
 `;
 
 export const Title = styled(Subtitle1).attrs({
   $color: COLORS.black,
   $fontWeight: 500,
-})``;
+})`
+  margin: 0;
+`;
 
 export const TagRow = styled.div`
   display: flex;
@@ -56,5 +56,5 @@ export const TagRow = styled.div`
   gap: 0.5rem;
   flex-wrap: nowrap;
   width: 100%;
-  overflow-x: hidden;
+  overflow: hidden;
 `;

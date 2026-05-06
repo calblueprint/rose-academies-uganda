@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import VillageTags from "../VillageTags";
 import { Card, ImageFrame, TagRow, Title, Titleholder } from "./styles";
 
+const FALLBACK_LESSON_IMAGE = "/placeholders/preset-0.jpg";
+
 export default function LessonCard({
   lessonId,
   lessonName,
@@ -23,17 +25,15 @@ export default function LessonCard({
 
   return (
     <Card onClick={() => router.push(`/app/lessons/${lessonId}`)}>
-      {lessonImage ? (
-        <ImageFrame>
-          <Image
-            src={lessonImage}
-            alt={lessonName}
-            fill
-            sizes="21.875rem"
-            style={{ objectFit: "cover" }}
-          />
-        </ImageFrame>
-      ) : null}
+      <ImageFrame>
+        <Image
+          src={lessonImage ?? FALLBACK_LESSON_IMAGE}
+          alt={lessonName}
+          fill
+          sizes="21.875rem"
+          style={{ objectFit: "cover" }}
+        />
+      </ImageFrame>
 
       <Titleholder>
         <Title>{lessonName}</Title>

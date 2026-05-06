@@ -1,4 +1,4 @@
-import { Card, Container, Description, Steps, Title } from "./styles";
+import { Card, Container, Description, Title } from "./styles";
 
 export default function MissingDevicePage() {
   return (

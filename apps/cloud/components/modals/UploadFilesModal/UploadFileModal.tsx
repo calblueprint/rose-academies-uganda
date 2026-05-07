@@ -244,7 +244,7 @@ export default function UploadFilesModal({
             ref={fileInputRef}
             type="file"
             multiple
-            accept=".jpg,.jpeg,.png,.pdf,.mp4"
+            accept=".jpg,.jpeg,.png,.heic,.pdf,.mp4,.mov"
             style={{ display: "none" }}
             onChange={e => {
               addFiles(e.target.files);

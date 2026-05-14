@@ -1,0 +1,93 @@
+#!/bin/bash
+set -e
+
+REPO_URL="https://github.com/calblueprint/rose-academies-uganda.git"
+REPO_DIR="$HOME/rose-academies-uganda"
+APP_DIR="$REPO_DIR/apps/local"
+FILES_DIR="$HOME/rose-files"
+SERVICE_NAME="rose-web"
+
+echo "Setting up Rose Academies Pi..."
+
+read -p "Enter DEVICE_ID for this Pi: " DEVICE_ID
+
+if [ -z "$DEVICE_ID" ]; then
+  echo "DEVICE_ID cannot be empty."
+  exit 1
+fi
+
+echo "Updating system packages..."
+sudo apt update
+sudo apt install -y git curl build-essential
+
+echo "Installing Node dependencies..."
+if ! command -v node >/dev/null 2>&1; then
+  echo "Node is not installed. Install Node 22 before continuing."
+  echo "Recommended: install Node with nvm or NodeSource."
+  exit 1
+fi
+
+if ! command -v pnpm >/dev/null 2>&1; then
+  echo "Installing pnpm..."
+  corepack enable
+  corepack prepare pnpm@10.20.0 --activate
+fi
+
+echo "Preparing folders..."
+mkdir -p "$FILES_DIR"
+
+if [ ! -d "$REPO_DIR" ]; then
+  echo "Cloning repo..."
+  git clone "$REPO_URL" "$REPO_DIR"
+fi
+
+cd "$REPO_DIR"
+
+echo "Checking out main..."
+git switch main || git checkout main
+git pull --ff-only origin main
+
+echo "Writing local env file..."
+cat > "$APP_DIR/.env.local" <<EOF
+NEXT_PUBLIC_SUPABASE_URL=https://tyckvrwfblheqxuliscl.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR5Y2t2cndmYmxoZXF4dWxpc2NsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkxNzIwNTksImV4cCI6MjA3NDc0ODA1OX0.dggjzvmAdwHif9v3hUZWrYdwOFPfZAPMO9BHGlPaqPg
+
+DEVICE_ID=$DEVICE_ID
+NEXT_PUBLIC_DEVICE_ID=$DEVICE_ID
+
+LOCAL_FILES_DIR=$FILES_DIR
+LOCAL_REPO_DIR=$REPO_DIR
+EOF
+
+echo "Installing project dependencies..."
+pnpm install
+
+echo "Building local app..."
+cd "$APP_DIR"
+pnpm build
+
+echo "Installing systemd service..."
+sudo tee /etc/systemd/system/$SERVICE_NAME.service > /dev/null <<EOF
+[Unit]
+Description=Rose Academies Next.js app
+After=network.target
+
+[Service]
+Type=simple
+User=$USER
+WorkingDirectory=$APP_DIR
+Environment="LOCAL_FILES_DIR=$FILES_DIR"
+ExecStart=/usr/bin/bash -lc 'cd $APP_DIR && $HOME/.local/share/pnpm/pnpm start'
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+echo "Starting service..."
+sudo systemctl daemon-reload
+sudo systemctl enable "$SERVICE_NAME"
+sudo systemctl restart "$SERVICE_NAME"
+
+echo "Setup complete."
+sudo systemctl status "$SERVICE_NAME" --no-pager

@@ -1,5 +1,6 @@
 #!/bin/bash
-set -e
+
+set -euo pipefail
 
 REPO_URL="https://github.com/calblueprint/rose-academies-uganda.git"
 REPO_DIR="$HOME/rose-academies-uganda"
@@ -20,12 +21,15 @@ echo "Updating system packages..."
 sudo apt update
 sudo apt install -y git curl build-essential
 
-echo "Installing Node dependencies..."
+echo "Checking Node installation..."
+
 if ! command -v node >/dev/null 2>&1; then
-  echo "Node is not installed. Install Node 22 before continuing."
-  echo "Recommended: install Node with nvm or NodeSource."
+  echo "Node.js is not installed."
+  echo "Install Node 22 before running this script."
   exit 1
 fi
+
+echo "Checking pnpm installation..."
 
 if ! command -v pnpm >/dev/null 2>&1; then
   echo "Installing pnpm..."
@@ -47,8 +51,15 @@ echo "Checking out main..."
 git switch main || git checkout main
 git pull --ff-only origin main
 
-echo "Writing local env file..."
-cat > "$APP_DIR/.env.local" <<EOF
+if [ -f "$APP_DIR/.env.local" ]; then
+  read -p ".env.local already exists. Overwrite? [y/N] " OVERWRITE_ENV
+
+  if [[ "$OVERWRITE_ENV" != "y" && "$OVERWRITE_ENV" != "Y" ]]; then
+    echo "Keeping existing .env.local"
+  else
+    echo "Writing local env file..."
+
+    cat > "$APP_DIR/.env.local" <<EOF
 NEXT_PUBLIC_SUPABASE_URL=https://tyckvrwfblheqxuliscl.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR5Y2t2cndmYmxoZXF4dWxpc2NsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkxNzIwNTksImV4cCI6MjA3NDc0ODA1OX0.dggjzvmAdwHif9v3hUZWrYdwOFPfZAPMO9BHGlPaqPg
 
@@ -58,6 +69,21 @@ NEXT_PUBLIC_DEVICE_ID=$DEVICE_ID
 LOCAL_FILES_DIR=$FILES_DIR
 LOCAL_REPO_DIR=$REPO_DIR
 EOF
+  fi
+else
+  echo "Writing local env file..."
+
+  cat > "$APP_DIR/.env.local" <<EOF
+NEXT_PUBLIC_SUPABASE_URL=https://tyckvrwfblheqxuliscl.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=YOUR_ANON_KEY_HERE
+
+DEVICE_ID=$DEVICE_ID
+NEXT_PUBLIC_DEVICE_ID=$DEVICE_ID
+
+LOCAL_FILES_DIR=$FILES_DIR
+LOCAL_REPO_DIR=$REPO_DIR
+EOF
+fi
 
 echo "Installing project dependencies..."
 pnpm install
@@ -67,6 +93,7 @@ cd "$APP_DIR"
 pnpm build
 
 echo "Installing systemd service..."
+
 sudo tee /etc/systemd/system/$SERVICE_NAME.service > /dev/null <<EOF
 [Unit]
 Description=Rose Academies Next.js app
@@ -85,9 +112,21 @@ WantedBy=multi-user.target
 EOF
 
 echo "Starting service..."
+
 sudo systemctl daemon-reload
 sudo systemctl enable "$SERVICE_NAME"
 sudo systemctl restart "$SERVICE_NAME"
 
+echo "Waiting for local app..."
+sleep 5
+
+echo "Testing local app..."
+
+curl -I http://localhost:3000 || {
+  echo "Local app did not respond."
+  exit 1
+}
+
 echo "Setup complete."
+
 sudo systemctl status "$SERVICE_NAME" --no-pager

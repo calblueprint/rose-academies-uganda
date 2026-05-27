@@ -1,14 +1,19 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  compiler: {
+    styledComponents: true,
+  },
+
   // Optimize for Raspberry Pi performance
   experimental: {
     // Reduce memory usage on low-end devices
     optimizePackageImports: ["styled-components"],
   },
+
   // Disable source maps in production to save memory
   productionBrowserSourceMaps: false,
+
   // Reduce webpack memory usage
   webpack: (config, { isServer }) => {
     if (!isServer) {
@@ -33,8 +38,10 @@ const nextConfig: NextConfig = {
         },
       };
     }
+
     return config;
   },
+
   images: {
     remotePatterns: [
       {

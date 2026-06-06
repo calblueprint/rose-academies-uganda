@@ -3,20 +3,30 @@ import COLORS from "@/styles/colors";
 
 export const Header = styled.header`
   width: 100%;
+  height: 4rem;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: ${COLORS.white};
+  box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.06);
+`;
+
+export const HeaderInner = styled.div`
+  width: 100%;
+  max-width: 67.5rem;
+  height: 100%;
+
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.81rem 6.5rem;
-  box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.06);
-  font-family: var(--font-gilroy);
-  font-size: 20px;
-  font-style: normal;
-  font-weight: 400;
-  line-height: 23.343px;
 `;
+
 export const PageShell = styled.div`
   --gutter: 7.25rem;
 `;
+
 export const LogoAndTitle = styled.div`
   display: flex;
   align-items: center;
@@ -27,9 +37,11 @@ export const LogoContainer = styled.div`
   display: flex;
   align-items: center;
   gap: 0.75rem;
+
   font-size: 1.25rem;
   font-weight: 600;
   color: ${COLORS.veryDarkBlue};
+
   img {
     height: 2.5rem;
     width: auto;
@@ -50,10 +62,14 @@ export const Content = styled.div`
 `;
 
 export const Title = styled.h1`
+  margin: 0;
+
   text-align: center;
   font-family: var(--font-gilroy);
   color: ${COLORS.black};
+
   font-size: 20px;
   font-style: normal;
   font-weight: 400;
+  line-height: 25px;
 `;

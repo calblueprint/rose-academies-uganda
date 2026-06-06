@@ -91,7 +91,7 @@ EOF
 fi
 
 echo "Installing project dependencies..."
-$PNPM_CMD install
+CI=true $PNPM_CMD install
 
 echo "Building local app..."
 cd "$APP_DIR"

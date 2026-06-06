@@ -33,16 +33,14 @@ fi
 echo "Node version:"
 node -v
 
-echo "Checking pnpm installation..."
+echo "Configuring pnpm $PNPM_VERSION with Corepack..."
+sudo corepack enable
+corepack prepare "pnpm@$PNPM_VERSION" --activate
 
-if ! command -v pnpm >/dev/null 2>&1; then
-  echo "Installing pnpm $PNPM_VERSION..."
-  sudo corepack enable
-  sudo corepack prepare "pnpm@$PNPM_VERSION" --activate
-fi
+PNPM_CMD="corepack pnpm"
 
 echo "pnpm version:"
-pnpm -v
+$PNPM_CMD -v
 
 echo "Preparing folders..."
 mkdir -p "$FILES_DIR"
@@ -93,11 +91,11 @@ EOF
 fi
 
 echo "Installing project dependencies..."
-pnpm install
+$PNPM_CMD install
 
 echo "Building local app..."
 cd "$APP_DIR"
-pnpm build
+$PNPM_CMD build
 
 echo "Installing systemd service..."
 
@@ -111,7 +109,7 @@ Type=simple
 User=$USER
 WorkingDirectory=$APP_DIR
 Environment="LOCAL_FILES_DIR=$FILES_DIR"
-ExecStart=/usr/bin/bash -lc 'cd $APP_DIR && pnpm start'
+ExecStart=/usr/bin/bash -lc 'cd $APP_DIR && corepack pnpm start'
 Restart=on-failure
 
 [Install]

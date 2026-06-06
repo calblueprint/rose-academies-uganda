@@ -7,6 +7,7 @@ REPO_DIR="$HOME/rose-academies-uganda"
 APP_DIR="$REPO_DIR/apps/local"
 FILES_DIR="$HOME/rose-files"
 SERVICE_NAME="rose-web"
+PNPM_VERSION="10.20.0"
 
 echo "Setting up Rose Academies Pi..."
 
@@ -19,23 +20,29 @@ fi
 
 echo "Updating system packages..."
 sudo apt update
-sudo apt install -y git curl build-essential
+sudo apt install -y git curl build-essential ca-certificates
 
 echo "Checking Node installation..."
 
 if ! command -v node >/dev/null 2>&1; then
-  echo "Node.js is not installed."
-  echo "Install Node 22 before running this script."
-  exit 1
+  echo "Installing Node.js 22..."
+  curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+  sudo apt install -y nodejs
 fi
+
+echo "Node version:"
+node -v
 
 echo "Checking pnpm installation..."
 
 if ! command -v pnpm >/dev/null 2>&1; then
-  echo "Installing pnpm..."
-  corepack enable
-  corepack prepare pnpm@10.20.0 --activate
+  echo "Installing pnpm $PNPM_VERSION..."
+  sudo corepack enable
+  sudo corepack prepare "pnpm@$PNPM_VERSION" --activate
 fi
+
+echo "pnpm version:"
+pnpm -v
 
 echo "Preparing folders..."
 mkdir -p "$FILES_DIR"
@@ -104,7 +111,7 @@ Type=simple
 User=$USER
 WorkingDirectory=$APP_DIR
 Environment="LOCAL_FILES_DIR=$FILES_DIR"
-ExecStart=/usr/bin/bash -lc 'cd $APP_DIR && $HOME/.local/share/pnpm/pnpm start'
+ExecStart=/usr/bin/bash -lc 'cd $APP_DIR && pnpm start'
 Restart=on-failure
 
 [Install]

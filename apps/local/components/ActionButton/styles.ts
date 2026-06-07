@@ -27,7 +27,7 @@ export const StyledActionButton = styled.button<ActionButtonProps>`
   color: ${({ $textColor }) => $textColor};
   border: ${({ $borderColor }) =>
     $borderColor ? `1px solid ${$borderColor}` : "none"};
-  font-family: inherit;
+  // font-family: var(--font-gilroy);
   font-size: 1rem;
   font-weight: 500;
   cursor: pointer;

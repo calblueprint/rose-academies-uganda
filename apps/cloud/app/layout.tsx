@@ -3,7 +3,7 @@
 // - Place global providers here later (theme, query client, etc.).
 // - Keep it minimal for now.
 
-import "./globals.css";
+import "./global.css";
 import type { ReactNode } from "react";
 import StyledComponentsRegistry from "@/lib/registry";
 

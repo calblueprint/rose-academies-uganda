@@ -28,9 +28,9 @@ export const SearchInput = styled.input`
   overflow: hidden;
   color: #808582;
   text-overflow: ellipsis;
-  font-size: 1.125rem;
+  font-size: 0.875rem;
   font-style: normal;
-  font-weight: 300;
+  font-weight: 500;
   line-height: 1.125rem;
   border: none;
   outline: none;

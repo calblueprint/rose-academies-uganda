@@ -20,7 +20,7 @@ export const StyledActionButton = styled.button<ActionButtonProps>`
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 13px 20px;
+  padding: 12px 20px;
   border-radius: 11.25px;
   border: none;
   background-color: ${({ $backgroundColor }) => $backgroundColor};

@@ -9,6 +9,13 @@ FILES_DIR="$HOME/rose-files"
 SERVICE_NAME="rose-web"
 PNPM_VERSION="10.20.0"
 
+AP_CONNECTION_NAME="pi-ap"
+AP_SSID="RoseAcademies"
+AP_PASSWORD="roseacademy"
+
+SUPABASE_URL="https://tyckvrwfblheqxuliscl.supabase.co"
+SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR5Y2t2cndmYmxoZXF4dWxpc2NsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkxNzIwNTksImV4cCI6MjA3NDc0ODA1OX0.dggjzvmAdwHif9v3hUZWrYdwOFPfZAPMO9BHGlPaqPg"
+
 echo "Setting up Rose Academies Pi..."
 
 read -p "Enter DEVICE_ID for this Pi: " DEVICE_ID
@@ -21,6 +28,42 @@ fi
 echo "Updating system packages..."
 sudo apt update
 sudo apt install -y git curl build-essential ca-certificates
+
+echo "Configuring WiFi access point fallback..."
+
+if nmcli connection show "$AP_CONNECTION_NAME" >/dev/null 2>&1; then
+  echo "AP connection already exists. Updating it..."
+else
+  echo "Creating AP connection..."
+  sudo nmcli connection add \
+    type wifi \
+    ifname wlan0 \
+    con-name "$AP_CONNECTION_NAME" \
+    autoconnect yes \
+    ssid "$AP_SSID"
+fi
+
+sudo nmcli connection modify "$AP_CONNECTION_NAME" \
+  802-11-wireless.mode ap \
+  802-11-wireless.band bg \
+  ipv4.method shared \
+  wifi-sec.key-mgmt wpa-psk \
+  wifi-sec.psk "$AP_PASSWORD" \
+  connection.autoconnect yes \
+  connection.autoconnect-priority 0
+
+echo "Setting normal WiFi connections to higher priority than AP..."
+
+WIFI_CONNECTIONS=$(nmcli -t -f NAME,TYPE connection show | awk -F: '$2=="802-11-wireless"{print $1}')
+
+for CONN in $WIFI_CONNECTIONS; do
+  if [ "$CONN" != "$AP_CONNECTION_NAME" ]; then
+    echo "Setting WiFi priority for $CONN..."
+    sudo nmcli connection modify "$CONN" \
+      connection.autoconnect yes \
+      connection.autoconnect-priority 10
+  fi
+done
 
 echo "Checking Node installation..."
 
@@ -65,8 +108,8 @@ if [ -f "$APP_DIR/.env.local" ]; then
     echo "Writing local env file..."
 
     cat > "$APP_DIR/.env.local" <<EOF
-NEXT_PUBLIC_SUPABASE_URL=https://tyckvrwfblheqxuliscl.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR5Y2t2cndmYmxoZXF4dWxpc2NsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkxNzIwNTksImV4cCI6MjA3NDc0ODA1OX0.dggjzvmAdwHif9v3hUZWrYdwOFPfZAPMO9BHGlPaqPg
+NEXT_PUBLIC_SUPABASE_URL=$SUPABASE_URL
+NEXT_PUBLIC_SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY
 
 DEVICE_ID=$DEVICE_ID
 NEXT_PUBLIC_DEVICE_ID=$DEVICE_ID
@@ -79,8 +122,8 @@ else
   echo "Writing local env file..."
 
   cat > "$APP_DIR/.env.local" <<EOF
-NEXT_PUBLIC_SUPABASE_URL=https://tyckvrwfblheqxuliscl.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=YOUR_ANON_KEY_HERE
+NEXT_PUBLIC_SUPABASE_URL=$SUPABASE_URL
+NEXT_PUBLIC_SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY
 
 DEVICE_ID=$DEVICE_ID
 NEXT_PUBLIC_DEVICE_ID=$DEVICE_ID

@@ -25,6 +25,7 @@ const COLORS = {
   lightLightGreen: "#248F5D",
   green10: "#E9F4E9",
   green20: "#DEE3D1",
+  stem: "#F9FAF3",
 };
 
 export default COLORS;

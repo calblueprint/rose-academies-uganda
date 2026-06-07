@@ -15,7 +15,6 @@ import {
   FileRow,
   FilesContainer,
   LessonHeader,
-  LessonIcon,
   LessonLeft,
   LessonName,
   LessonRight,
@@ -64,7 +63,6 @@ export default function LessonItem({
   action,
   onAction,
   isActionLoading = false,
-  showIcon = true,
 }: {
   lessonId: number;
   lessonName: string;
@@ -89,7 +87,6 @@ export default function LessonItem({
     <LessonWrapper>
       <LessonHeader onClick={() => setOpened(prev => !prev)}>
         <LessonLeft>
-          {showIcon ? <LessonIcon /> : null}
           <LessonName>{lessonName}</LessonName>
 
           {/* status stays on LEFT */}

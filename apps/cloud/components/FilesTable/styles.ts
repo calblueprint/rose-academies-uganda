@@ -5,6 +5,10 @@ import { Body, H6, Subtitle2 } from "@/styles/text";
 const FILE_TABLE_COLUMNS =
   "1rem 1rem minmax(0, 1.35fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 0.75fr)";
 
+const TABLE_LINE_LEFT = "1.03131rem";
+const TABLE_LINE_RIGHT = "1.80481rem";
+const TABLE_LINE_COLOR = COLORS.gray40;
+
 export const TableSection = styled.section`
   display: flex;
   flex-direction: column;
@@ -47,8 +51,19 @@ export const TableHead = styled.thead`
     grid-template-columns: ${FILE_TABLE_COLUMNS};
     align-items: center;
     padding: 1.125rem 1.80481rem 1.125rem 1.03131rem;
+    position: relative;
     background: ${COLORS.white};
     column-gap: 1rem;
+  }
+
+  tr::after {
+    content: "";
+    position: absolute;
+    left: ${TABLE_LINE_LEFT};
+    right: ${TABLE_LINE_RIGHT};
+    bottom: 0;
+    height: 1px;
+    background: ${TABLE_LINE_COLOR};
   }
 `;
 
@@ -93,10 +108,10 @@ export const TableBody = styled.tbody`
   tr::after {
     content: "";
     position: absolute;
-    left: 1.03131rem;
-    right: 1.80481rem;
+    left: ${TABLE_LINE_LEFT};
+    right: ${TABLE_LINE_RIGHT};
     height: 1px;
-    background: ${COLORS.gray40};
+    background: ${TABLE_LINE_COLOR};
   }
 
   tr::before {
@@ -184,10 +199,22 @@ export const DragHandle = styled.button`
 export const FooterRow = styled.div`
   display: grid;
   grid-template-columns: ${FILE_TABLE_COLUMNS};
-  padding: 1.03131rem 2.5rem 1.03131rem 1.5rem;
+  padding: 1.03131rem 1.80481rem 1.03131rem 1.03131rem;
   align-items: center;
   align-self: stretch;
+  position: relative;
   background: ${COLORS.white};
+  column-gap: 1rem;
+
+  &::before {
+    content: "";
+    position: absolute;
+    left: ${TABLE_LINE_LEFT};
+    right: ${TABLE_LINE_RIGHT};
+    top: 0;
+    height: 1px;
+    background: ${TABLE_LINE_COLOR};
+  }
 `;
 
 export const FooterText = styled(Subtitle2).attrs({

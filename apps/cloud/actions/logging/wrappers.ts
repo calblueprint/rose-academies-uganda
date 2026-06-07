@@ -1,17 +1,15 @@
 "use server";
 
 /**
- * This file defines server actions for logging.
- * The output of these logs will be shown only to
- * the server console, with the possibility of extending
- * to external logging services in the future.
+ * These server actions keep logging available to client-triggered flows while
+ * still sending output only to the server console.
  *
- * This wrapping is necessary because server actions must be
- * defined as async free functions (i.e. not class methods).
- * However, the functions defined here are used directly by
- * the Logger class, accessible to both server-side and
- * client-side code.
+ * The wrappers are separate functions because Next.js server actions must be
+ * async free functions, not class methods. The Logger facade delegates here so
+ * callers do not need to know about that framework constraint.
  */
+
+// Taken from https://github.com/calblueprint/adopt-an-inmate
 
 export async function serverLog(message: string) {
   console.log(message);

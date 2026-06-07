@@ -1,6 +1,7 @@
 {
   "name": "rose-academies-uganda",
   "private": true,
+  "packageManager": "pnpm@10.20.0",
   "scripts": {
     "dev:local": "pnpm -C apps/local dev",
     "build:local": "pnpm -C apps/local build",

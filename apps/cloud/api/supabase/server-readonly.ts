@@ -1,8 +1,11 @@
 import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
 
-// This file was created for layout and pages as they shouldn't have write access to cookies
+// This is the server file for reading only, which is used in layouts and pages (basically everything else).
 
+// Use this read-only server client inside layouts and pages. Those files need
+// to read the session cookie to decide whether to redirect, but Next.js does
+// not allow them to write cookies while rendering.
 export async function getSupabaseServerClientReadOnly() {
   const cookieStore = await cookies();
 
@@ -20,8 +23,9 @@ export async function getSupabaseServerClientReadOnly() {
       getAll() {
         return cookieStore.getAll();
       },
-      // Layouts/pages can't modify cookies in Next.js.
-      // If Supabase tries to refresh session and set cookies here, we no-op.
+      // Supabase may ask to refresh the session while checking auth. We ignore
+      // cookie writes here because layout/page rendering should only answer
+      // "who is logged in?", not mutate the user's session.
       setAll() {},
     },
   });

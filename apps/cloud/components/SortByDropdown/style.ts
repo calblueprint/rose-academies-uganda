@@ -6,13 +6,14 @@ export const SortButtonWrapper = styled.div`
 `;
 
 export const SortButton = styled.button<{ $active: boolean }>`
-  height: 2.5rem;
-  padding: 0 1rem;
-  border-radius: 999px;
-  background: ${COLORS.white};
   display: flex;
+  height: 2.75rem;
+  padding: 0.625rem 1rem;
+  justify-content: center;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.625rem;
+  border-radius: 1rem;
+  background: ${COLORS.white};
   cursor: pointer;
   white-space: nowrap;
 
@@ -20,10 +21,10 @@ export const SortButton = styled.button<{ $active: boolean }>`
     ${({ $active }) => ($active ? COLORS.evergreen : COLORS.gray40)};
 `;
 
-export const SortButtonLabel = styled.span`
+export const SortButtonLabel = styled.span<{ $active: boolean }>`
   font-size: var(--font-subtitle-2);
   line-height: var(--lh-subtitle-2);
-  color: ${COLORS.evergreen};
+  color: ${({ $active }) => ($active ? COLORS.evergreen : COLORS.gray60)};
   font-weight: 500;
   white-space: nowrap;
 `;

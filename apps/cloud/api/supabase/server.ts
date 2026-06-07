@@ -1,6 +1,11 @@
 import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
 
+// This is the server file for writing, which is mainly used for login/logout actions.
+
+// Use this writable server client inside server actions, where Next.js allows
+// cookie updates. Supabase stores auth sessions in cookies, so login, logout,
+// and token refreshes all need a client that can both read and write them.
 export async function getSupabaseServerClient() {
   const cookieStore = await cookies();
 
@@ -19,6 +24,8 @@ export async function getSupabaseServerClient() {
         return cookieStore.getAll();
       },
       setAll(cookiesToSet) {
+        // Supabase passes back every cookie it needs to create, refresh, or
+        // clear so the browser and server stay in sync about the auth session.
         cookiesToSet.forEach(({ name, value, options }) => {
           cookieStore.set(name, value, options);
         });

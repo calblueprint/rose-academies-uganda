@@ -4,8 +4,8 @@ import { Body, Subtitle2 } from "@/styles/text";
 
 export const Card = styled.div`
   display: flex;
-  width: 100%;
-  height: 100%;
+  width: 28.875rem;
+  height: 11.375rem;
   padding: 1.5rem;
   flex-direction: column;
   justify-content: center;

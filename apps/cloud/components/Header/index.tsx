@@ -10,7 +10,6 @@ import { usePathname, useRouter } from "next/navigation";
 import { signOut } from "@/actions/logout";
 import RoseLogo from "@/assets/images/rose-academies-logo.png";
 import {
-  DropdownDivider,
   DropdownItem,
   DropdownMenu,
   DropdownWrapper,

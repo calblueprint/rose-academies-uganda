@@ -1,6 +1,6 @@
 import { getSupabaseServerClientReadOnly } from "@/api/supabase/server-readonly";
 import LessonsClient from "@/app/(authed)/app/lessons/LessonsClient";
-import StorageAndSync from "@/components/StorageAndSync";
+import CloudSyncButton from "@/components/CloudSyncButton";
 import SyncSummaryCard from "@/components/SyncSummaryCard";
 import { getCurrentDeviceId } from "@/lib/getCurrentUserDevice";
 import {
@@ -24,20 +24,6 @@ type DeviceLessonRow = {
   Lessons: DeviceLessonLessonRow | DeviceLessonLessonRow[] | null;
 };
 
-function formatLastSynced(lastSyncedAt: string | null) {
-  if (!lastSyncedAt) return "Not synced yet";
-
-  const date = new Date(lastSyncedAt);
-
-  return date.toLocaleString("en-US", {
-    month: "short",
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-  });
-}
-
 export default async function OfflineLibraryPage() {
   const supabase = await getSupabaseServerClientReadOnly();
 
@@ -50,19 +36,17 @@ export default async function OfflineLibraryPage() {
   const deviceId = await getCurrentDeviceId({ userId: user.id });
   if (!deviceId) return null;
 
+  // The offline library is derived from DeviceLessons, not every lesson owned
+  // by the user, because it represents what this specific Pi should sync.
   const { data } = await supabase
     .from("DeviceLessons")
     .select("lesson_id, status, Lessons(id, name, image_path)")
     .eq("device_id", deviceId);
 
-  const { data: deviceData } = await supabase
-    .from("devices")
-    .select("last_synced_at")
-    .eq("id", deviceId)
-    .single();
-
   const deviceLessonRows = (data as DeviceLessonRow[]) ?? [];
 
+  // Supabase can return joined Lessons as an object or array depending on the
+  // generated relationship shape, so normalize it before passing to the client.
   const lessons = deviceLessonRows.reduce<
     { id: number; name: string; image_path: string | null }[]
   >((acc, row) => {
@@ -99,8 +83,6 @@ export default async function OfflineLibraryPage() {
     { availableCount: 0, pendingCount: 0 },
   );
 
-  const lastSyncedLabel = formatLastSynced(deviceData?.last_synced_at ?? null);
-
   return (
     <PageWrapper>
       <Content>
@@ -112,9 +94,9 @@ export default async function OfflineLibraryPage() {
         </PageHeader>
 
         <SyncCardsRow>
-          <StorageAndSync userId={user.id} />
+          <CloudSyncButton userId={user.id} />
           <SyncSummaryCard
-            lastSynced={lastSyncedLabel}
+            userId={user.id}
             availableCount={availableCount}
             pendingCount={pendingCount}
           />

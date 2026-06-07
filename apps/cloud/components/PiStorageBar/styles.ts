@@ -8,7 +8,7 @@ export const Content = styled.div`
   flex-direction: column;
   justify-content: center;
   align-items: flex-start;
-  gap: 20px;
+  gap: 0.75rem;
   flex-shrink: 0;
 `;
 

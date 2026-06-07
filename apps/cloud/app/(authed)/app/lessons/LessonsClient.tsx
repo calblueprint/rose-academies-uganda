@@ -1,7 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import supabase from "@/api/supabase/client";
+import ClassroomFilterDropdown from "@/components/ClassroomFilterDropdown";
 import CreateButton from "@/components/CreateLessonButton";
 import LessonCard from "@/components/LessonCard";
 import LessonItem from "@/components/LessonItem";
@@ -69,6 +71,8 @@ export default function LessonsClient({
   variant = "dashboard",
   showSortButton = false,
 }: LessonsClientProps) {
+  const router = useRouter();
+
   const [searchTerm, setSearchTerm] = useState("");
   const [view, setView] = useState<"grid" | "list">(defaultView);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -83,12 +87,56 @@ export default function LessonsClient({
   >(null);
   const [lessons, setLessons] = useState(initialLessons);
   const [loadingLessonId, setLoadingLessonId] = useState<number | null>(null);
+
   const [sortBy, setSortBy] = useState<SortOptionValue>("updated_desc");
+  const [selectedClassrooms, setSelectedClassrooms] = useState<string[]>([]);
+
+  useEffect(() => {
+    setLessons(initialLessons);
+  }, [initialLessons]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const saved = localStorage.getItem(
+      "lessonsSortBy",
+    ) as SortOptionValue | null;
+
+    if (saved) {
+      setSortBy(saved);
+    }
+  }, []);
+
+  function handleSortChange(value: SortOptionValue) {
+    setSortBy(value);
+
+    if (typeof window !== "undefined") {
+      localStorage.setItem("lessonsSortBy", value);
+    }
+  }
+
+  const availableClassrooms = useMemo(() => {
+    const classroomSet = new Set<string>();
+
+    lessons.forEach(lesson => {
+      lesson.villages?.forEach(village => classroomSet.add(village));
+    });
+
+    return [...classroomSet].sort((a, b) => a.localeCompare(b));
+  }, [lessons]);
 
   const filteredLessons = useMemo(() => {
-    const filtered = lessons.filter(lesson =>
-      lesson.name.toLowerCase().includes(searchTerm.toLowerCase()),
-    );
+    const filtered = lessons.filter(lesson => {
+      const matchesSearch = lesson.name
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase());
+
+      const matchesClassroom =
+        selectedClassrooms.length === 0 ||
+        lesson.villages?.some(village => selectedClassrooms.includes(village));
+
+      return matchesSearch && matchesClassroom;
+    });
 
     if (!sortBy) return filtered;
 
@@ -142,7 +190,7 @@ export default function LessonsClient({
 
       return 0;
     });
-  }, [lessons, searchTerm, sortBy]);
+  }, [lessons, searchTerm, sortBy, selectedClassrooms]);
 
   async function handleListAction(lessonId: number) {
     if (!listAction) return;
@@ -154,25 +202,28 @@ export default function LessonsClient({
 
     if (listAction === "remove") {
       setRemoveConfirmLessonId(lessonId);
-      return;
     }
   }
 
   async function handleRestoreConfirm() {
     if (restoreConfirmLessonId === null) return;
 
-    setLoadingLessonId(restoreConfirmLessonId);
+    const lessonIdToRestore = restoreConfirmLessonId;
+
+    setLoadingLessonId(lessonIdToRestore);
 
     try {
       const { error } = await supabase
         .from("Lessons")
         .update({ is_archived: false })
-        .eq("id", restoreConfirmLessonId);
+        .eq("id", lessonIdToRestore);
 
       if (error) throw error;
 
-      setLessons(prev => prev.filter(l => l.id !== restoreConfirmLessonId));
+      setLessons(prev => prev.filter(l => l.id !== lessonIdToRestore));
       setRestoreConfirmLessonId(null);
+
+      router.refresh();
     } catch (err) {
       console.error(err);
     } finally {
@@ -182,24 +233,29 @@ export default function LessonsClient({
 
   async function handleRemoveConfirm() {
     if (removeConfirmLessonId === null) return;
+
     if (!deviceId) {
       console.error(new Error("Missing deviceId"));
       return;
     }
 
-    setLoadingLessonId(removeConfirmLessonId);
+    const lessonIdToRemove = removeConfirmLessonId;
+
+    setLoadingLessonId(lessonIdToRemove);
 
     try {
       const { error } = await supabase
         .from("DeviceLessons")
         .delete()
-        .eq("lesson_id", removeConfirmLessonId)
+        .eq("lesson_id", lessonIdToRemove)
         .eq("device_id", deviceId);
 
       if (error) throw error;
 
-      setLessons(prev => prev.filter(l => l.id !== removeConfirmLessonId));
+      setLessons(prev => prev.filter(l => l.id !== lessonIdToRemove));
       setRemoveConfirmLessonId(null);
+
+      router.refresh();
     } catch (err) {
       console.error(err);
     } finally {
@@ -239,7 +295,7 @@ export default function LessonsClient({
       <ConfirmationModal
         isOpen={restoreConfirmLessonId !== null}
         title="Restore Lesson"
-        description="This lesson will be restored to the active lessons dashboard. To make it available on the Raspberry Pi, you’ll need to sync it from the Sync Lessons page."
+        description="This lesson will be restored..."
         confirmText="Restore to Active"
         onCancel={() => setRestoreConfirmLessonId(null)}
         onConfirm={handleRestoreConfirm}
@@ -252,7 +308,7 @@ export default function LessonsClient({
       <ConfirmationModal
         isOpen={removeConfirmLessonId !== null}
         title="Remove Lesson from Sync"
-        description="The lesson will still be saved, but you’ll need to send it to the Sync Lessons page to use it on the Raspberry Pi."
+        description="The lesson will still be saved..."
         confirmText="Remove Lesson"
         onCancel={() => setRemoveConfirmLessonId(null)}
         onConfirm={handleRemoveConfirm}
@@ -268,8 +324,16 @@ export default function LessonsClient({
             <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
           )}
 
+          {showSortButton && availableClassrooms.length > 0 && (
+            <ClassroomFilterDropdown
+              classrooms={availableClassrooms}
+              selectedClassrooms={selectedClassrooms}
+              onChange={setSelectedClassrooms}
+            />
+          )}
+
           {showSortButton && (
-            <SortByDropdown value={sortBy} onChange={setSortBy} />
+            <SortByDropdown value={sortBy} onChange={handleSortChange} />
           )}
 
           {showViewToggle && (

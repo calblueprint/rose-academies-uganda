@@ -5,7 +5,7 @@ export default function StatusPill({
 }: {
   status: "available" | "pending";
 }) {
-  const label = status === "available" ? "Available Offline" : "Pending Sync";
+  const label = status === "available" ? "Synced" : "Pending Sync";
 
   return (
     <Pill $status={status}>

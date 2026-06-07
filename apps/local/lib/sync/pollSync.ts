@@ -5,6 +5,8 @@ const DEVICE_ID = getDeviceId();
 const POLL_INTERVAL_MS = 30000;
 const LOCAL_APP_ORIGIN = `http://127.0.0.1:${process.env.PORT ?? "3000"}`;
 
+// The Pi polls Supabase because the cloud app cannot directly call a Raspberry
+// Pi that is usually behind a local network or offline from the public internet.
 let intervalId: ReturnType<typeof setInterval> | null = null;
 let isPolling = false;
 
@@ -47,6 +49,8 @@ async function pollForRequestedSync() {
     const pendingRun = data as PendingSyncRun;
     console.log("[PI] Found requested sync:", pendingRun.id);
 
+    // Claim the run with a status guard so two overlapping pollers cannot start
+    // the same cloud-requested sync at the same time.
     const { data: claimedRun, error: claimError } = await supabase
       .from("sync_runs")
       .update({ status: "in_progress" })
@@ -68,6 +72,8 @@ async function pollForRequestedSync() {
     const syncUrl = new URL("/api/sync", LOCAL_APP_ORIGIN);
     syncUrl.searchParams.set("syncRunId", String(pendingRun.id));
 
+    // Calling the local API route reuses the same sync path as a manual local
+    // sync request, including status updates and all-or-nothing file staging.
     const response = await fetch(syncUrl);
 
     if (!response.ok) {
@@ -91,6 +97,8 @@ export function startSyncPolling() {
   }
 
   console.log("[PI] Starting sync polling.");
+  // Poll once immediately so a requested sync does not wait for the first
+  // interval tick after the local server starts.
   void pollForRequestedSync();
 
   intervalId = setInterval(() => {

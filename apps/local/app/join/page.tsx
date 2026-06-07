@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import RoseLogo from "@/assets/images/rose-academies-logo.png";
 import { DataContext } from "@/context/DataContext";
 import {
-  AdminLink,
   Card,
   CodeInput,
   CodeInputSection,
@@ -58,7 +57,7 @@ export default function JoinPage() {
           <LogoContainer>
             <Image src={RoseLogo} alt="Rose Academies Logo" unoptimized />
           </LogoContainer>
-          <Title>Join Your Class</Title>
+          <Title>Join Your Class!!</Title>
           <Helper>Enter the join code provided by your instructor</Helper>
         </HeaderSection>
         <CodeSection>

@@ -5,6 +5,8 @@ import MissingDevicePage from "@/components/MissingDevicePage";
 import { DataContextProvider } from "@/context/DataContext";
 import { getCurrentDeviceId } from "@/lib/getCurrentUserDevice";
 
+// This layout is the Cloud App's auth boundary: every route in this group must
+// have a Supabase session before we render shared app data or navigation.
 export default async function AuthedLayout({
   children,
 }: {
@@ -20,6 +22,8 @@ export default async function AuthedLayout({
     redirect("/login");
   }
 
+  // Teachers need a linked device before using app pages because offline sync
+  // actions depend on knowing which Raspberry Pi they are managing.
   const deviceId = await getCurrentDeviceId({ userId: user.id });
 
   const { data, error } = await supabase

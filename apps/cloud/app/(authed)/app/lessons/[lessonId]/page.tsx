@@ -39,6 +39,8 @@ type LessonFileRow = {
   } | null;
 };
 
+type LessonSyncStatus = "available" | "pending" | null;
+
 export default async function LessonDetailPage({ params }: PageProps) {
   const { lessonId } = await params;
   const numericLessonId = Number(lessonId);
@@ -71,9 +73,11 @@ export default async function LessonDetailPage({ params }: PageProps) {
   const deviceId = await getCurrentDeviceId({ userId: user.id });
   if (!deviceId) return null;
 
+  // A lesson is considered "offline" for this page only when the current Pi has
+  // a DeviceLessons row for it.
   const { data: offlineRows, error: offlineError } = await supabase
     .from("DeviceLessons")
-    .select("lesson_id")
+    .select("lesson_id, status")
     .eq("device_id", deviceId)
     .eq("lesson_id", numericLessonId);
 
@@ -129,6 +133,8 @@ export default async function LessonDetailPage({ params }: PageProps) {
           Files: NonNullable<LessonFileRow["Files"]>;
         } => row.Files !== null,
       )
+      // LessonFiles is the ordered join table, while Files contains the actual
+      // metadata needed by the detail page.
       .map(row => ({
         id: String(row.Files.id),
         name: row.Files.name,
@@ -140,13 +146,17 @@ export default async function LessonDetailPage({ params }: PageProps) {
         mimeType: row.Files.mime_type,
       })) ?? [];
 
-  const isOffline = !!offlineRows && offlineRows.length > 0;
+  const initialSyncStatus: LessonSyncStatus =
+    offlineRows?.[0]?.status === "available" ||
+    offlineRows?.[0]?.status === "pending"
+      ? offlineRows[0].status
+      : null;
 
   return (
     <LessonDetailClient
       lesson={lesson}
       deviceId={deviceId}
-      initialIsOffline={isOffline}
+      initialSyncStatus={initialSyncStatus}
       files={normalizedFiles}
       villages={villages}
     />

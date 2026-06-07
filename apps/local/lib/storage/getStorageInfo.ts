@@ -29,12 +29,12 @@ export async function getStorageInfo() {
   const homeDir = os.homedir();
 
   const roseFilesPath = `${homeDir}/rose-files`;
-  const repoPath = `${homeDir}/rose-academies-uganda`;
+  const repoDir = process.env.LOCAL_REPO_DIR ?? process.cwd();
 
   const [disk, roseFilesKb, repoKb] = await Promise.all([
     getDiskInfo(),
     getDirectorySizeKb(roseFilesPath),
-    getDirectorySizeKb(repoPath),
+    getDirectorySizeKb(repoDir),
   ]);
 
   return {
@@ -43,7 +43,7 @@ export async function getStorageInfo() {
       roseFilesKb,
       repoKb,
       roseFilesPath,
-      repoPath,
+      repoDir,
     },
   };
 }

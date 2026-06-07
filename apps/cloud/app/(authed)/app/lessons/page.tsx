@@ -69,6 +69,10 @@ export default async function LessonsPage() {
     ...lesson,
     villages: villagesByLessonId[lesson.id] ?? [],
   }));
+
+  // DeviceLessons stores the offline-library state for the user's Pi. The main
+  // lessons dashboard uses it only to show whether each lesson is pending or
+  // already available offline.
   const deviceId = await getCurrentDeviceId({ userId: user.id });
   if (!deviceId) return null;
 

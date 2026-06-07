@@ -9,23 +9,19 @@ export const PageContainer = styled.div`
 
   width: 100%;
   min-width: 0;
-  max-width: 67.5rem;
+  max-width: 80rem;
   margin: 0 auto;
 
   min-height: 100vh;
-  padding: 1.38rem 0 0 0;
-
+  padding: 13px clamp(16px, 5vw, 116px);
   background: transparent;
 `;
 
 export const Title = styled.h1`
   margin: 0;
-
   color: ${COLORS.black};
-
-  font-family: var(--font-gilroy);
-  font-size: 1.75rem;
-  line-height: 2.125rem;
+  font-size: 2.25rem;
+  line-height: normal;
   font-weight: 400;
 `;
 
@@ -47,7 +43,6 @@ export const SearchBarRow = styled.div`
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.75rem 0rem;
   width: 100%;
 `;
 
@@ -76,7 +71,6 @@ export const ToggleDivider = styled.div`
 `;
 
 export const ToggleText = styled.div`
-  font-family: var(--font-gilroy);
   font-size: 14px;
   font-style: normal;
   font-weight: 500;
@@ -92,7 +86,7 @@ export const GridToggle = styled.div<ToggleProps>`
   height: 22px;
   cursor: pointer;
   flex-direction: row;
-  gap: 10px;
+  gap: 5px;
   align-items: center;
   line-height: normal;
 

@@ -9,7 +9,7 @@ export default function ExitClassButton() {
   const router = useRouter();
   const pathname = usePathname();
 
-  let buttonText = "Exit Class";
+  let buttonText = "Sign Out";
 
   if (pathname.startsWith("/sync")) {
     buttonText = "View Lessons";
@@ -21,7 +21,7 @@ export default function ExitClassButton() {
       backgroundColor={COLORS.evergreen}
       textColor={COLORS.white}
       iconColor={COLORS.white}
-      iconType={"exitClass"}
+      iconType={"refresh"}
       text={buttonText}
       title="Click to refresh status"
       animationDuration="1s"

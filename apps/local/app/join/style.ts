@@ -43,7 +43,6 @@ export const LogoContainer = styled.div`
 export const Title = styled.h1`
   color: ${COLORS.veryDarkBlue};
   text-align: center;
-  font-family: var(--font-gilroy);
   font-size: 2rem;
   font-style: normal;
   font-weight: 400;
@@ -54,23 +53,11 @@ export const Title = styled.h1`
 export const Helper = styled.p`
   color: ${COLORS.lightGrey};
   text-align: center;
-  font-family: var(--font-gilroy);
   font-size: 1.25rem;
   font-style: normal;
   font-weight: 400;
   line-height: normal;
   width: 20.5rem;
-`;
-
-export const AdminLink = styled.button`
-  color: ${COLORS.evergreen};
-  text-decoration: underline;
-  cursor: pointer;
-  font-family: var(--font-gilroy);
-  background: none;
-  border: none;
-  font-size: 1.25rem;
-  font-weight: 400;
 `;
 
 export const CodeSection = styled.div`
@@ -95,14 +82,18 @@ export const CodeInput = styled.input<{ $error?: boolean }>`
   border: none;
   padding: 0 0.75rem;
   outline: none;
+  font-family: "Google Sans";
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 25px
 
   &::placeholder {
-    color: ${COLORS.lightGrey};
-    text-align: center;
-    font-family: var(--font-gilroy);
-    font-size: 1rem;
+    color: var(--gray-60, #808582);
+    font-family: "Google Sans";
+    font-size: 1.125rem;
     font-style: normal;
-    font-weight: 400;
+    font-weight: 500;
     line-height: normal;
     text-align: left;
   }
@@ -122,20 +113,19 @@ export const JoinButton = styled.button`
   justify-content: center;
   align-items: center;
   border-radius: 0.5rem;
-  background: var(--cyan-12, #1e4240); // TODO: fix stacked components
+  background: ${COLORS.evergreen};
   color: ${COLORS.white};
   text-align: center;
-  font-family: var(--font-gilroy);
   font-size: 1.125rem;
   font-style: normal;
-  font-weight: 400;
+  font-weight: 500;
   line-height: normal;
   text-decoration: none;
+  border: none;
 `;
 
 export const ErrorMessage = styled.p`
   width: 100%;
   color: ${COLORS.red};
-  font-family: var(--font-gilroy);
   font-size: 1rem;
 `;

@@ -1,51 +1,50 @@
 import styled from "styled-components";
 
 export const PageContainer = styled.div`
-  padding-top: 1.25rem;
-  padding-left: 6.875rem;
-  padding-right: 6.875rem;
-  background-color: #fafafa;
+  display: flex;
+  flex-direction: column;
+
+  width: 100%;
+  min-width: 0;
+  max-width: 80rem;
+  margin: 0 auto;
+
   min-height: 100dvh;
+  padding: 13px clamp(16px, 5vw, 116px);
+
+  background-color: #fafafa;
 `;
 
 export const Title = styled.h2`
   color: #000000;
-
-  /* Heading 2 */
-  font-family: var(--font-gilroy);
   font-size: 36px;
   font-style: normal;
   font-weight: 400;
   line-height: normal;
+  padding-top: 23px;
 `;
 
 export const HeaderRow = styled.div`
   display: flex;
   align-items: center;
+  gap: 18px;
   justify-content: space-between;
-  width: 100%;
-  max-width: 1048px;
-  margin-top: 24px;
-  margin-bottom: 24px;
-`;
-
-export const HeaderRight = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 12px;
+  margin-top: 23px;
 `;
 
 export const SearchBar = styled.div`
   display: flex;
-  width: 17.375rem;
+  width: 100%;
+`;
+
+export const EmptyState = styled.div`
+  margin-top: 23px;
 `;
 
 export const DescriptionText = styled.p`
-  font-family: var(--font-gilroy);
   font-size: 1.125rem;
-  font-weight: 400;
+  font-weight: 500;
   color: #808582;
-  margin-top: 23px;
-  margin-bottom: 23px;
   line-height: normal;
+  margin-top: 12px;
 `;

@@ -6,14 +6,13 @@ import {
   DropdownMenu,
   DropdownOption,
   FileTypeDropdown as FileTypeDropdownContainer,
-  FileTypeDropdownIcon,
   FileTypeLabel,
 } from "./style";
 
 export type FileTypeFilter = "all" | "images" | "pdf" | "other";
 
 const OPTIONS: { value: FileTypeFilter; label: string }[] = [
-  { value: "all", label: "All Files" },
+  { value: "all", label: "File Type" },
   { value: "images", label: "Images" },
   { value: "pdf", label: "PDF" },
   { value: "other", label: "Other" },
@@ -54,9 +53,7 @@ export default function FileTypeDropdown({ selectedType, onChange }: Props) {
     <div ref={containerRef} style={{ position: "relative" }}>
       <FileTypeDropdownContainer onClick={() => setIsOpen(prev => !prev)}>
         <FileTypeLabel>{selectedLabel}</FileTypeLabel>
-        <FileTypeDropdownIcon>
-          {IconSvgs.dropdownChevronSmall}
-        </FileTypeDropdownIcon>
+        {IconSvgs.dropdownChevronSmall}
       </FileTypeDropdownContainer>
 
       {isOpen && (

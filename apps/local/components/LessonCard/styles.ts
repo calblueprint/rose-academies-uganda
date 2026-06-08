@@ -4,8 +4,8 @@ import COLORS from "@/styles/colors";
 export const Card = styled.div`
   display: flex;
   flex-direction: column;
-  width: 20.625rem;
-  min-height: 15rem;
+  width: 21.875rem;
+  height: 15.625rem;
   border-radius: 0.85769rem;
   box-shadow:
     0 63.494px 17.41px 0 rgba(170, 170, 170, 0),
@@ -15,31 +15,50 @@ export const Card = styled.div`
     0 2.048px 5.12px 0 rgba(170, 170, 170, 0.1);
   overflow: hidden;
   cursor: pointer;
+  flex-shrink: 0;
+  background: ${COLORS.white};
 `;
 
 export const ImagePlaceholder = styled.div`
   width: 100%;
-  height: 147.29px;
-  background-color: ${COLORS.evergreen};
+  height: calc(15.625rem - 5.5rem);
+  flex-shrink: 0;
+  overflow: hidden;
+  background: ${COLORS.gray10};
 `;
 
 export const Titleholder = styled.div`
   display: flex;
+  flex-direction: column;
   width: 100%;
-  height: 5.94656rem;
-  padding: 0.97rem 1.26rem;
-  align-items: flex-start;
-  gap: 0.57181rem;
+  height: 5.5rem;
   flex-shrink: 0;
+  padding: 0.75rem 1.25rem;
+  align-items: flex-start;
+  gap: 0.5rem;
   background: ${COLORS.white};
   border-radius: 0 0 0.938rem 0.938rem;
+  box-sizing: border-box;
 `;
 
 export const Title = styled.h3`
+  margin: 0;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+
   color: ${COLORS.black};
   font-family: var(--font-gilroy);
   font-size: 1.14356rem;
   font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+`;
+
+export const DescriptionText = styled.p`
+  font-size: 0.875rem;
   font-weight: 500;
+  color: #808582;
   line-height: normal;
 `;

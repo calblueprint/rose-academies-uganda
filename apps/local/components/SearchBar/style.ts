@@ -11,11 +11,11 @@ export const SearchBarField = styled.div`
   display: flex;
   gap: 1rem;
   width: 100%;
-  height: 2.71556rem;
-  padding: 0.27156rem 1.3035rem;
+  height: 2.75rem;
+  padding: 4.367px 20px;
   justify-content: space-between;
   align-items: center;
-  border-radius: 1.08625rem;
+  border-radius: 16px;
   border-top: 0.434px solid var(--gray, #d9d9d9);
   border-right: 0.869px solid var(--gray, #d9d9d9);
   border-bottom: 1.303px solid var(--gray, #d9d9d9);
@@ -26,12 +26,12 @@ export const SearchBarField = styled.div`
 export const SearchInput = styled.input`
   width: 100%;
   overflow: hidden;
-  color: #808582;
+  color: var(--gray-60, #808582);
   text-overflow: ellipsis;
-  font-family: var(--font-gilroy);
-  font-size: 1.125rem;
+  font-size: 0.875rem;
+  font-family: "Google Sans";
   font-style: normal;
-  font-weight: 300;
+  font-weight: 500;
   line-height: 1.125rem;
   border: none;
   outline: none;

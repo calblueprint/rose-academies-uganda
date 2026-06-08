@@ -7,6 +7,7 @@ import ExitClassButton from "@/components/ExitClassButton";
 import OperationalButton from "@/components/OperationalButton";
 import {
   Header as HeaderBar,
+  HeaderInner,
   HeaderRight,
   LogoAndTitle,
   LogoContainer,
@@ -17,17 +18,19 @@ import {
 export default function Header() {
   return (
     <HeaderBar>
-      <LogoAndTitle>
-        <PageShell />
-        <LogoContainer>
-          <Image src={RoseLogo} alt="Rose Academies Logo" unoptimized />
-          <Title>Rose Academies-Uganda</Title>
-        </LogoContainer>
-      </LogoAndTitle>
-      <HeaderRight>
-        <OperationalButton />
-        <ExitClassButton />
-      </HeaderRight>
+      <HeaderInner>
+        <LogoAndTitle>
+          <PageShell />
+          <LogoContainer>
+            <Image src={RoseLogo} alt="Rose Academies Logo" unoptimized />
+            <Title>Rose Academies-Uganda</Title>
+          </LogoContainer>
+        </LogoAndTitle>
+        <HeaderRight>
+          <OperationalButton />
+          <ExitClassButton />
+        </HeaderRight>
+      </HeaderInner>
     </HeaderBar>
   );
 }

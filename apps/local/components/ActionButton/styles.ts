@@ -20,14 +20,14 @@ export const StyledActionButton = styled.button<ActionButtonProps>`
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 13px 20px;
+  padding: 12px 20px;
   border-radius: 11.25px;
   border: none;
   background-color: ${({ $backgroundColor }) => $backgroundColor};
   color: ${({ $textColor }) => $textColor};
   border: ${({ $borderColor }) =>
     $borderColor ? `1px solid ${$borderColor}` : "none"};
-  font-family: inherit;
+  // font-family: var(--font-gilroy);
   font-size: 1rem;
   font-weight: 500;
   cursor: pointer;

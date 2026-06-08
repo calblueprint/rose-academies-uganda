@@ -1,11 +1,16 @@
 "use client";
 
+// This is the top navigation bar rendered on every authenticated page. It displays
+// the app logo, primary nav tabs, and a profile dropdown with sign-out. The
+// displayName prop is fetched server-side in the authed layout from the Supabase
+// Profiles table and passed down; it defaults to "User" if the query fails.
 import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { signOut } from "@/actions/logout";
 import RoseLogo from "@/assets/images/rose-academies-logo.png";
 import {
+  DropdownDivider,
   DropdownItem,
   DropdownMenu,
   DropdownWrapper,
@@ -32,6 +37,8 @@ export default function Header({ displayName }: { displayName: string }) {
   const router = useRouter();
   const pathname = usePathname();
 
+  // The ref covers both the trigger button and the menu panel so that clicks
+  // inside either one do not close the dropdown.
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (
@@ -45,6 +52,8 @@ export default function Header({ displayName }: { displayName: string }) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Keeps only the first and last word so multi-part names like "Mary Jane Watson"
+  // produce "MW" instead of three characters.
   const initials =
     displayName
       .trim()
@@ -100,6 +109,18 @@ export default function Header({ displayName }: { displayName: string }) {
 
             {dropdownOpen && (
               <DropdownMenu>
+                <DropdownItem onClick={() => console.log("Clicked Settings")}>
+                  Settings
+                </DropdownItem>
+                <DropdownItem
+                  onClick={() => console.log("Clicked Information")}
+                >
+                  Information
+                </DropdownItem>
+                <DropdownDivider />
+
+                {/* Sign Out uses a native form so the signOut action works
+                      before JS has fully hydrated, so it can work instantly. */}
                 <form action={signOut}>
                   <DropdownItem type="submit">Sign Out</DropdownItem>
                 </form>

@@ -1,5 +1,9 @@
 "use client";
 
+// Displays a progress bar showing how much disk space is used on the teacher's
+// Raspberry Pi. The Pi reports storage fields to the devices table after each
+// sync; this component reads that cached row rather than calling the Pi directly,
+// since the Pi may not be reachable from the public internet.
 import { useEffect, useState } from "react";
 import supabase from "@/api/supabase/client";
 import {
@@ -10,6 +14,8 @@ import {
   StorageInfo,
 } from "./styles";
 
+// availableKb and usePercent are fetched from the database and stored here for
+// completeness, but the display uses usedKb and totalKb directly (see percent below).
 type StorageResponse = {
   disk: {
     totalKb: number;
@@ -72,10 +78,10 @@ export default function PiStorageBar({ userId }: { userId: string }) {
 
   const totalGb = Math.round(storage.disk.totalKb / 1024 / 1024);
   const usedGb = Math.round(storage.disk.usedKb / 1024 / 1024);
-  const percent =
-    storage.disk.totalKb > 0
-      ? Math.round((storage.disk.usedKb / storage.disk.totalKb) * 100)
-      : 0;
+  // usePercent from the Pi reports used / (used + available), which excludes space
+  // reserved by the OS and produces a lower number than the actual disk usage.
+  // Recalculating from usedKb / totalKb keeps the bar consistent with the GB labels.
+  const percent = Math.round((usedGb / totalGb) * 100);
 
   return (
     <Content>

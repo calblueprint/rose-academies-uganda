@@ -4,12 +4,7 @@ import React from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { IconSvgs } from "@/lib/icons";
-import {
-  BackButton,
-  BackButtonIconSlot,
-  BackgroundImage,
-  LessonHeaderContainer,
-} from "./style";
+import { BackButton, BackgroundImage, LessonHeaderContainer } from "./style";
 
 type LessonHeaderProps = {
   label: string;
@@ -46,8 +41,8 @@ export default function LessonHeader({
         </BackgroundImage>
       )}
       <BackButton onClick={handleBackClick}>
-        <BackButtonIconSlot>{IconSvgs.backChevron}</BackButtonIconSlot>
-        <span>{label}</span>
+        {IconSvgs.backChevron}
+        {label}
       </BackButton>
     </LessonHeaderContainer>
   );

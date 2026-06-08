@@ -12,7 +12,6 @@ import {
   GridToggle,
   LessonsGrid,
   LessonsList,
-  ListToggle,
   PageContainer,
   SearchBarRow,
   Title,
@@ -81,6 +80,7 @@ export default function LessonsPage() {
                 lessonId={lesson.id}
                 lessonName={lesson.name}
                 lessonImage={lesson.image_path}
+                lessonDescription={lesson.description}
               />
             ))
           ) : (

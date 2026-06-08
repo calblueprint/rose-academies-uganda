@@ -3,16 +3,24 @@
 import React from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { Card, ImagePlaceholder, Title, Titleholder } from "./styles";
+import {
+  Card,
+  DescriptionText,
+  ImagePlaceholder,
+  Title,
+  Titleholder,
+} from "./styles";
 
 export default function LessonCard({
   lessonId,
   lessonName,
   lessonImage,
+  lessonDescription,
 }: {
   lessonId: number;
   lessonName: string;
   lessonImage: string | null;
+  lessonDescription: string | null;
 }) {
   const router = useRouter();
 
@@ -22,7 +30,7 @@ export default function LessonCard({
         <Image
           src={lessonImage}
           alt={lessonName}
-          width={330}
+          width={350}
           height={147.29}
           style={{ objectFit: "cover" }}
         />
@@ -31,6 +39,7 @@ export default function LessonCard({
       )}
       <Titleholder>
         <Title>{lessonName}</Title>
+        <DescriptionText>{lessonDescription}</DescriptionText>
       </Titleholder>
     </Card>
   );

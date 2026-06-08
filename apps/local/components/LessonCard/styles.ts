@@ -55,3 +55,10 @@ export const Title = styled.h3`
   font-weight: 400;
   line-height: normal;
 `;
+
+export const DescriptionText = styled.p`
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #808582;
+  line-height: normal;
+`;

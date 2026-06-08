@@ -13,7 +13,7 @@ import { DataContext } from "@/context/DataContext";
 import { LocalFile } from "@/types/schema";
 import {
   DescriptionText,
-  HeaderRight,
+  EmptyState,
   HeaderRow,
   PageContainer,
   SearchBar as SearchBarWrapper,
@@ -84,32 +84,29 @@ export default function FilesPage() {
   return (
     <PageContainer>
       <LessonHeader label="My Lessons" image={lesson?.image_path} />
-
-      <HeaderRow>
-        <Title>{lesson?.name ?? "Lesson Files"}</Title>
-
-        <HeaderRight>
-          <SearchBarWrapper>
-            <SearchBarComponent
-              searchTerm={searchTerm}
-              setSearchTerm={setSearchTerm}
-              placeholder="Search for file"
-            />
-          </SearchBarWrapper>
-
-          <FileTypeDropdown
-            selectedType={fileTypeFilter}
-            onChange={setFileTypeFilter}
-          />
-        </HeaderRight>
-      </HeaderRow>
+      <Title>{lesson?.name ?? "Lesson Files"}</Title>
 
       {lesson?.description && (
         <DescriptionText>{lesson.description}</DescriptionText>
       )}
 
+      <HeaderRow>
+        <SearchBarWrapper>
+          <SearchBarComponent
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            placeholder="Search for file"
+          />
+        </SearchBarWrapper>
+
+        <FileTypeDropdown
+          selectedType={fileTypeFilter}
+          onChange={setFileTypeFilter}
+        />
+      </HeaderRow>
+
       {tableFiles.length === 0 ? (
-        <div>No files in this lesson yet.</div>
+        <EmptyState>No files in this lesson yet.</EmptyState>
       ) : (
         <FilesTable files={tableFiles} onRowClick={handleRowClick} />
       )}

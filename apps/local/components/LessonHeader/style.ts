@@ -8,7 +8,7 @@ export const LessonHeaderContainer = styled.div`
   background-color: ${COLORS.evergreen};
   width: 100%;
   height: 141px;
-  padding: 12px 931px 96px 25px;
+  padding: 12px clamp(16px, 3vw, 25px);
   border-radius: 10px;
   overflow: hidden;
 `;
@@ -20,7 +20,8 @@ export const BackgroundImage = styled.div`
 `;
 
 export const BackButton = styled.button`
-  position: relative;
+  position: absolute;
+  top: 15px;
   z-index: 2;
   display: flex;
   align-items: center;
@@ -30,15 +31,7 @@ export const BackButton = styled.button`
   cursor: pointer;
   color: #ffffff;
   font-family: var(--font-gilroy);
-  font-size: 1rem;
-  font-weight: 500;
+  font-size: 0.875rem;
+  font-weight: 400;
   white-space: nowrap;
-`;
-
-export const BackButtonIconSlot = styled.div`
-  width: 0.6875rem;
-  height: 0.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 `;

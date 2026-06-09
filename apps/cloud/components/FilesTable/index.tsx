@@ -177,10 +177,27 @@ export default function FilesTable({
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [isMounted, setIsMounted] = useState(false);
 
+  const fileIdSet = useMemo(() => {
+    return new Set(files.map(file => file.id));
+  }, [files]);
+
+  // Selection IDs from the parent are only valid if the file still exists.
+  // This prevents deleted files from staying selected inside TanStack state.
+  const validSelectedFileIds = useMemo(() => {
+    return selectedFileIds.filter(fileId => fileIdSet.has(fileId));
+  }, [selectedFileIds, fileIdSet]);
+
+  // If the parent ever contains stale selected IDs, clean them up.
+  useEffect(() => {
+    if (!haveSameIds(validSelectedFileIds, selectedFileIds)) {
+      onSelectionChange(validSelectedFileIds);
+    }
+  }, [onSelectionChange, selectedFileIds, validSelectedFileIds]);
+
   // Selection is controlled by the parent, so we mirror selectedFileIds into TanStack state.
   useEffect(() => {
     const nextSelection = Object.fromEntries(
-      selectedFileIds.map(fileId => [fileId, true]),
+      validSelectedFileIds.map(fileId => [fileId, true]),
     ) as RowSelectionState;
 
     setRowSelection(prevSelection => {
@@ -188,13 +205,13 @@ export default function FilesTable({
         id => prevSelection[id],
       );
 
-      if (haveSameIds(currentSelectedIds, selectedFileIds)) {
+      if (haveSameIds(currentSelectedIds, validSelectedFileIds)) {
         return prevSelection;
       }
 
       return nextSelection;
     });
-  }, [selectedFileIds]);
+  }, [validSelectedFileIds]);
 
   // Enable DnD only after mount to avoid hydration issues.
   useEffect(() => {
@@ -266,8 +283,10 @@ export default function FilesTable({
     sorting.length === 0 && !isSearchActive && !isDeleting && !isReordering;
 
   const selectedIds = useMemo(() => {
-    return Object.keys(rowSelection).filter(id => rowSelection[id]);
-  }, [rowSelection]);
+    return Object.keys(rowSelection).filter(
+      id => rowSelection[id] && fileIdSet.has(id),
+    );
+  }, [rowSelection, fileIdSet]);
 
   const selectedCount = selectedIds.length;
   const hasNoFiles = files.length === 0;
@@ -276,10 +295,10 @@ export default function FilesTable({
 
   // Notify the parent only when selected IDs actually change to avoid update loops.
   useEffect(() => {
-    if (!haveSameIds(selectedIds, selectedFileIds)) {
+    if (!haveSameIds(selectedIds, validSelectedFileIds)) {
       onSelectionChange(selectedIds);
     }
-  }, [onSelectionChange, selectedFileIds, selectedIds]);
+  }, [onSelectionChange, validSelectedFileIds, selectedIds]);
 
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;

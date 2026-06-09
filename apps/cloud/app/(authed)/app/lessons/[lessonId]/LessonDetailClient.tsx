@@ -192,6 +192,10 @@ export default function LessonDetailClient({
     });
   }
 
+  const handleSelectionChange = useCallback((fileIds: string[]) => {
+    setSelectedFileIds(fileIds);
+  }, []);
+
   return (
     <PageContainer>
       <LessonInformation>
@@ -257,7 +261,7 @@ export default function LessonDetailClient({
           onReorderFiles={handleReorderFiles}
           isReordering={isReordering}
           selectedFileIds={selectedFileIds}
-          onSelectionChange={setSelectedFileIds}
+          onSelectionChange={handleSelectionChange}
           onRowClick={setSelectedPreviewFile}
         />
       </LessonInformation>

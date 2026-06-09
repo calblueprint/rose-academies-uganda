@@ -15,7 +15,9 @@ function storageUrlToKey(url: string, bucket: string): string {
   const idx = url.indexOf(marker);
 
   if (idx === -1) {
-    return url;
+    throw new Error(
+      `Could not extract storage object key. Expected bucket "${bucket}" in URL: ${url}`,
+    );
   }
 
   return url.slice(idx + marker.length);

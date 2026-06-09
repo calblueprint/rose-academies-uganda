@@ -18,7 +18,7 @@ import {
 import { updateLastSyncedAt } from "@/lib/sync/updateLastSynced";
 import { updateDeviceLessonStatuses } from "@/lib/sync/updateLessonStatus";
 
-const BUCKET = "lesson-files";
+const BUCKET = "files";
 const LOCAL_DIR =
   process.env.LOCAL_FILES_DIR ?? path.join(os.homedir(), "rose-files");
 const DEVICE_ID = getDeviceId();

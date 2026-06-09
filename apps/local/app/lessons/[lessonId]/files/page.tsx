@@ -44,7 +44,14 @@ export default function FilesPage() {
 
   const files = useMemo(() => {
     if (!data) return [];
-    return data.files.filter(file => file.lesson_id === lessonId);
+
+    const fileIdsForLesson = new Set(
+      data.lessonFiles
+        .filter(lessonFile => lessonFile.lesson_id === lessonId)
+        .map(lessonFile => lessonFile.file_id),
+    );
+
+    return data.files.filter(file => fileIdsForLesson.has(file.id));
   }, [data, lessonId]);
 
   const filteredFiles = useMemo(

@@ -17,6 +17,7 @@ import {
   HeaderRow,
   PageContainer,
   SearchBar as SearchBarWrapper,
+  TableWrapper,
   Title,
 } from "./style";
 
@@ -115,7 +116,9 @@ export default function FilesPage() {
       {tableFiles.length === 0 ? (
         <EmptyState>No files in this lesson yet.</EmptyState>
       ) : (
-        <FilesTable files={tableFiles} onRowClick={handleRowClick} />
+        <TableWrapper>
+          <FilesTable files={tableFiles} onRowClick={handleRowClick} />
+        </TableWrapper>
       )}
 
       {selectedFile && (

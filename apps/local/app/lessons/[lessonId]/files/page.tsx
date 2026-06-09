@@ -17,6 +17,7 @@ import {
   HeaderRow,
   PageContainer,
   SearchBar as SearchBarWrapper,
+  TableWrapper,
   Title,
 } from "./style";
 
@@ -44,7 +45,14 @@ export default function FilesPage() {
 
   const files = useMemo(() => {
     if (!data) return [];
-    return data.files.filter(file => file.lesson_id === lessonId);
+
+    const fileIdsForLesson = new Set(
+      data.lessonFiles
+        .filter(lessonFile => lessonFile.lesson_id === lessonId)
+        .map(lessonFile => lessonFile.file_id),
+    );
+
+    return data.files.filter(file => fileIdsForLesson.has(file.id));
   }, [data, lessonId]);
 
   const filteredFiles = useMemo(
@@ -108,7 +116,9 @@ export default function FilesPage() {
       {tableFiles.length === 0 ? (
         <EmptyState>No files in this lesson yet.</EmptyState>
       ) : (
-        <FilesTable files={tableFiles} onRowClick={handleRowClick} />
+        <TableWrapper>
+          <FilesTable files={tableFiles} onRowClick={handleRowClick} />
+        </TableWrapper>
       )}
 
       {selectedFile && (

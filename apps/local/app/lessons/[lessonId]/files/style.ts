@@ -37,6 +37,12 @@ export const SearchBar = styled.div`
   width: 100%;
 `;
 
+export const TableWrapper = styled.div`
+  width: 100%;
+  margin-top: 23px;
+  flex: 0 0 auto;
+`;
+
 export const EmptyState = styled.div`
   margin-top: 23px;
 `;

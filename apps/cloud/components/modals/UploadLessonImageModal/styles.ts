@@ -50,7 +50,7 @@ export const Tab = styled.button<{ $active: boolean }>`
   border: none;
   border-radius: 3.5rem;
 
-  font-family: var(--font-gilroy);
+  font-family: var(--font-primary);
   font-size: 14px;
   font-weight: 500;
   white-space: nowrap;

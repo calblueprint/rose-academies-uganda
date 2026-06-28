@@ -1,22 +1,27 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import ActionButton from "@/components/ActionButton";
+import { useLanguage } from "@/lib/i18n";
 import COLORS from "@/styles/colors";
 
 export default function OperationalButton() {
+  const { t } = useLanguage();
   const [isOperational, setIsOperational] = useState<boolean | null>(false);
+  const [statusMessage, setStatusMessage] = useState(
+    t("header.checkingConnection"),
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
-  const [isChecking, setIsChecking] = useState(false);
+  const isCheckingRef = useRef(false);
 
-  const checkStatus = async () => {
+  const checkStatus = useCallback(async () => {
     // Guard: prevent concurrent status checks
-    if (isChecking) {
+    if (isCheckingRef.current) {
       return;
     }
 
-    setIsChecking(true);
+    isCheckingRef.current = true;
     setIsLoading(true);
 
     // minimum loading time promise (1 second)
@@ -33,16 +38,18 @@ export default function OperationalButton() {
       await minLoadingTime;
 
       setIsOperational(data.operational);
+      setStatusMessage(data.message ?? t("header.connectedToHub"));
     } catch (error) {
       console.error("Failed to check operational status:", error);
       await minLoadingTime;
       setIsOperational(false);
+      setStatusMessage(t("header.unableToReachHub"));
     } finally {
       setIsLoading(false);
       setIsInitialLoad(false);
-      setIsChecking(false);
+      isCheckingRef.current = false;
     }
-  };
+  }, [t]);
 
   useEffect(() => {
     checkStatus();
@@ -51,15 +58,15 @@ export default function OperationalButton() {
     const interval = setInterval(checkStatus, 30000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [checkStatus]);
 
   // Determine button appearance based on operational state
 
   const backgroundColor =
     isOperational === null
-      ? COLORS.lightGrey
+      ? COLORS.green10
       : isOperational
-        ? COLORS.lightGreen
+        ? COLORS.green10
         : COLORS.rose10;
 
   const textColor =
@@ -70,7 +77,8 @@ export default function OperationalButton() {
 
   const iconSize = isOperational === false ? "1.5rem" : "1.25rem";
 
-  const text = isOperational === false ? "Inactive" : "Active";
+  const text =
+    isOperational === false ? t("header.notConnected") : t("header.connected");
 
   return (
     <ActionButton
@@ -83,7 +91,7 @@ export default function OperationalButton() {
       text={text}
       isLoading={isLoading && !isInitialLoad}
       disabled={isLoading}
-      title="Click to refresh status"
+      title={statusMessage}
       animationDuration="1s"
     />
   );

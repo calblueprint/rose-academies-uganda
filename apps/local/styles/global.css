@@ -4,8 +4,15 @@
 
 html,
 body {
-  background: #fff;
-  color: #000;
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(222, 227, 209, 0.78),
+      transparent 34rem
+    ),
+    #f9faf3;
+  background-attachment: fixed;
+  color: #25282b;
   color-scheme: light;
 }
 

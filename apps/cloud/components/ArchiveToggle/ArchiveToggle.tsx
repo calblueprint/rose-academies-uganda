@@ -9,28 +9,47 @@ import { ArchiveButton, ArchiveButtonText } from "./styles";
 type ArchiveToggleProps = {
   lesson_Id: number;
   isArchived: boolean;
+  deviceId?: string | null;
 };
 
 export default function ArchiveToggle({
   lesson_Id,
   isArchived,
+  deviceId = null,
 }: ArchiveToggleProps) {
   const supabase = getSupabaseBrowserClient();
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
 
   async function handleConfirm() {
-    const { error } = await supabase
+    const { error: lessonError } = await supabase
       .from("Lessons")
-      .update({ is_archived: !isArchived })
+      .update({
+        is_archived: !isArchived,
+        updated_at: new Date().toISOString(),
+      })
       .eq("id", lesson_Id);
 
-    if (error) {
-      throw new Error(error.message);
+    if (lessonError) {
+      throw new Error(lessonError.message);
+    }
+
+    if (!isArchived && deviceId) {
+      const { error: syncError } = await supabase
+        .from("DeviceLessons")
+        .delete()
+        .eq("lesson_id", lesson_Id)
+        .eq("device_id", deviceId);
+
+      if (syncError) {
+        throw new Error(syncError.message);
+      }
     }
 
     setIsOpen(false);
-    router.push("/app/lessons");
+    router.push(
+      isArchived || !deviceId ? "/app/lessons" : "/app/offline-library",
+    );
   }
 
   return (
@@ -70,8 +89,10 @@ export default function ArchiveToggle({
         title={isArchived ? "Restore Lesson" : "Archive Lesson"}
         description={
           isArchived
-            ? "This lesson will be restored to the Lesson Dashboard and Sync Lessons pages."
-            : "This lesson will be removed from the Lesson Dashboard and Sync Lessons pages. You can restore it through the Archive page."
+            ? "This lesson will return to the Lesson Dashboard. You can send it to sync again when it is ready."
+            : deviceId
+              ? "This lesson will be removed from the Lesson Dashboard and Sync Lessons page. Sync afterwards to remove it from the classroom device."
+              : "This lesson will be removed from the Lesson Dashboard. You can restore it later from Archived Lessons."
         }
         confirmText={isArchived ? "Restore Lesson" : "Archive Lesson"}
         onCancel={() => setIsOpen(false)}

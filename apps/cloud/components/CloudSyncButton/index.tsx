@@ -6,10 +6,12 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import supabase from "@/api/supabase/client";
 import SyncModal from "@/components/SyncModal";
+import { useLanguage } from "@/lib/i18n";
 import { IconSvgs } from "@/lib/icons";
 import {
   ButtonText,
   ButtonWrapper,
+  CardHeader,
   CardTitle,
   IconWrapper,
   SyncCard,
@@ -36,12 +38,12 @@ function delay(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-function formatLastSynced(lastSyncedAt: string | null) {
-  if (!lastSyncedAt) return "Not synced yet";
+function formatLastSynced(lastSyncedAt: string | null, locale: string) {
+  if (!lastSyncedAt) return null;
 
   const date = new Date(lastSyncedAt);
 
-  return date.toLocaleString("en-US", {
+  return date.toLocaleString(locale, {
     month: "short",
     day: "numeric",
     hour: "numeric",
@@ -49,8 +51,15 @@ function formatLastSynced(lastSyncedAt: string | null) {
   });
 }
 
-export default function CloudSyncButton({ userId }: { userId: string }) {
+export default function CloudSyncButton({
+  userId,
+  deviceId,
+}: {
+  userId?: string | null;
+  deviceId?: string | null;
+}) {
   const router = useRouter();
+  const { language, t } = useLanguage();
 
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncStage, setSyncStage] = useState<SyncStage | null>(null);
@@ -61,12 +70,24 @@ export default function CloudSyncButton({ userId }: { userId: string }) {
 
   useEffect(() => {
     async function loadDevice() {
+      const hasDeviceId = Boolean(deviceId && deviceId !== "undefined");
+      const hasUserId = Boolean(userId && userId !== "undefined");
+
+      if (!hasDeviceId && !hasUserId) {
+        console.error(
+          "[CLOUD] Cannot fetch device without userId or deviceId.",
+        );
+        return;
+      }
+
       // The cloud app uses the signed-in user to find the Pi this dashboard controls.
-      const { data, error } = await supabase
-        .from("devices")
-        .select("id, last_synced_at")
-        .eq("user_id", userId)
-        .single();
+      let query = supabase.from("devices").select("id, last_synced_at");
+
+      query = hasDeviceId
+        ? query.eq("id", deviceId as string)
+        : query.eq("user_id", userId as string);
+
+      const { data, error } = await query.single();
 
       if (error || !data) {
         console.error("[CLOUD] Failed to fetch device:", error);
@@ -80,7 +101,7 @@ export default function CloudSyncButton({ userId }: { userId: string }) {
     }
 
     loadDevice();
-  }, [userId]);
+  }, [deviceId, userId]);
 
   const waitForSyncRunCompletion = async (syncRunId: string) => {
     const startedAt = Date.now();
@@ -175,17 +196,14 @@ export default function CloudSyncButton({ userId }: { userId: string }) {
       } else {
         console.error("Sync failed:", completedRun.error_message);
         setSyncStage(null);
-        setModalBodyText(
-          completedRun.error_message ??
-            "The sync could not be completed. Please try again later.",
-        );
+        setModalBodyText(completedRun.error_message ?? t("sync.errorBody"));
         setModalVariant("error");
       }
     } catch (syncError) {
       console.error("Error requesting sync:", syncError);
       await minLoadingTime;
       setSyncStage(null);
-      setModalBodyText("The sync request could not be completed.");
+      setModalBodyText(t("sync.requestError"));
       setModalVariant("error");
     } finally {
       setIsSyncing(false);
@@ -195,21 +213,29 @@ export default function CloudSyncButton({ userId }: { userId: string }) {
   return (
     <>
       <SyncCard>
-        <CardTitle>Sync Progress</CardTitle>
+        <CardHeader>
+          <CardTitle>{t("sync.progress")}</CardTitle>
+
+          <ButtonWrapper
+            onClick={handleSync}
+            disabled={isSyncing || !device}
+            title={t("sync.buttonTitle")}
+          >
+            <IconWrapper $isSpinning={isSyncing}>
+              {IconSvgs.refresh}
+            </IconWrapper>
+            <ButtonText>
+              {isSyncing ? t("sync.syncing") : t("sync.button")}
+            </ButtonText>
+          </ButtonWrapper>
+        </CardHeader>
 
         <SyncStageIndicator
           stage={syncStage}
-          lastSyncedText={formatLastSynced(lastSyncedAt)}
+          lastSyncedText={
+            formatLastSynced(lastSyncedAt, language) ?? t("sync.notSynced")
+          }
         />
-
-        <ButtonWrapper
-          onClick={handleSync}
-          disabled={isSyncing || !device}
-          title="Click to request sync on the Pi"
-        >
-          <IconWrapper $isSpinning={isSyncing}>{IconSvgs.refresh}</IconWrapper>
-          <ButtonText>Sync</ButtonText>
-        </ButtonWrapper>
       </SyncCard>
 
       {modalVariant && (

@@ -4,11 +4,14 @@ import { useContext, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import FileTypeBadge from "@/components/FileTypeBadge";
 import { DataContext } from "@/context/DataContext";
+import { useLanguage } from "@/lib/i18n";
 import { IconSvgs } from "@/lib/icons";
 import StatusPill from "../StatusPill";
 import {
   ActionButton,
   ActionLabel,
+  DownloadLink,
+  ExpandButton,
   FileLeft,
   FileMeta,
   FileName,
@@ -16,9 +19,11 @@ import {
   FilesContainer,
   LessonHeader,
   LessonLeft,
+  LessonLink,
   LessonName,
   LessonRight,
   LessonWrapper,
+  NoFilesMessage,
 } from "./styles";
 
 type LessonAction = "remove" | "restore";
@@ -75,19 +80,23 @@ export default function LessonItem({
   const [opened, setOpened] = useState(false);
   const data = useContext(DataContext);
   const router = useRouter();
+  const { t } = useLanguage();
 
   const files = useMemo(() => {
     if (!data) return [];
     return data.files.filter(file => file.lesson_id === lessonId);
   }, [data, lessonId]);
 
-  const actionLabel = action === "remove" ? "Remove" : "Restore";
+  const actionLabel =
+    action === "remove" ? t("lessons.remove") : t("lessons.restore");
 
   return (
     <LessonWrapper>
-      <LessonHeader onClick={() => setOpened(prev => !prev)}>
+      <LessonHeader>
         <LessonLeft>
-          <LessonName>{lessonName}</LessonName>
+          <LessonLink href={`/app/lessons/${lessonId}`}>
+            <LessonName>{lessonName}</LessonName>
+          </LessonLink>
 
           {/* status stays on LEFT */}
           {status ? <StatusPill status={status} /> : null}
@@ -107,33 +116,57 @@ export default function LessonItem({
             >
               {action === "remove" ? <RemoveIcon /> : <RestoreIcon />}
               <ActionLabel>
-                {isActionLoading ? "Working..." : actionLabel}
+                {isActionLoading ? t("common.working") : actionLabel}
               </ActionLabel>
             </ActionButton>
           )}
 
-          {/* dropdown arrow */}
-          {opened ? IconSvgs.upArrow : IconSvgs.downArrow}
+          <ExpandButton
+            type="button"
+            onClick={() => setOpened(prev => !prev)}
+            aria-label={opened ? "Hide lesson files" : "Show lesson files"}
+            aria-expanded={opened}
+          >
+            {opened ? IconSvgs.upArrow : IconSvgs.downArrow}
+          </ExpandButton>
         </LessonRight>
       </LessonHeader>
 
-      {opened && files.length > 0 && (
+      {opened && (
         <FilesContainer>
-          {files.map(file => (
-            <FileRow
-              key={file.id}
-              onClick={() => router.push(`/lessons/${lessonId}/files`)}
-            >
-              <FileLeft>
-                <FileTypeBadge fileName={file.name} />
-                <FileMeta>
-                  <FileName>{file.name}</FileName>
-                </FileMeta>
-              </FileLeft>
+          {files.length > 0 ? (
+            files.map(file => (
+              <FileRow
+                key={file.id}
+                onClick={() =>
+                  router.push(
+                    `/app/lessons/${lessonId}?file=${encodeURIComponent(String(file.id))}`,
+                  )
+                }
+              >
+                <FileLeft>
+                  <FileTypeBadge fileName={file.name} />
+                  <FileMeta>
+                    <FileName>{file.name}</FileName>
+                  </FileMeta>
+                </FileLeft>
 
-              {IconSvgs.download}
-            </FileRow>
-          ))}
+                {file.storage_path ? (
+                  <DownloadLink
+                    href={file.storage_path}
+                    download={file.name}
+                    title={`${t("files.download")} ${file.name}`}
+                    aria-label={`${t("files.download")} ${file.name}`}
+                    onClick={event => event.stopPropagation()}
+                  >
+                    {IconSvgs.download}
+                  </DownloadLink>
+                ) : null}
+              </FileRow>
+            ))
+          ) : (
+            <NoFilesMessage>{t("lessons.noFilesAttached")}</NoFilesMessage>
+          )}
         </FilesContainer>
       )}
     </LessonWrapper>

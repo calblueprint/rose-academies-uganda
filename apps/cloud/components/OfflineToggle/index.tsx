@@ -107,7 +107,7 @@ function OfflineToggle({
       <ConfirmationModal
         isOpen={isRemoveConfirmOpen}
         title="Remove Lesson from Sync"
-        description="The lesson will still be saved, but you’ll need to send it to the Sync Lessons page to use it on the Raspberry Pi."
+        description="The lesson will stay saved, but it will be removed from the classroom device after the next sync."
         confirmText="Remove Lesson"
         onCancel={() => setIsRemoveConfirmOpen(false)}
         onConfirm={handleRemoveConfirm}

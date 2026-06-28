@@ -3,12 +3,12 @@
 import React from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useLanguage } from "@/lib/i18n";
 import { IconSvgs } from "@/lib/icons";
 import VillageTags from "../VillageTags";
 import {
   Card,
   ImageFrame,
-  MoreTag,
   StatusIconCircle,
   TagRow,
   Title,
@@ -19,10 +19,15 @@ import {
 const FALLBACK_LESSON_IMAGE = "/placeholders/preset-0.jpg";
 
 function LessonStatusIcon({ status }: { status?: "available" | "pending" }) {
+  const { t } = useLanguage();
+
   if (!status) return null;
 
+  const label =
+    status === "available" ? t("status.synced") : t("status.pendingSyncLower");
+
   return (
-    <StatusIconCircle $status={status} aria-label={status}>
+    <StatusIconCircle $status={status} aria-label={label} title={label}>
       {status === "available"
         ? IconSvgs.lessonAvailable
         : IconSvgs.lessonPending}
@@ -45,9 +50,6 @@ export default function LessonCard({
 }) {
   const router = useRouter();
 
-  const visibleVillages = villages.slice(0, 2);
-  const remainingVillageCount = villages.length - visibleVillages.length;
-
   return (
     <Card onClick={() => router.push(`/app/lessons/${lessonId}`)}>
       <ImageFrame>
@@ -68,10 +70,7 @@ export default function LessonCard({
 
         {villages.length > 0 && (
           <TagRow>
-            <VillageTags villages={visibleVillages} />
-            {remainingVillageCount > 0 && (
-              <MoreTag>+{remainingVillageCount}</MoreTag>
-            )}
+            <VillageTags villages={villages} />
           </TagRow>
         )}
       </Titleholder>

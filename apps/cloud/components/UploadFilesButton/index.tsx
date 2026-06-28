@@ -2,6 +2,7 @@
 
 import type { LocalFile } from "@/types/schema";
 import { useState } from "react";
+import { useLanguage } from "@/lib/i18n";
 import { IconSvgs } from "@/lib/icons";
 import UploadFilesModal from "../modals/UploadFilesModal/UploadFileModal";
 import { ButtonContainer, ButtonText, IconWrapper } from "./style";
@@ -15,11 +16,13 @@ export default function UploadFilesButton({
   onFilesUploadedAction,
 }: UploadFilesButtonProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const { t } = useLanguage();
+
   return (
     <>
       <ButtonContainer type="button" onClick={() => setIsModalOpen(true)}>
         <IconWrapper>{IconSvgs.upload}</IconWrapper>
-        <ButtonText>Upload File</ButtonText>
+        <ButtonText>{t("files.upload")}</ButtonText>
       </ButtonContainer>
       <UploadFilesModal
         lessonId={lessonId}

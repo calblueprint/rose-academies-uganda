@@ -12,13 +12,14 @@ export const SortButton = styled.button<{ $active: boolean }>`
   justify-content: center;
   align-items: center;
   gap: 0.625rem;
-  border-radius: 1rem;
+  border-radius: 8px;
   background: ${COLORS.white};
   cursor: pointer;
   white-space: nowrap;
 
   border: 1px solid
-    ${({ $active }) => ($active ? COLORS.evergreen : COLORS.gray40)};
+    ${({ $active }) => ($active ? COLORS.evergreen : COLORS.surfaceBorder)};
+  box-shadow: ${COLORS.surfaceShadowSoft};
 `;
 
 export const SortButtonLabel = styled.span<{ $active: boolean }>`
@@ -40,12 +41,10 @@ export const SortDropdown = styled.div`
 
   background: ${COLORS.white};
 
-  border-radius: 0.5rem;
-  border-right: 0.5px solid ${COLORS.gray40};
-  border-left: 0.5px solid ${COLORS.gray40};
-  border-bottom: 1.5px solid ${COLORS.gray40};
+  border-radius: 8px;
+  border: 1px solid ${COLORS.surfaceBorder};
 
-  box-shadow: 0 0.25rem 1rem rgba(0, 0, 0, 0.08);
+  box-shadow: ${COLORS.surfaceShadowSoft};
   padding: 0.5rem;
   z-index: 10;
 `;
@@ -53,7 +52,7 @@ export const SortDropdown = styled.div`
 export const SortOption = styled.button<{ $active: boolean }>`
   width: 100%;
   border: none;
-  background: ${({ $active }) => ($active ? COLORS.gray10 : COLORS.white)};
+  background: ${({ $active }) => ($active ? COLORS.pageWash : COLORS.white)};
   border-radius: 0.5rem;
   padding: 0.625rem 0.75rem;
 
@@ -69,9 +68,9 @@ export const SortOption = styled.button<{ $active: boolean }>`
   font-size: var(--font-subtitle-3);
   line-height: var(--lh-subtitle-3);
   color: ${COLORS.evergreen};
-  font-weight: 400;
+  font-weight: 500;
 
   &:hover {
-    background: ${COLORS.gray10};
+    background: ${COLORS.pageWash};
   }
 `;

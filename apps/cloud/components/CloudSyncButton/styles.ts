@@ -3,20 +3,31 @@ import COLORS from "@/styles/colors";
 import { Subtitle1, Subtitle2 } from "@/styles/text";
 
 export const SyncCard = styled.div`
-  display: grid;
-  width: 37.375rem;
-  height: 11.375rem;
-  grid-template-rows: auto 2.75rem 3.25rem;
-  gap: 0.5rem;
+  display: flex;
+  width: 100%;
+  min-height: 11.375rem;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1.5rem;
   padding: 1.5rem;
   border-radius: 1rem;
   background: ${COLORS.white};
-  box-shadow:
-    0 22px 6px 0 rgba(170, 170, 170, 0),
-    0 14px 6px 0 rgba(170, 170, 170, 0.01),
-    0 8px 5px 0 rgba(170, 170, 170, 0.05),
-    0 4px 4px 0 rgba(170, 170, 170, 0.09),
-    0 1px 2px 0 rgba(170, 170, 170, 0.1);
+  border: 1px solid ${COLORS.surfaceBorder};
+  box-shadow: ${COLORS.surfaceShadowSoft};
+  box-sizing: border-box;
+`;
+
+export const CardHeader = styled.div`
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+
+  @media (max-width: 560px) {
+    align-items: flex-start;
+    flex-direction: column;
+  }
 `;
 
 export const CardTitle = styled(Subtitle2).attrs({
@@ -28,19 +39,21 @@ export const CardTitle = styled(Subtitle2).attrs({
 
 export const LastSyncedInfo = styled.div`
   display: flex;
-  height: 2.75rem;
-  justify-content: space-between;
-  align-items: center;
+  min-height: 4.25rem;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 0.35rem;
   align-self: stretch;
 `;
 
 export const SyncProgressArea = styled.div`
   display: flex;
   width: 100%;
-  height: 2.75rem;
+  min-height: 4.25rem;
   flex-direction: column;
   justify-content: center;
-  gap: 0.75rem;
+  gap: 1rem;
 `;
 
 export const ProgressBar = styled.div`
@@ -62,7 +75,14 @@ export const StageStatusText = styled(Subtitle2).attrs({
   $color: COLORS.gray60,
   $fontWeight: 500,
 })`
-  white-space: nowrap;
+  overflow-wrap: anywhere;
+`;
+
+export const StageValueText = styled(Subtitle1).attrs({
+  $color: COLORS.gray100,
+  $fontWeight: 500,
+})`
+  overflow-wrap: anywhere;
 `;
 
 const spin = keyframes`
@@ -76,14 +96,15 @@ const spin = keyframes`
 
 export const ButtonWrapper = styled.button`
   display: flex;
-  width: 100%;
-  height: 3.25rem;
-  padding: 0.625rem;
+  width: auto;
+  min-width: 7rem;
+  height: 2.75rem;
+  padding: 0 1.25rem;
   justify-content: center;
   align-items: center;
   gap: 0.5rem;
 
-  border-radius: 0.75rem;
+  border-radius: 8px;
   background: ${COLORS.evergreen};
   border: none;
   cursor: pointer;

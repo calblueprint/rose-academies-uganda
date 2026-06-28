@@ -9,8 +9,9 @@ export const LessonHeaderContainer = styled.div`
   width: 100%;
   height: 141px;
   padding: 12px clamp(16px, 3vw, 25px);
-  border-radius: 10px;
+  border-radius: 12px;
   overflow: hidden;
+  box-shadow: 0 12px 32px rgba(30, 66, 64, 0.1);
 `;
 
 export const BackgroundImage = styled.div`
@@ -29,9 +30,9 @@ export const BackButton = styled.button`
   background: transparent;
   border: none;
   cursor: pointer;
-  color: #ffffff;
-  font-family: var(--font-gilroy);
+  color: ${COLORS.white};
+  font-family: var(--font-primary);
   font-size: 0.875rem;
-  font-weight: 400;
+  font-weight: var(--font-weight-section-title);
   white-space: nowrap;
 `;

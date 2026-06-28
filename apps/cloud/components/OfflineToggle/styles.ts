@@ -6,10 +6,11 @@ export const SyncButton = styled.button`
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  min-height: 2.5rem;
   padding: 8px 16px;
   background-color: ${COLORS.white};
   border: 1px solid ${COLORS.gray40};
-  border-radius: 12px;
+  border-radius: 8px;
   cursor: pointer;
   white-space: nowrap;
   transition:

@@ -1,0 +1,283 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Classroom Hub Device Setup Guide</title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        line-height: 1.45;
+        color: #1f2933;
+        max-width: 860px;
+        margin: 32px auto;
+        padding: 0 24px;
+      }
+      h1 {
+        font-size: 30px;
+      }
+      h2 {
+        font-size: 22px;
+        margin-top: 30px;
+      }
+      h3 {
+        font-size: 18px;
+        margin-top: 24px;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 14px 0;
+      }
+      th,
+      td {
+        border: 1px solid #d8e2dc;
+        padding: 8px;
+        text-align: left;
+        vertical-align: top;
+      }
+      th {
+        background: #edf7ef;
+      }
+      code {
+        font-family: Menlo, Consolas, monospace;
+        background: #f3f5f4;
+        padding: 1px 4px;
+        border-radius: 4px;
+      }
+      pre {
+        background: #f3f5f4;
+        padding: 12px;
+        border-radius: 8px;
+        overflow: auto;
+      }
+      blockquote {
+        border-left: 4px solid #7ca982;
+        margin: 16px 0;
+        padding: 8px 12px;
+        background: #f4faf5;
+        color: #3f5f50;
+      }
+      li {
+        margin: 5px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Classroom Hub Device Setup Guide</h1>
+    <p>
+      Use this guide when you are physically setting up the Classroom Hub
+      device.
+    </p>
+    <p>You are working on the local setup page:</p>
+    <pre><code>http://rosehub.local/setup</code></pre>
+    <p>
+      This guide is only for the device setup work: power, hotspot, Wi-Fi,
+      pairing, and downloading files. Use the
+      <a href="./educator-dashboard-guide.md">Educator Dashboard Guide</a> for
+      accounts, classrooms, lessons, and sync management.
+    </p>
+    <h2>What You Need</h2>
+    <ul>
+      <li>Classroom Hub device</li>
+      <li>Wall charger or charged battery pack</li>
+      <li>Tablet, phone, or laptop</li>
+      <li>Internet Wi-Fi for setup and downloading lessons</li>
+      <li>
+        Educator Dashboard account already created, or an educator ready to
+        create one at <code>rosepch.org</code>
+      </li>
+    </ul>
+    <blockquote>
+      Picture to add: photo of the Classroom Hub device, charger, optional
+      battery pack, and a tablet/laptop.
+    </blockquote>
+    <h2>Step 1: Power On The Classroom Hub</h2>
+    <p>The Classroom Hub can use wall power or a battery pack.</p>
+    <h3>Wall Charger</h3>
+    <ol>
+      <li>Plug the power cable into the Classroom Hub.</li>
+      <li>Plug the charger into the wall.</li>
+      <li>Wait about 1 minute for the hub to start.</li>
+      <li>
+        Look for the setup Wi-Fi network on your tablet, phone, or laptop.
+      </li>
+    </ol>
+    <h3>Battery Pack</h3>
+    <ol>
+      <li>Make sure the battery pack is charged.</li>
+      <li>Plug the Classroom Hub power cable into the battery pack.</li>
+      <li>Turn on the battery pack if it has a power button.</li>
+      <li>Wait about 1 minute for the hub to start.</li>
+      <li>Keep the battery pack connected while teaching.</li>
+    </ol>
+    <blockquote>
+      Picture to add: close-up photo of the Classroom Hub powered by a charger
+      and another photo powered by a battery pack.
+    </blockquote>
+    <h2>Step 2: Join The Hub Setup Hotspot</h2>
+    <p>
+      When the hub is not yet connected to internet Wi-Fi, it creates a
+      temporary setup network.
+    </p>
+    <p>The network name looks like:</p>
+    <pre><code>Rose-Setup-XXXX</code></pre>
+    <p>The setup hotspot password is:</p>
+    <pre><code>rosehub1</code></pre>
+    <ol>
+      <li>Open Wi-Fi settings on your tablet, phone, or laptop.</li>
+      <li>Choose the <code>Rose-Setup-XXXX</code> network.</li>
+      <li>Enter the password <code>rosehub1</code>.</li>
+      <li>Wait for your device to connect.</li>
+    </ol>
+    <blockquote>
+      Picture to add: screenshot of Wi-Fi settings showing a
+      <code>Rose-Setup-XXXX</code> network.
+    </blockquote>
+    <h2>Step 3: Open Classroom Hub Device Setup</h2>
+    <p>
+      After joining the setup hotspot, the setup page may open automatically.
+    </p>
+    <p>If it does not open:</p>
+    <ol>
+      <li>Open a browser.</li>
+      <li>Go to:</li>
+    </ol>
+    <pre><code>http://rosehub.local/setup</code></pre>
+    <ol>
+      <li>Follow the setup page.</li>
+    </ol>
+    <blockquote>
+      Picture to add: screenshot of the first Classroom Hub Device Setup screen.
+    </blockquote>
+    <h2>Step 4: Connect The Hub To Internet Wi-Fi</h2>
+    <p>The hub needs internet during setup and when downloading new lessons.</p>
+    <ol>
+      <li>
+        On the setup page, choose the internet Wi-Fi network the hub should use.
+      </li>
+      <li>Enter the Wi-Fi password.</li>
+      <li>Submit the form.</li>
+      <li>Wait about 1 minute.</li>
+      <li>
+        Reconnect your tablet, phone, or laptop to the same internet Wi-Fi
+        network.
+      </li>
+      <li>Open:</li>
+    </ol>
+    <pre><code>http://rosehub.local/setup</code></pre>
+    <p>
+      If the hub cannot connect to internet Wi-Fi, it will return to the
+      <code>Rose-Setup-XXXX</code> hotspot so you can try again.
+    </p>
+    <blockquote>
+      Picture to add: screenshot of the Wi-Fi selection screen on the setup
+      page.
+    </blockquote>
+    <h2>Step 5: Show The Pairing Code</h2>
+    <p>
+      After the hub is online, the setup page shows a one-time pairing code.
+    </p>
+    <p>
+      This code is entered in the Educator Dashboard at
+      <code>rosepch.org</code>.
+    </p>
+    <ol>
+      <li>Keep the setup page open.</li>
+      <li>Find the pairing code on the page.</li>
+      <li>
+        Give the pairing code to the educator using the Educator Dashboard.
+      </li>
+      <li>Wait on this page while the educator links the hub.</li>
+    </ol>
+    <p>
+      The setup page checks automatically. When the hub is linked, it will move
+      to the next step.
+    </p>
+    <blockquote>
+      Picture to add: screenshot of the pairing code on the hub setup page.
+    </blockquote>
+    <h2>Step 6: Download Latest Files</h2>
+    <p>
+      After the hub is linked, the educator creates classrooms and lessons in
+      the Educator Dashboard.
+    </p>
+    <p>When lessons are ready for the hub:</p>
+    <ol>
+      <li>Keep the Classroom Hub powered on.</li>
+      <li>Make sure it is connected to internet Wi-Fi.</li>
+      <li>On the setup page, choose <strong>Download latest files</strong>.</li>
+      <li>Wait until the page says the Student Library is ready.</li>
+    </ol>
+    <blockquote>
+      Picture to add: screenshot of the download/latest files step.
+    </blockquote>
+    <h2>Step 7: Open The Student Library</h2>
+    <p>When setup is complete, students use the Student Library.</p>
+    <p>Student address:</p>
+    <pre><code>http://rosehub.local/join</code></pre>
+    <p>Students will need the classroom join code from the educator.</p>
+    <blockquote>
+      Picture to add: screenshot of the Student Library join page.
+    </blockquote>
+    <h2>Troubleshooting</h2>
+    <h3>I Cannot See <code>Rose-Setup-XXXX</code></h3>
+    <ul>
+      <li>Wait 1 minute after plugging in the hub.</li>
+      <li>Move closer to the hub.</li>
+      <li>Turn Wi-Fi off and on again on your tablet, phone, or laptop.</li>
+      <li>
+        Restart the hub by unplugging power, waiting 10 seconds, and plugging it
+        back in.
+      </li>
+    </ul>
+    <h3>The Setup Page Does Not Open</h3>
+    <ul>
+      <li>
+        Make sure you are connected to the <code>Rose-Setup-XXXX</code> Wi-Fi
+        network first.
+      </li>
+      <li>Open a browser and type <code>http://rosehub.local/setup</code>.</li>
+      <li>If that does not work, try again after restarting the hub.</li>
+    </ul>
+    <h3>The Hub Will Not Connect To Internet Wi-Fi</h3>
+    <ul>
+      <li>Check the Wi-Fi password.</li>
+      <li>Choose the correct network name.</li>
+      <li>Move the hub closer to the router.</li>
+      <li>Try again from the setup page.</li>
+    </ul>
+    <p>
+      Some Wi-Fi networks that require a separate agreement page may not work
+      with the hub.
+    </p>
+    <h3>The Hub Does Not Show As Linked</h3>
+    <ul>
+      <li>Make sure the hub has internet.</li>
+      <li>
+        Make sure the educator entered the pairing code in the Educator
+        Dashboard.
+      </li>
+      <li>
+        Keep the setup page open for a few seconds; it checks automatically.
+      </li>
+      <li>If needed, choose <strong>Check status</strong>.</li>
+    </ul>
+    <h3>Students Cannot Open The Student Library</h3>
+    <ul>
+      <li>Make sure the Classroom Hub is powered on.</li>
+      <li>Make sure students are connected to the hub Wi-Fi network.</li>
+      <li>Make sure students open <code>http://rosehub.local/join</code>.</li>
+      <li>Make sure students have the correct classroom join code.</li>
+    </ul>
+    <h2>Device Setup Checklist</h2>
+    <ul>
+      <li>☐ Classroom Hub is powered on</li>
+      <li>☐ Tablet/phone/laptop joined the setup hotspot</li>
+      <li>☐ Hub connected to internet Wi-Fi</li>
+      <li>☐ Pairing code was shown</li>
+      <li>☐ Hub was linked in the Educator Dashboard</li>
+      <li>☐ Latest files were downloaded</li>
+      <li>☐ Student Library opened successfully</li>
+    </ul>
+  </body>
+</html>

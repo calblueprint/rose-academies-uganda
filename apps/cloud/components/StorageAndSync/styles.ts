@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import COLORS from "@/styles/colors";
 
 export const Wrapper = styled.div`
   display: flex;
@@ -10,13 +11,9 @@ export const Wrapper = styled.div`
   min-width: 0;
 
   border-radius: 16px;
-  background: var(--white, #fff);
-  box-shadow:
-    0 22px 6px 0 rgba(170, 170, 170, 0),
-    0 14px 6px 0 rgba(170, 170, 170, 0.01),
-    0 8px 5px 0 rgba(170, 170, 170, 0.05),
-    0 4px 4px 0 rgba(170, 170, 170, 0.09),
-    0 1px 2px 0 rgba(170, 170, 170, 0.1);
+  background: ${COLORS.white};
+  border: 1px solid ${COLORS.surfaceBorder};
+  box-shadow: ${COLORS.surfaceShadowSoft};
 `;
 
 export const Card = styled.div`
@@ -28,13 +25,9 @@ export const Card = styled.div`
   flex-shrink: 0;
 
   border-radius: 16px;
-  background: var(--white, #fff);
-  box-shadow:
-    0 22px 6px 0 rgba(170, 170, 170, 0),
-    0 14px 6px 0 rgba(170, 170, 170, 0.01),
-    0 8px 5px 0 rgba(170, 170, 170, 0.05),
-    0 4px 4px 0 rgba(170, 170, 170, 0.09),
-    0 1px 2px 0 rgba(170, 170, 170, 0.1);
+  background: ${COLORS.white};
+  border: 1px solid ${COLORS.surfaceBorder};
+  box-shadow: ${COLORS.surfaceShadowSoft};
 `;
 
 export const Actions = styled.div`

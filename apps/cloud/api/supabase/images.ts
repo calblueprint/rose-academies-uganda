@@ -21,13 +21,18 @@ export async function uploadLessonImage(
     data: { publicUrl },
   } = supabase.storage.from("lesson-images").getPublicUrl(path);
 
+  const versionedPublicUrl = `${publicUrl}?v=${Date.now()}`;
+
   const { error: updateError } = await supabase
     .from("Lessons")
-    .update({ image_path: publicUrl, updated_at: new Date().toISOString() })
+    .update({
+      image_path: versionedPublicUrl,
+      updated_at: new Date().toISOString(),
+    })
     .eq("id", lessonId)
     .eq("user_id", user.id);
 
   if (updateError) throw updateError;
 
-  return publicUrl;
+  return versionedPublicUrl;
 }

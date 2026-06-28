@@ -3,20 +3,22 @@ import COLORS from "@/styles/colors";
 
 export const ButtonContainer = styled.button<{ $active: boolean }>`
   display: flex;
-  padding: 0.75rem 1.125rem;
+  min-height: 2.5rem;
+  padding: 0.625rem 1rem;
   align-items: center;
   gap: 0.5rem;
 
-  border-radius: 0.75rem;
-  border: 1px solid ${({ $active }) => ($active ? COLORS.rose10 : "#d9d9d9")};
+  border-radius: 8px;
+  border: 1px solid
+    ${({ $active }) => ($active ? COLORS.rose80 : COLORS.gray40)};
 
-  background: ${({ $active }) => ($active ? COLORS.rose10 : "#ffffff")};
+  background: ${({ $active }) => ($active ? COLORS.rose10 : COLORS.white)};
 
   cursor: pointer;
   flex-shrink: 0;
 
   &:hover {
-    background: ${({ $active }) => ($active ? COLORS.rose10 : "#fafafa")};
+    background: ${({ $active }) => ($active ? COLORS.rose10 : COLORS.gray10)};
   }
 
   &:disabled {
@@ -31,16 +33,16 @@ export const IconWrapper = styled.span<{ $active: boolean }>`
   justify-content: center;
 
   svg {
-    color: ${({ $active }) => ($active ? COLORS.rose100 : "#808582")};
+    color: ${({ $active }) => ($active ? COLORS.rose100 : COLORS.gray60)};
   }
 `;
 
 export const ButtonText = styled.span<{ $active: boolean }>`
-  font-family: "Google Sans", sans-serif;
+  font-family: var(--font-primary);
   font-size: 0.875rem;
   font-weight: 500;
 
   white-space: nowrap;
 
-  color: ${({ $active }) => ($active ? COLORS.rose100 : "#808582")};
+  color: ${({ $active }) => ($active ? COLORS.rose100 : COLORS.gray60)};
 `;

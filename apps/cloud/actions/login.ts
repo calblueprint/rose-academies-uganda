@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { getSupabaseServerClient } from "@/api/supabase/server";
 import Logger from "./logging";
@@ -32,4 +33,48 @@ export async function loginWithEmailPassword({
 
   // Redirect only after Supabase has written the cookie-backed session.
   redirect("/app");
+}
+
+export async function signUpWithEmailPassword({
+  displayName,
+  email,
+  password,
+}: {
+  displayName: string;
+  email: string;
+  password: string;
+}) {
+  const supabase = await getSupabaseServerClient();
+  const headerStore = await headers();
+
+  const trimmedEmail = email.trim().toLowerCase();
+  const trimmedDisplayName = displayName.trim();
+  const origin =
+    headerStore.get("origin") ??
+    process.env.NEXT_PUBLIC_SITE_URL ??
+    "http://localhost:3001";
+
+  const { data, error } = await supabase.auth.signUp({
+    email: trimmedEmail,
+    password,
+    options: {
+      emailRedirectTo: `${origin}/auth/callback?next=/app`,
+      data: {
+        display_name: trimmedDisplayName,
+        full_name: trimmedDisplayName,
+      },
+    },
+  });
+
+  if (error) {
+    Logger.error(`Error attempting sign up: ${error.message} (${error.code})`);
+    return { error: JSON.parse(JSON.stringify(error)) };
+  }
+
+  if (data.session) {
+    revalidatePath("/");
+    redirect("/app");
+  }
+
+  return { success: true };
 }

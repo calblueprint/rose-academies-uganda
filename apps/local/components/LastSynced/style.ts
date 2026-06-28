@@ -1,11 +1,12 @@
 import styled from "styled-components";
+import COLORS from "@/styles/colors";
 
 export const Card = styled.div`
   border-radius: 12px;
-  border-right: 1px solid var(--gray, #d9d9d9);
-  border-bottom: 1px solid var(--gray, #d9d9d9);
-  border-left: 1px solid var(--gray, #d9d9d9);
-  background: var(--white, #fff);
+  border: 1px solid ${COLORS.surfaceBorder};
+  background: ${COLORS.white};
+  box-shadow: ${COLORS.surfaceShadowSoft};
+  box-sizing: border-box;
 
   display: flex;
   height: 92px;
@@ -24,7 +25,7 @@ export const IconWrapper = styled.div`
   align-items: center;
   gap: 10px;
   border-radius: 148.571px;
-  background: var(--Rose-10, #fcefef);
+  background: ${COLORS.green10};
 `;
 
 export const Content = styled.div`
@@ -34,19 +35,19 @@ export const Content = styled.div`
 `;
 
 export const Title = styled.div`
-  color: #000;
+  color: ${COLORS.gray100};
 
   /* Subtitle 1 */
-  font-family: var(--font-gilroy);
+  font-family: var(--font-primary);
   font-size: 18px;
   font-style: normal;
-  font-weight: 400;
+  font-weight: var(--font-weight-section-title);
   line-height: normal;
 `;
 
 export const StatusText = styled.div`
-  color: #000;
-  font-family: var(--font-gilroy);
+  color: ${COLORS.gray80};
+  font-family: var(--font-primary);
   font-size: 20px;
   font-style: normal;
   font-weight: 500;

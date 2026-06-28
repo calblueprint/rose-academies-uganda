@@ -8,11 +8,13 @@ export const ButtonContainer = styled.button`
   align-items: center;
   gap: 0.5rem;
 
-  padding: 0.25rem 1.3125rem;
-  border-radius: 1rem;
+  min-height: 2.5rem;
+  padding: 0.625rem 1rem;
+  border-radius: 8px;
 
-  border: 1px solid ${COLORS.gray40};
+  border: 1px solid ${COLORS.surfaceBorder};
   background: ${COLORS.white};
+  box-shadow: ${COLORS.surfaceShadowSoft};
 
   cursor: pointer;
 
@@ -32,7 +34,7 @@ export const IconWrapper = styled.span`
 `;
 
 export const ButtonText = styled.span`
-  color: ${COLORS.gray60};
+  color: ${COLORS.gray80};
 
   font-size: var(--font-subtitle-2);
   line-height: var(--lh-subtitle-2);

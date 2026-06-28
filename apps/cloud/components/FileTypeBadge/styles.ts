@@ -14,7 +14,7 @@ export const FileBadge = styled.div<{ $color: string }>`
 `;
 
 export const FileBadgeText = styled.span`
-  font-family: var(--font-gilroy);
+  font-family: var(--font-primary);
   font-size: 0.5rem;
   font-weight: 700;
   color: white;

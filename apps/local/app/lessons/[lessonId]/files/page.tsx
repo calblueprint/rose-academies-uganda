@@ -1,8 +1,8 @@
 "use client";
 
 import type { FileTypeFilter } from "@/components/FileTypeDropdown";
-import { useContext, useMemo, useState } from "react";
-import { useParams } from "next/navigation";
+import { useContext, useEffect, useMemo, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
 import FilePreview from "@/components/FilePreview/";
 import FilePreviewModal from "@/components/FilePreviewModal";
 import { FileRow, FilesTable } from "@/components/FilesTable";
@@ -10,6 +10,7 @@ import FileTypeDropdown from "@/components/FileTypeDropdown";
 import LessonHeader from "@/components/LessonHeader";
 import SearchBarComponent from "@/components/SearchBar";
 import { DataContext } from "@/context/DataContext";
+import { useLanguage } from "@/lib/i18n";
 import { LocalFile } from "@/types/schema";
 import {
   DescriptionText,
@@ -30,8 +31,26 @@ function matchesFileType(fileName: string, filter: FileTypeFilter): boolean {
   return !["jpg", "jpeg", "png", "pdf"].includes(ext);
 }
 
+function formatFileDate(
+  value: string | null | undefined,
+  notAvailableLabel: string,
+): string {
+  if (!value) return notAvailableLabel;
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return notAvailableLabel;
+
+  return date.toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
 export default function FilesPage() {
   const lessonId = Number(useParams().lessonId);
+  const router = useRouter();
+  const { t } = useLanguage();
   const data = useContext(DataContext);
 
   const [selectedFile, setSelectedFile] = useState<LocalFile | null>(null);
@@ -42,6 +61,14 @@ export default function FilesPage() {
     if (!data) return null;
     return data.lessons.find(l => l.id === lessonId);
   }, [data, lessonId]);
+
+  const authorizedGroupId = data?.groups[0]?.id;
+
+  useEffect(() => {
+    if (data && !lesson && authorizedGroupId) {
+      router.replace(`/groups/${authorizedGroupId}/lessons`);
+    }
+  }, [authorizedGroupId, data, lesson, router]);
 
   const files = useMemo(() => {
     if (!data) return [];
@@ -70,12 +97,14 @@ export default function FilesPage() {
       filteredFiles.map(file => ({
         id: file.id,
         name: file.name,
-        // TODO: dates are not currently in LocalFile type, should probably add them
-        dateAdded: "Mar 4, 2026",
-        dateModified: "Mar 4, 2026",
+        dateAdded: formatFileDate(file.created_at, t("files.notAvailable")),
+        dateModified: formatFileDate(
+          file.updated_at ?? file.created_at,
+          t("files.notAvailable"),
+        ),
         sizeBytes: file.size_bytes,
       })),
-    [filteredFiles],
+    [filteredFiles, t],
   );
 
   function handleRowClick(row: FileRow) {
@@ -86,13 +115,17 @@ export default function FilesPage() {
   }
 
   if (!data) {
-    return <div>Loading...</div>;
+    return (
+      <PageContainer>
+        <EmptyState>{t("files.loading")}</EmptyState>
+      </PageContainer>
+    );
   }
 
   return (
     <PageContainer>
-      <LessonHeader label="My Lessons" image={lesson?.image_path} />
-      <Title>{lesson?.name ?? "Lesson Files"}</Title>
+      <LessonHeader label={t("lessons.title")} image={lesson?.image_path} />
+      <Title>{lesson?.name ?? t("files.titleFallback")}</Title>
 
       {lesson?.description && (
         <DescriptionText>{lesson.description}</DescriptionText>
@@ -103,7 +136,7 @@ export default function FilesPage() {
           <SearchBarComponent
             searchTerm={searchTerm}
             setSearchTerm={setSearchTerm}
-            placeholder="Search for file"
+            placeholder={t("search.filePlaceholder")}
           />
         </SearchBarWrapper>
 
@@ -114,7 +147,7 @@ export default function FilesPage() {
       </HeaderRow>
 
       {tableFiles.length === 0 ? (
-        <EmptyState>No files in this lesson yet.</EmptyState>
+        <EmptyState>{t("files.empty")}</EmptyState>
       ) : (
         <TableWrapper>
           <FilesTable files={tableFiles} onRowClick={handleRowClick} />

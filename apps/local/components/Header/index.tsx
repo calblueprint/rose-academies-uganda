@@ -4,7 +4,9 @@ import React from "react";
 import Image from "next/image";
 import RoseLogo from "@/assets/images/rose-academies-logo.png";
 import ExitClassButton from "@/components/ExitClassButton";
+import LanguageSelector from "@/components/LanguageSelector";
 import OperationalButton from "@/components/OperationalButton";
+import { useLanguage } from "@/lib/i18n";
 import {
   Header as HeaderBar,
   HeaderInner,
@@ -12,10 +14,14 @@ import {
   LogoAndTitle,
   LogoContainer,
   PageShell,
+  Subtitle,
   Title,
+  TitleWrapper,
 } from "./styles";
 
 export default function Header() {
+  const { t } = useLanguage();
+
   return (
     <HeaderBar>
       <HeaderInner>
@@ -23,10 +29,14 @@ export default function Header() {
           <PageShell />
           <LogoContainer>
             <Image src={RoseLogo} alt="Rose Academies Logo" unoptimized />
-            <Title>Rose Academies-Uganda</Title>
+            <TitleWrapper>
+              <Title>{t("app.title")}</Title>
+              <Subtitle>{t("app.studentDashboard")}</Subtitle>
+            </TitleWrapper>
           </LogoContainer>
         </LogoAndTitle>
         <HeaderRight>
+          <LanguageSelector />
           <OperationalButton />
           <ExitClassButton />
         </HeaderRight>

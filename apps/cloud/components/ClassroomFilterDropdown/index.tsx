@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useLanguage } from "@/lib/i18n";
 import {
   ClassroomCheckbox,
   SortButton,
@@ -11,20 +12,21 @@ import {
 } from "./style";
 
 type ClassroomFilterDropdownProps = {
-  classrooms: string[];
-  selectedClassrooms: string[];
-  onChange: (classrooms: string[]) => void;
+  classrooms: { id: number; name: string }[];
+  selectedClassroomIds: number[];
+  onChange: (classroomIds: number[]) => void;
 };
 
 export default function ClassroomFilterDropdown({
   classrooms,
-  selectedClassrooms,
+  selectedClassroomIds,
   onChange,
 }: ClassroomFilterDropdownProps) {
+  const { t } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const isActive = selectedClassrooms.length > 0;
+  const isActive = selectedClassroomIds.length > 0;
 
   useEffect(() => {
     if (!isOpen) return;
@@ -42,13 +44,13 @@ export default function ClassroomFilterDropdown({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isOpen]);
 
-  function toggleClassroom(classroom: string) {
-    if (selectedClassrooms.includes(classroom)) {
-      onChange(selectedClassrooms.filter(item => item !== classroom));
+  function toggleClassroom(classroomId: number) {
+    if (selectedClassroomIds.includes(classroomId)) {
+      onChange(selectedClassroomIds.filter(item => item !== classroomId));
       return;
     }
 
-    onChange([...selectedClassrooms, classroom]);
+    onChange([...selectedClassroomIds, classroomId]);
   }
 
   return (
@@ -59,9 +61,9 @@ export default function ClassroomFilterDropdown({
         onClick={() => setIsOpen(prev => !prev)}
       >
         <SortButtonLabel $active={isActive}>
-          {selectedClassrooms.length === 0
-            ? "Classroom"
-            : `${selectedClassrooms.length} selected`}
+          {selectedClassroomIds.length === 0
+            ? t("common.classroom")
+            : `${selectedClassroomIds.length} ${t("common.selected")}`}
         </SortButtonLabel>
 
         <svg
@@ -88,16 +90,16 @@ export default function ClassroomFilterDropdown({
         <SortDropdown>
           {classrooms.map(classroom => (
             <SortOption
-              key={classroom}
+              key={classroom.id}
               type="button"
-              $active={selectedClassrooms.includes(classroom)}
-              onClick={() => toggleClassroom(classroom)}
+              $active={selectedClassroomIds.includes(classroom.id)}
+              onClick={() => toggleClassroom(classroom.id)}
             >
-              <span>{classroom}</span>
+              <span>{classroom.name}</span>
 
               <ClassroomCheckbox
                 type="checkbox"
-                checked={selectedClassrooms.includes(classroom)}
+                checked={selectedClassroomIds.includes(classroom.id)}
                 readOnly
               />
             </SortOption>

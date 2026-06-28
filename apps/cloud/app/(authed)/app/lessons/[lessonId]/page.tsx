@@ -4,6 +4,7 @@ import LessonDetailClient from "./LessonDetailClient";
 
 type PageProps = {
   params: Promise<{ lessonId: string }>;
+  searchParams: Promise<{ file?: string | string[] }>;
 };
 
 type Lesson = {
@@ -41,9 +42,14 @@ type LessonFileRow = {
 
 type LessonSyncStatus = "available" | "pending" | null;
 
-export default async function LessonDetailPage({ params }: PageProps) {
+export default async function LessonDetailPage({
+  params,
+  searchParams,
+}: PageProps) {
   const { lessonId } = await params;
+  const { file } = await searchParams;
   const numericLessonId = Number(lessonId);
+  const initialPreviewFileId = Array.isArray(file) ? file[0] : file;
 
   if (Number.isNaN(numericLessonId)) {
     return <main>Invalid lesson ID.</main>;
@@ -71,19 +77,18 @@ export default async function LessonDetailPage({ params }: PageProps) {
   }
 
   const deviceId = await getCurrentDeviceId({ userId: user.id });
-  if (!deviceId) return null;
 
   // A lesson is considered "offline" for this page only when the current Pi has
   // a DeviceLessons row for it.
-  const { data: offlineRows, error: offlineError } = await supabase
-    .from("DeviceLessons")
-    .select("lesson_id, status")
-    .eq("device_id", deviceId)
-    .eq("lesson_id", numericLessonId);
+  const { data: offlineRows, error: offlineError } = deviceId
+    ? await supabase
+        .from("DeviceLessons")
+        .select("lesson_id, status")
+        .eq("device_id", deviceId)
+        .eq("lesson_id", numericLessonId)
+    : { data: [], error: null };
 
-  if (offlineError) {
-    throw new Error(offlineError.message);
-  }
+  if (offlineError) throw new Error(offlineError.message);
 
   const { data: lessonGroupRows, error: lessonGroupsError } = await supabase
     .from("LessonGroups")
@@ -159,6 +164,7 @@ export default async function LessonDetailPage({ params }: PageProps) {
       initialSyncStatus={initialSyncStatus}
       files={normalizedFiles}
       villages={villages}
+      initialPreviewFileId={initialPreviewFileId}
     />
   );
 }

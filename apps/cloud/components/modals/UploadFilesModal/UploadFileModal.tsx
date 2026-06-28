@@ -3,7 +3,11 @@
 import type { LocalFile } from "@/types/schema";
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { getSupabaseBrowserClient } from "@/api/supabase/browser";
-import { hashFile, uploadFile } from "@/api/supabase/files";
+import {
+  getLessonFileSizeError,
+  hashFile,
+  uploadFile,
+} from "@/api/supabase/files";
 import FileTypeBadge from "@/components/FileTypeBadge";
 import { DataContext } from "@/context/DataContext";
 import {
@@ -46,6 +50,13 @@ interface Props {
   onFilesUploaded?: (files: LocalFile[]) => void; // optional
 }
 
+type CurrentLessonFileRow = {
+  Files: Pick<LocalFile, "hash"> | null;
+};
+
+const ACCEPTED_FILE_TYPES =
+  ".jpg,.jpeg,.png,.pdf,.mp4,.ppt,.pptx,.pps,.ppsx,.ppx,.apk";
+
 function formatBytes(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
@@ -78,8 +89,15 @@ export default function UploadFilesModal({
 
   function addFiles(fileList: FileList | null) {
     if (!fileList) return;
+    const selectedFiles = Array.from(fileList);
+    const fileSizeError = getLessonFileSizeError(selectedFiles);
 
-    const newEntries: FileEntry[] = Array.from(fileList).map(file => ({
+    if (fileSizeError) {
+      setError(fileSizeError);
+      return;
+    }
+
+    const newEntries: FileEntry[] = selectedFiles.map(file => ({
       id: `${Date.now()}-${Math.random()}`,
       file,
       status: "queued",
@@ -122,16 +140,39 @@ export default function UploadFilesModal({
     addFiles(e.dataTransfer.files);
   }
 
+  async function fetchExistingHashesInLesson() {
+    const supabase = getSupabaseBrowserClient();
+    const { data: lessonFileRows, error: lessonFilesError } = await supabase
+      .from("LessonFiles")
+      .select("Files(hash)")
+      .eq("lesson_id", lessonId);
+
+    if (lessonFilesError) throw lessonFilesError;
+
+    return new Set(
+      ((lessonFileRows ?? []) as unknown as CurrentLessonFileRow[])
+        .map(row => row.Files?.hash)
+        .filter((hash): hash is string => Boolean(hash)),
+    );
+  }
+
   async function handleSubmit() {
     if (files.length === 0 || isSubmitting) return;
+
+    const fileSizeError = getLessonFileSizeError(
+      files.map(entry => entry.file),
+    );
+
+    if (fileSizeError) {
+      setError(fileSizeError);
+      return;
+    }
 
     setIsSubmitting(true);
     setError(null);
 
     try {
-      const existingHashesInLesson = new Set(
-        data.files.filter(f => f.lesson_id === lessonId).map(f => f.hash),
-      );
+      const existingHashesInLesson = await fetchExistingHashesInLesson();
 
       const hashes = await Promise.all(
         files.map(entry => hashFile(entry.file)),
@@ -224,9 +265,9 @@ export default function UploadFilesModal({
           onDrop={handleDrop}
           onClick={() => !isSubmitting && fileInputRef.current?.click()}
         >
-          <DropZoneText>Choose a file or drag & drop it here</DropZoneText>
+          <DropZoneText>Choose files or drag files here</DropZoneText>
           <DropZoneSubtext>
-            JPEG, PNG, PDF, and MP4 formats accepted
+            JPEG, PNG, PDF, MP4, PowerPoint, and APK formats accepted
           </DropZoneSubtext>
 
           <BrowseButton
@@ -237,14 +278,14 @@ export default function UploadFilesModal({
               fileInputRef.current?.click();
             }}
           >
-            Browse File
+            Browse files
           </BrowseButton>
 
           <input
             ref={fileInputRef}
             type="file"
             multiple
-            accept=".jpg,.jpeg,.png,.pdf,.mp4"
+            accept={ACCEPTED_FILE_TYPES}
             style={{ display: "none" }}
             onChange={e => {
               addFiles(e.target.files);

@@ -14,7 +14,8 @@ export const Overlay = styled.div`
 
 export const ModalCard = styled.div`
   background: ${COLORS.white};
-  border-radius: 12px;
+  border: 1px solid ${COLORS.surfaceBorder};
+  border-radius: 16px;
   width: 100%;
   max-width: 480px;
   max-height: 90vh;
@@ -23,9 +24,7 @@ export const ModalCard = styled.div`
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
-  box-shadow:
-    0 20px 60px rgba(0, 0, 0, 0.12),
-    0 4px 16px rgba(0, 0, 0, 0.08);
+  box-shadow: ${COLORS.surfaceShadow};
 `;
 
 export const ModalHeader = styled.div`
@@ -39,8 +38,8 @@ export const ModalTitle = styled.h2`
   margin: 0;
 
   font-size: 1.5rem;
-  font-weight: 500;
-  line-height: normal;
+  font-weight: var(--font-weight-section-title);
+  line-height: 1.2;
 `;
 
 export const CloseButton = styled.button`
@@ -84,6 +83,11 @@ export const AssignedVillageRow = styled.div`
   justify-content: space-between;
   gap: 16px;
   width: 100%;
+
+  @media (max-width: 520px) {
+    align-items: flex-start;
+    flex-direction: column;
+  }
 `;
 
 export const VillageDropdownWrapper = styled.div`
@@ -91,11 +95,13 @@ export const VillageDropdownWrapper = styled.div`
   display: flex;
   flex-direction: column;
   align-items: flex-end;
+  width: min(240px, 100%);
 `;
 
 export const VillageSelectTrigger = styled.button`
-  display: inline-flex;
+  display: flex;
   height: 44px;
+  width: 100%;
   padding: 10px 16px;
   justify-content: space-between;
   align-items: center;
@@ -103,10 +109,16 @@ export const VillageSelectTrigger = styled.button`
   flex-shrink: 0;
 
   border-radius: 8px;
-  border: 1px solid ${COLORS.gray40};
+  border: 1px solid ${COLORS.surfaceBorder};
   background: ${COLORS.white};
+  color: ${COLORS.gray60};
 
   cursor: pointer;
+
+  &:focus-visible {
+    outline: 3px solid rgba(30, 66, 64, 0.18);
+    border-color: ${COLORS.evergreen};
+  }
 `;
 
 export const VillageSelectTriggerText = styled.span`
@@ -124,22 +136,18 @@ export const VillageDropdownMenu = styled.div`
   z-index: 20;
 
   display: flex;
-  width: 182px;
-  padding: 16px 48px 18px 18px;
+  width: 100%;
+  padding: 0.75rem;
   flex-direction: column;
   justify-content: center;
   align-items: flex-start;
-  gap: 15px;
+  gap: 0.625rem;
   box-sizing: border-box;
 
   border-radius: 8px;
+  border: 1px solid ${COLORS.surfaceBorder};
   background: ${COLORS.white};
-  box-shadow:
-    0 29px 8px 0 rgba(0, 0, 0, 0),
-    0 19px 7px 0 rgba(0, 0, 0, 0.01),
-    0 10px 6px 0 rgba(0, 0, 0, 0.05),
-    0 5px 5px 0 rgba(0, 0, 0, 0.09),
-    0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  box-shadow: ${COLORS.surfaceShadowSoft};
 `;
 
 export const VillageOption = styled.label`
@@ -171,16 +179,109 @@ export const Checkmark = styled.svg`
 `;
 
 export const VillageOptionText = styled.span`
-  font-size: var(--font-subtitle-3);
-  line-height: var(--lh-subtitle-3);
+  font-family: var(--font-primary);
+  font-size: 13px;
+  line-height: normal;
   font-weight: 400;
-  color: ${COLORS.gray100};
+  color: ${COLORS.gray80};
+  min-width: 0;
+  overflow-wrap: anywhere;
+`;
+
+export const ClassroomDropdownEmpty = styled.div`
+  color: ${COLORS.gray60};
+  font-size: 0.8125rem;
+  line-height: 1.35;
+`;
+
+export const ClassroomDropdownAction = styled.button`
+  width: 100%;
+  min-height: 2.25rem;
+  border: 1px solid ${COLORS.surfaceBorder};
+  border-radius: 8px;
+  background: ${COLORS.white};
+  color: ${COLORS.evergreen};
+  cursor: pointer;
+  font-family: var(--font-primary);
+  font-size: 0.875rem;
+
+  &:hover:not(:disabled) {
+    border-color: ${COLORS.evergreen};
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+`;
+
+export const ClassroomManageButton = styled.button`
+  border: none;
+  background: transparent;
+  color: ${COLORS.gray60};
+  cursor: pointer;
+  padding: 0.25rem 0;
+  font-family: var(--font-primary);
+  font-size: 0.8125rem;
+  text-align: left;
+
+  &:hover {
+    color: ${COLORS.evergreen};
+  }
+`;
+
+export const ClassroomCreatePanel = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  padding: 0.875rem;
+  border: 1px solid ${COLORS.surfaceBorder};
+  border-radius: 8px;
+  background: ${COLORS.pageWash};
+`;
+
+export const ClassroomCreateRow = styled.div`
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.8fr);
+  gap: 0.625rem;
+
+  @media (max-width: 520px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+export const ClassroomCreateActions = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+`;
+
+export const ClassroomSecondaryButton = styled.button`
+  padding: 0.625rem 0.875rem;
+  background: ${COLORS.white};
+  border: 1px solid ${COLORS.surfaceBorder};
+  border-radius: 8px;
+  color: ${COLORS.gray80};
+  cursor: pointer;
+  font-family: var(--font-primary);
+  font-size: 0.875rem;
+
+  &:hover:not(:disabled) {
+    border-color: ${COLORS.evergreen};
+    color: ${COLORS.evergreen};
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 `;
 
 export const TextInput = styled.input`
   width: 100%;
   padding: 0.6875rem 1rem;
-  border: 1px solid ${COLORS.gray40};
+  border: 1px solid ${COLORS.surfaceBorder};
   border-radius: 8px;
 
   font-family: inherit;
@@ -199,6 +300,7 @@ export const TextInput = styled.input`
 
   &:focus {
     border-color: ${COLORS.evergreen};
+    box-shadow: 0 0 0 3px rgba(30, 66, 64, 0.18);
   }
 
   &:disabled {
@@ -210,7 +312,7 @@ export const TextInput = styled.input`
 export const TextArea = styled.textarea`
   width: 100%;
   padding: 0.6875rem 1rem;
-  border: 1px solid ${COLORS.gray40};
+  border: 1px solid ${COLORS.surfaceBorder};
   border-radius: 8px;
 
   font-family: inherit;
@@ -231,30 +333,11 @@ export const TextArea = styled.textarea`
 
   &:focus {
     border-color: ${COLORS.evergreen};
+    box-shadow: 0 0 0 3px rgba(30, 66, 64, 0.18);
   }
 
   &:disabled {
     background: ${COLORS.gray10};
-    cursor: not-allowed;
-  }
-`;
-
-export const EditTextInput = styled(TextInput)<{ $isEdited: boolean }>`
-  color: ${({ $isEdited }) => ($isEdited ? COLORS.gray100 : COLORS.gray60)};
-
-  &:disabled {
-    background: ${COLORS.gray10};
-    color: ${({ $isEdited }) => ($isEdited ? COLORS.gray100 : COLORS.gray60)};
-    cursor: not-allowed;
-  }
-`;
-
-export const EditTextArea = styled(TextArea)<{ $isEdited: boolean }>`
-  color: ${({ $isEdited }) => ($isEdited ? COLORS.gray100 : COLORS.gray60)};
-
-  &:disabled {
-    background: ${COLORS.gray10};
-    color: ${({ $isEdited }) => ($isEdited ? COLORS.gray100 : COLORS.gray60)};
     cursor: not-allowed;
   }
 `;
@@ -274,21 +357,23 @@ export const ActionRow = styled.div`
 `;
 
 export const CancelButton = styled.button`
-  padding: 0.625rem 1.5rem;
+  min-height: 3.25rem;
+  padding: 0 1.5rem;
   background: ${COLORS.white};
-  border: 1px solid ${COLORS.gray40};
-  border-radius: 8px;
+  border: 1px solid ${COLORS.surfaceBorder};
+  border-radius: 9px;
 
   font-size: var(--font-subtitle-2);
   line-height: var(--lh-subtitle-2);
-  font-weight: 500;
+  font-weight: var(--font-weight-section-title);
   color: ${COLORS.gray80};
 
   cursor: pointer;
   transition: border-color 0.15s;
 
   &:hover:not(:disabled) {
-    border-color: ${COLORS.gray100};
+    border-color: ${COLORS.evergreen};
+    color: ${COLORS.evergreen};
   }
 
   &:disabled {
@@ -298,14 +383,15 @@ export const CancelButton = styled.button`
 `;
 
 export const CreateButton = styled.button`
-  padding: 0.625rem 1.5rem;
+  min-height: 3.25rem;
+  padding: 0 1.5rem;
   background: ${COLORS.evergreen};
   border: none;
-  border-radius: 8px;
+  border-radius: 9px;
 
   font-size: var(--font-subtitle-2);
   line-height: var(--lh-subtitle-2);
-  font-weight: 500;
+  font-weight: var(--font-weight-action);
   color: ${COLORS.white};
 
   cursor: pointer;

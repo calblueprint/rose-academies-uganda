@@ -3,7 +3,7 @@ import COLORS from "@/styles/colors";
 
 export const PageWrapper = styled.main`
   min-height: 100dvh;
-  background: ${COLORS.gray10};
+  background: transparent;
   padding: 1.38rem 0 0 0;
 `;
 
@@ -17,6 +17,8 @@ export const Content = styled.div`
   width: 100%;
   max-width: 67.5rem;
   margin: 0 auto;
+  padding: 0 clamp(16px, 4vw, 24px);
+  box-sizing: border-box;
 `;
 
 export const PageHeader = styled.div`
@@ -31,7 +33,7 @@ export const PageTitle = styled.h1`
 
   font-size: var(--font-h3);
   line-height: var(--lh-h3);
-  font-weight: 400;
+  font-weight: var(--font-weight-page-title);
 `;
 
 export const PageSubtitle = styled.p`
@@ -64,6 +66,52 @@ export const SyncCardsRow = styled.div`
   > :last-child {
     justify-self: end;
   }
+
+  @media (max-width: 860px) {
+    grid-template-columns: 1fr;
+
+    > :first-child,
+    > :last-child {
+      justify-self: stretch;
+    }
+  }
+`;
+
+export const EmptyHubCard = styled.section`
+  width: 100%;
+  max-width: 44rem;
+  padding: 1.5rem;
+  border: 1px solid ${COLORS.mintGreenBorder};
+  border-radius: 1rem;
+  background: ${COLORS.white};
+  box-shadow: ${COLORS.surfaceShadowSoft};
+`;
+
+export const EmptyHubTitle = styled.h2`
+  margin: 0 0 0.5rem;
+  color: ${COLORS.gray100};
+  font-size: 1.35rem;
+  line-height: 1.2;
+  font-weight: 700;
+`;
+
+export const EmptyHubText = styled.p`
+  margin: 0;
+  color: ${COLORS.gray60};
+  font-size: 1rem;
+  line-height: 1.5;
+`;
+
+export const EmptyHubSteps = styled.ol`
+  margin: 1rem 0 0;
+  padding-left: 1.25rem;
+  color: ${COLORS.gray80};
+  font-size: 0.95rem;
+  line-height: 1.55;
+
+  li + li {
+    margin-top: 0.35rem;
+  }
 `;
 
 export const SectionTitle = styled.h2`
@@ -74,7 +122,7 @@ export const SectionTitle = styled.h2`
 
   font-size: 1.5rem;
   line-height: normal;
-  font-weight: 400;
+  font-weight: var(--font-weight-section-title);
 `;
 
 export const LessonsStack = styled.div`

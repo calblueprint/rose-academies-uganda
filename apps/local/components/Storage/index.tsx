@@ -15,7 +15,7 @@ export default function Storage() {
     <Card>
       <IconWrapper>{IconSvgs.storage}</IconWrapper>
       <Content>
-        <Title>Pi Storage</Title>
+        <Title>Classroom Hub Storage</Title>
         <StorageInfo>
           <StatusText>19 GB of 64 GB Used</StatusText>
           <StatusText>30% used</StatusText>

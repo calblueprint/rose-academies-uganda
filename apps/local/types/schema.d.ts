@@ -67,7 +67,10 @@ export type LocalFile = {
   name: string;
   size_bytes: number;
   storage_path: string;
+  hash?: string | null;
   lesson_id: number | null;
+  created_at?: string | null;
+  updated_at?: string | null;
   mime_type?: string | null; // indicates file format (pdf, jpg, etc.)
   local_path?: string | null;
 };

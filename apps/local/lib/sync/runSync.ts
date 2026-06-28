@@ -113,6 +113,7 @@ export async function runSync({ syncRunId }: RunSyncOptions = {}) {
       syncPayload.lessons,
       syncPayload.files,
       syncPayload.lessonFiles,
+      syncPayload.lessonGroups,
     );
 
     finalizeDownloadedFiles(
@@ -169,7 +170,7 @@ export async function runSync({ syncRunId }: RunSyncOptions = {}) {
       const errorMessage =
         error instanceof Error
           ? error.message
-          : "The sync failed on the Raspberry Pi.";
+          : "The sync failed on the Classroom Hub.";
 
       // A failure to report failure should not hide the original sync error, so
       // this nested update is logged separately and the function still returns.

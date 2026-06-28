@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect } from "react";
+import { useLanguage } from "@/lib/i18n";
 import { IconSvgs } from "@/lib/icons";
 import {
   ActionsRow,
@@ -30,6 +31,8 @@ const SyncModal: React.FC<SyncModalProps> = ({
   onSyncAgain,
   bodyText,
 }) => {
+  const { t } = useLanguage();
+
   useEffect(() => {
     document.documentElement.style.overflowY = "hidden";
     return () => {
@@ -40,8 +43,8 @@ const SyncModal: React.FC<SyncModalProps> = ({
   const isSuccess = variant === "success";
 
   const defaultBodyText = isSuccess
-    ? "All changes have been successfully synced."
-    : "The sync could not be completed. Please try again later.";
+    ? t("sync.successBody")
+    : t("sync.errorBody");
 
   return (
     <Overlay>
@@ -53,7 +56,7 @@ const SyncModal: React.FC<SyncModalProps> = ({
         </IconWrapper>
 
         <Title>
-          {isSuccess ? "Syncing Successful!" : "Error! Syncing Failed"}
+          {isSuccess ? t("sync.successTitle") : t("sync.errorTitle")}
         </Title>
 
         <Body>{bodyText ?? defaultBodyText}</Body>
@@ -61,13 +64,17 @@ const SyncModal: React.FC<SyncModalProps> = ({
         {isSuccess ? (
           <ActionsRow>
             <ContinueButton onClick={onClose}>
-              <ContinueText>Continue</ContinueText>
+              <ContinueText>{t("sync.continue")}</ContinueText>
             </ContinueButton>
           </ActionsRow>
         ) : (
           <ActionsRow>
-            <TryLaterButton onClick={onClose}>Try Later</TryLaterButton>
-            <SyncAgainButton onClick={onSyncAgain}>Sync Again</SyncAgainButton>
+            <TryLaterButton onClick={onClose}>
+              {t("sync.tryLater")}
+            </TryLaterButton>
+            <SyncAgainButton onClick={onSyncAgain}>
+              {t("sync.syncAgain")}
+            </SyncAgainButton>
           </ActionsRow>
         )}
       </Card>

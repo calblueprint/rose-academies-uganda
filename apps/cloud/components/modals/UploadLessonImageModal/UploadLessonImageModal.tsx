@@ -344,7 +344,7 @@ export default function UploadLessonImageModal({
                     fileInputRef.current?.click();
                   }}
                 >
-                  Browse File
+                  Browse file
                 </BrowseButton>
               </>
             )}

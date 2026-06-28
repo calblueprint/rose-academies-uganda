@@ -18,6 +18,7 @@ type ConfirmationModalProps = {
   confirmText: string;
   cancelText?: string;
   isLoading?: boolean;
+  variant?: "default" | "danger";
   onCancel: () => void;
   onConfirm: () => void;
 };
@@ -29,6 +30,7 @@ export default function ConfirmationModal({
   confirmText,
   cancelText = "Cancel",
   isLoading = false,
+  variant = "default",
   onCancel,
   onConfirm,
 }: ConfirmationModalProps) {
@@ -61,7 +63,12 @@ export default function ConfirmationModal({
             {cancelText}
           </CancelButton>
 
-          <ConfirmButton onClick={onConfirm} disabled={isLoading} type="button">
+          <ConfirmButton
+            onClick={onConfirm}
+            disabled={isLoading}
+            type="button"
+            $variant={variant}
+          >
             {isLoading ? "Loading..." : confirmText}
           </ConfirmButton>
         </ActionRow>

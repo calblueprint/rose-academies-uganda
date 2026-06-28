@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import UploadLessonImageModal from "@/components/modals/UploadLessonImageModal/UploadLessonImageModal";
 import { IconSvgs } from "@/lib/icons";
 import * as style from "./styles";
@@ -18,10 +18,16 @@ export default function LessonHeader({
 }: LessonHeaderProps) {
   const [isUploadLessonImageModalOpen, setIsUploadLessonImageModalOpen] =
     useState(false);
+  const [currentImagePath, setCurrentImagePath] = useState(imagePath);
+
+  useEffect(() => {
+    setCurrentImagePath(imagePath);
+  }, [imagePath]);
+
   return (
     <>
       <style.HeaderContainer>
-        <style.ImageBanner $imagePath={imagePath}>
+        <style.ImageBanner $imagePath={currentImagePath}>
           <style.HeaderTopRow>
             <style.BackLink href="/app/lessons">
               <style.IconContainer>{IconSvgs.coolicon}</style.IconContainer>
@@ -49,6 +55,9 @@ export default function LessonHeader({
           setIsUploadLessonImageModalOpen(false);
         }}
         lessonId={lessonId}
+        onImageUpdated={(_, updatedImagePath) => {
+          setCurrentImagePath(updatedImagePath);
+        }}
       />
     </>
   );

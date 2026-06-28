@@ -4,6 +4,7 @@ import type {
   Group,
   Lesson,
   LessonFileRow,
+  LessonGroupRow,
   SyncPayload,
 } from "@/lib/sync/types";
 import supabase from "@/api/supabase/client";
@@ -46,6 +47,7 @@ export async function fetchAssignedSyncData(
       lessons: [],
       files: [],
       lessonFiles: [],
+      lessonGroups: [],
     };
   }
 
@@ -73,6 +75,17 @@ export async function fetchAssignedSyncData(
       `DeviceLessons references missing lessons: ${missingLessonIds.join(", ")}`,
     );
   }
+
+  const { data: lessonGroupsData, error: lessonGroupsError } = await supabase
+    .from("LessonGroups")
+    .select("lesson_id, group_id")
+    .in("lesson_id", lessonIds);
+
+  if (lessonGroupsError) {
+    throw new Error(lessonGroupsError.message);
+  }
+
+  const lessonGroups = (lessonGroupsData ?? []) as LessonGroupRow[];
 
   // LessonFiles is a join table because one uploaded file can belong to more
   // than one lesson. Fetching through it avoids duplicate file downloads.
@@ -102,7 +115,7 @@ export async function fetchAssignedSyncData(
     // Get the actual files, or throw an error if there are any.
     const { data: filesData, error: fileError } = await supabase
       .from("Files")
-      .select("id, name, size_bytes, storage_path, lesson_id")
+      .select("id, name, size_bytes, storage_path, hash, lesson_id, created_at")
       .in("id", fileIds);
 
     if (fileError) {
@@ -127,9 +140,10 @@ export async function fetchAssignedSyncData(
 
   const groupIds = Array.from(
     new Set(
-      typedLessons
-        .map(lesson => lesson.group_id)
-        .filter((groupId): groupId is number => Number.isInteger(groupId)),
+      [
+        ...typedLessons.map(lesson => lesson.group_id),
+        ...lessonGroups.map(row => row.group_id),
+      ].filter((groupId): groupId is number => Number.isInteger(groupId)),
     ),
   );
 
@@ -166,6 +180,7 @@ export async function fetchAssignedSyncData(
     lessonIds: lessonIds.length,
     lessons: typedLessons.length,
     lessonFiles: lessonFiles.length,
+    lessonGroups: lessonGroups.length,
     files: files.length,
     groups: groups.length,
   });
@@ -175,5 +190,6 @@ export async function fetchAssignedSyncData(
     lessons: typedLessons,
     files,
     lessonFiles,
+    lessonGroups,
   };
 }

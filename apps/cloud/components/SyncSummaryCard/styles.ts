@@ -4,8 +4,8 @@ import { Body, Subtitle2 } from "@/styles/text";
 
 export const Card = styled.div`
   display: flex;
-  width: 28.875rem;
-  height: 11.375rem;
+  width: 100%;
+  min-height: 11.375rem;
   padding: 1.5rem;
   flex-direction: column;
   justify-content: center;
@@ -14,12 +14,9 @@ export const Card = styled.div`
   min-width: 0;
   border-radius: 1rem;
   background: ${COLORS.white};
-  box-shadow:
-    0 22px 6px 0 rgba(170, 170, 170, 0),
-    0 14px 6px 0 rgba(170, 170, 170, 0.01),
-    0 8px 5px 0 rgba(170, 170, 170, 0.05),
-    0 4px 4px 0 rgba(170, 170, 170, 0.09),
-    0 1px 2px 0 rgba(170, 170, 170, 0.1);
+  border: 1px solid ${COLORS.surfaceBorder};
+  box-shadow: ${COLORS.surfaceShadowSoft};
+  box-sizing: border-box;
 `;
 
 export const Content = styled.div`
@@ -82,7 +79,7 @@ export const Value = styled(Body).attrs({
 export const Divider = styled.div`
   width: 100%;
   height: 0.0625rem;
-  background: ${COLORS.gray40};
+  background: ${COLORS.green20};
 `;
 
 export const BottomRow = styled.div`

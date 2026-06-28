@@ -25,6 +25,12 @@ function inferMimeTypeFromFileName(fileName: string): string {
     webp: "image/webp",
     svg: "image/svg+xml",
     pdf: "application/pdf",
+    ppt: "application/vnd.ms-powerpoint",
+    pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+    pps: "application/vnd.ms-powerpoint",
+    ppsx: "application/vnd.openxmlformats-officedocument.presentationml.slideshow",
+    ppx: "application/vnd.ms-powerpoint",
+    apk: "application/vnd.android.package-archive",
   };
 
   return mimeByExtension[extension] ?? "";

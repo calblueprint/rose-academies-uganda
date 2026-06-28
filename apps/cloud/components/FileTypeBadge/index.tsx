@@ -12,6 +12,8 @@ function getFileBadgeColor(fileName: string): string {
   if (ext === "pdf") return "#C0392B";
   if (["jpg", "jpeg", "png"].includes(ext)) return "#2980B9";
   if (["mp4"].includes(ext)) return "#7D3C98";
+  if (["ppt", "pptx", "pps", "ppsx", "ppx"].includes(ext)) return "#D35400";
+  if (ext === "apk") return "#1F7A4D";
 
   return "#808582";
 }

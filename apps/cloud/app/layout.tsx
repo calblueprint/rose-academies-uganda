@@ -4,14 +4,23 @@
 // - Keep it minimal for now.
 
 import "./global.css";
+import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import { LanguageProvider } from "@/lib/i18n";
 import StyledComponentsRegistry from "@/lib/registry";
+
+export const metadata: Metadata = {
+  title: "Rose Portable Classroom Hub",
+  description: "Educator dashboard for portable classroom lessons.",
+};
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" style={{ colorScheme: "light" }}>
       <body>
-        <StyledComponentsRegistry>{children}</StyledComponentsRegistry>
+        <StyledComponentsRegistry>
+          <LanguageProvider>{children}</LanguageProvider>
+        </StyledComponentsRegistry>
       </body>
     </html>
   );

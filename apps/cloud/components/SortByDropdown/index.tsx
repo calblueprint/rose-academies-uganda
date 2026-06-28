@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useLanguage } from "@/lib/i18n";
 import {
   SortButton,
   SortButtonLabel,
@@ -13,24 +14,46 @@ export type SortOptionValue =
   | "updated_desc"
   | "updated_asc"
   | "created_desc"
-  | "created_asc";
+  | "created_asc"
+  | "name_asc"
+  | "name_desc";
 
 type SortByDropdownProps = {
+  options?: SortOption[];
   value: SortOptionValue;
   onChange: (value: SortOptionValue) => void;
 };
 
-const SORT_OPTIONS: { label: string; value: SortOptionValue }[] = [
+export type SortOption = { label: string; value: SortOptionValue };
+
+const SORT_OPTIONS: SortOption[] = [
   { label: "Updated (Newest)", value: "updated_desc" },
   { label: "Updated (Oldest)", value: "updated_asc" },
   { label: "Created (Newest)", value: "created_desc" },
   { label: "Created (Oldest)", value: "created_asc" },
 ];
 
+const SORT_LABEL_KEYS: Partial<Record<SortOptionValue, string>> = {
+  updated_desc: "sort.updatedNewest",
+  updated_asc: "sort.updatedOldest",
+  created_desc: "sort.createdNewest",
+  created_asc: "sort.createdOldest",
+  name_asc: "sort.nameAsc",
+};
+
+function getSortLabelKey(option: SortOption) {
+  if (option.label === "Recently archived") return "sort.recentlyArchived";
+  if (option.label === "Oldest archived") return "sort.oldestArchived";
+
+  return SORT_LABEL_KEYS[option.value];
+}
+
 export default function SortByDropdown({
+  options = SORT_OPTIONS,
   value,
   onChange,
 }: SortByDropdownProps) {
+  const { t } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const sortRef = useRef<HTMLDivElement>(null);
 
@@ -47,15 +70,18 @@ export default function SortByDropdown({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isOpen]);
 
+  const defaultValue = options[0]?.value ?? "updated_desc";
+  const isActive = value !== defaultValue;
+
   return (
     <SortButtonWrapper ref={sortRef}>
       <SortButton
         type="button"
-        $active={value !== "updated_desc"}
+        $active={isActive}
         onClick={() => setIsOpen(prev => !prev)}
       >
-        <SortButtonLabel $active={value !== "updated_desc"}>
-          Sort By
+        <SortButtonLabel $active={isActive}>
+          {t("common.sortBy")}
         </SortButtonLabel>
 
         <svg
@@ -70,7 +96,7 @@ export default function SortByDropdown({
         >
           <path
             d="M4.5 6.75L9 11.25L13.5 6.75"
-            stroke={value !== "updated_desc" ? "#1E4240" : "#808582"}
+            stroke={isActive ? "#1E4240" : "#808582"}
             strokeWidth="1.5"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -80,7 +106,7 @@ export default function SortByDropdown({
 
       {isOpen && (
         <SortDropdown>
-          {SORT_OPTIONS.map(option => (
+          {options.map(option => (
             <SortOption
               key={option.value}
               type="button"
@@ -90,7 +116,9 @@ export default function SortByDropdown({
                 setIsOpen(false);
               }}
             >
-              {option.label}
+              {getSortLabelKey(option)
+                ? t(getSortLabelKey(option)!)
+                : option.label}
 
               {value === option.value && (
                 <svg width="14" height="10" viewBox="0 0 14 10" fill="none">

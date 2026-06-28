@@ -21,12 +21,22 @@ import SearchBar from "@/components/SearchBar";
 import StatusPill from "@/components/StatusPill";
 import UploadFilesButton from "@/components/UploadFilesButton";
 import VillageTags from "@/components/VillageTags";
+import { useLanguage } from "@/lib/i18n";
 import { deleteLessonFilesAction, reorderLessonFilesAction } from "./actions";
 import {
+  ClassroomSection,
+  EmptyMetadataText,
+  ErrorMessage,
+  FileControlsLeft,
+  FileControlsRight,
+  FilesCount,
+  FilesTitle,
+  FilesTitleGroup,
   HeaderBox,
   HeaderButtons,
   LessonDescription,
   LessonInformation,
+  LessonMetadata,
   LessonTitle,
   PageContainer,
   SearchBarRow,
@@ -57,10 +67,11 @@ type LessonSyncStatus = "available" | "pending" | null;
 
 type LessonDetailClientProps = {
   lesson: Lesson;
-  deviceId: string;
+  deviceId: string | null;
   initialSyncStatus: LessonSyncStatus;
   files: LessonFile[];
   villages: string[];
+  initialPreviewFileId?: string;
 };
 
 export default function LessonDetailClient({
@@ -69,18 +80,18 @@ export default function LessonDetailClient({
   initialSyncStatus,
   files,
   villages,
+  initialPreviewFileId,
 }: LessonDetailClientProps) {
   const [syncStatus, setSyncStatus] =
     useState<LessonSyncStatus>(initialSyncStatus);
   const [isOffline, setIsOffline] = useState(initialSyncStatus !== null);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedFileIds, setSelectedFileIds] = useState<string[]>([]);
-  const [selectedPreviewFile, setSelectedPreviewFile] =
-    useState<FileRow | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [reorderError, setReorderError] = useState<string | null>(null);
   const [isDeleting, startDeleteTransition] = useTransition();
   const [isReordering, startReorderTransition] = useTransition();
+  const { t } = useLanguage();
 
   const updateOfflineState: Dispatch<SetStateAction<boolean>> = useCallback(
     nextIsOffline => {
@@ -116,6 +127,13 @@ export default function LessonDetailClient({
     [files],
   );
 
+  const [selectedPreviewFile, setSelectedPreviewFile] =
+    useState<FileRow | null>(
+      () =>
+        initialTableFiles.find(file => file.id === initialPreviewFileId) ??
+        null,
+    );
+
   const [tableFiles, setTableFiles] = useState<FileRow[]>(
     [...initialTableFiles].sort((a, b) => a.order - b.order),
   );
@@ -147,14 +165,17 @@ export default function LessonDetailClient({
           fileIds,
         });
 
-        setTableFiles(currentFiles =>
-          currentFiles
-            .filter(file => !fileIds.includes(file.id))
-            .map((file, index) => ({
-              ...file,
-              order: index,
-            })),
-        );
+        const nextFiles = tableFiles
+          .filter(file => !fileIds.includes(file.id))
+          .map((file, index) => ({
+            ...file,
+            order: index,
+          }));
+
+        setTableFiles(nextFiles);
+        if (nextFiles.length <= 1) {
+          setSearchTerm("");
+        }
 
         setSelectedFileIds([]);
 
@@ -196,6 +217,11 @@ export default function LessonDetailClient({
     setSelectedFileIds(fileIds);
   }, []);
 
+  const fileCountText =
+    tableFiles.length === 1
+      ? `1 ${t("files.fileSingular")}`
+      : `${tableFiles.length} ${t("files.filePlural")}`;
+
   return (
     <PageContainer>
       <LessonInformation>
@@ -212,10 +238,7 @@ export default function LessonDetailClient({
           </TitleRow>
 
           <HeaderButtons>
-            <ArchiveToggle
-              lesson_Id={lesson.id}
-              isArchived={lesson.is_archived}
-            />
+            <EditLessonButton lesson={lesson} />
             <OfflineToggle
               deviceId={deviceId}
               lessonId={lesson.id}
@@ -223,35 +246,63 @@ export default function LessonDetailClient({
               setIsOffline={updateOfflineState}
               hasFiles={tableFiles.length > 0}
             />
-            <EditLessonButton lesson={lesson} />
+            <ArchiveToggle
+              lesson_Id={lesson.id}
+              isArchived={lesson.is_archived}
+              deviceId={deviceId}
+            />
           </HeaderButtons>
         </HeaderBox>
 
-        <LessonDescription>{lesson.description}</LessonDescription>
+        <LessonMetadata>
+          <LessonDescription>
+            {lesson.description || t("files.noDescription")}
+          </LessonDescription>
 
-        <VillageTags villages={villages} variant="lessonPage" />
+          <ClassroomSection>
+            {villages.length > 0 ? (
+              <VillageTags villages={villages} variant="lessonPage" />
+            ) : (
+              <EmptyMetadataText>{t("files.noClassrooms")}</EmptyMetadataText>
+            )}
+          </ClassroomSection>
+        </LessonMetadata>
 
         <SearchBarRow>
-          <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+          <FileControlsLeft>
+            <FilesTitleGroup>
+              <FilesTitle>{t("files.files")}</FilesTitle>
+              <FilesCount>{fileCountText}</FilesCount>
+            </FilesTitleGroup>
 
-          <DeleteSelectedFilesButton
-            selectedCount={selectedFileIds.length}
-            onClick={() => {
-              void handleDeleteFiles(selectedFileIds);
-            }}
-            disabled={
-              selectedFileIds.length === 0 || isDeleting || isReordering
-            }
-          />
+            {tableFiles.length > 1 && (
+              <SearchBar
+                searchTerm={searchTerm}
+                setSearchTerm={setSearchTerm}
+              />
+            )}
+          </FileControlsLeft>
 
-          <UploadFilesButton
-            lessonId={lesson.id}
-            onFilesUploadedAction={handleFilesUploaded}
-          />
+          <FileControlsRight>
+            <DeleteSelectedFilesButton
+              selectedCount={selectedFileIds.length}
+              onClick={() => {
+                void handleDeleteFiles(selectedFileIds);
+              }}
+              disabled={
+                selectedFileIds.length === 0 || isDeleting || isReordering
+              }
+            />
+
+            <UploadFilesButton
+              lessonId={lesson.id}
+              onFilesUploadedAction={handleFilesUploaded}
+            />
+          </FileControlsRight>
         </SearchBarRow>
 
-        {deleteError && <p>{deleteError}</p>}
-        {reorderError && <p>{reorderError}</p>}
+        {deleteError && <ErrorMessage>{deleteError}</ErrorMessage>}
+        {reorderError && <ErrorMessage>{reorderError}</ErrorMessage>}
 
         <FilesTable
           files={tableFiles}

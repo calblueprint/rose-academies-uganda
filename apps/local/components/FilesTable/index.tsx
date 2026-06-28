@@ -2,6 +2,7 @@
 
 import React, { useMemo, useState } from "react";
 import FileTypeBadge from "@/components/FileTypeBadge";
+import { useLanguage } from "@/lib/i18n";
 import { IconSvgs } from "@/lib/icons";
 import {
   BodyCell,
@@ -46,6 +47,7 @@ type FilesTableProps = {
  * - Clicking a row calls `onRowClick` with the FileRow (if provided).
  */
 export function FilesTable({ files, onRowClick }: FilesTableProps) {
+  const { t } = useLanguage();
   const [sortKey, setSortKey] = useState<SortKey>("name");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
 
@@ -103,9 +105,17 @@ export function FilesTable({ files, onRowClick }: FilesTableProps) {
     if (onRowClick) onRowClick(file);
   }
 
-  // File size formatter that converts raw bytes into a string with MB units.
+  // File size formatter that keeps small lesson files from rounding to 0.0 MB.
   function formatSize(sizeBytes: number): string {
-    const mb = sizeBytes / (1024 * 1024);
+    if (!Number.isFinite(sizeBytes) || sizeBytes <= 0) return "0 B";
+    if (sizeBytes < 1024) return `${Math.round(sizeBytes)} B`;
+
+    const kb = sizeBytes / 1024;
+    if (kb < 1024) {
+      return `${kb < 10 ? kb.toFixed(1) : Math.round(kb)} KB`;
+    }
+
+    const mb = kb / 1024;
     return `${mb.toFixed(1)} MB`;
   }
 
@@ -123,25 +133,25 @@ export function FilesTable({ files, onRowClick }: FilesTableProps) {
         <thead>
           <HeadRow>
             <HeadCell $isSortable onClick={() => handleHeaderClick("name")}>
-              Name
+              {t("files.name")}
             </HeadCell>
             <HeadCell
               $isSortable
               onClick={() => handleHeaderClick("dateAdded")}
             >
-              Date Added
+              {t("files.dateAdded")}
             </HeadCell>
             <HeadCell
               $isSortable
               onClick={() => handleHeaderClick("dateModified")}
             >
-              Date Modified
+              {t("files.dateModified")}
             </HeadCell>
             <HeadCell
               $isSortable
               onClick={() => handleHeaderClick("sizeBytes")}
             >
-              File Size
+              {t("files.fileSize")}
             </HeadCell>
             {/* empty header for download column (no label in the design) */}
             <HeadCell />
@@ -162,7 +172,15 @@ export function FilesTable({ files, onRowClick }: FilesTableProps) {
               <BodyCell>{formatSize(file.sizeBytes)}</BodyCell>
 
               <BodyCell>
-                <DownloadIcon>{IconSvgs.download}</DownloadIcon>
+                <DownloadIcon
+                  href={`/api/sqlite/files/${file.id}?download=1`}
+                  download={file.name}
+                  title={`${t("files.download")} ${file.name}`}
+                  aria-label={`${t("files.download")} ${file.name}`}
+                  onClick={event => event.stopPropagation()}
+                >
+                  {IconSvgs.download}
+                </DownloadIcon>
               </BodyCell>
             </BodyRow>
           ))}

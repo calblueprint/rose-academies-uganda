@@ -6,11 +6,13 @@ import * as style from "./styles";
 type GetFileTableColumnsArgs = {
   isDeleting: boolean;
   isReordering: boolean;
+  t: (key: string) => string;
 };
 
 export function getFileTableColumns({
   isDeleting,
   isReordering,
+  t,
 }: GetFileTableColumnsArgs): ColumnDef<FileRow>[] {
   return [
     {
@@ -18,7 +20,7 @@ export function getFileTableColumns({
       header: ({ table }) => (
         <style.Checkbox
           type="checkbox"
-          aria-label="Select all files"
+          aria-label={t("files.selectAll")}
           checked={table.getIsAllRowsSelected()}
           ref={input => {
             if (input) {
@@ -49,26 +51,26 @@ export function getFileTableColumns({
     {
       accessorKey: "name",
       id: "name",
-      header: "Name",
+      header: t("files.name"),
       cell: ({ row }) => row.original.name,
       enableSorting: false,
     },
     {
       accessorKey: "createdAt",
       id: "createdAt",
-      header: "Date Added",
+      header: t("files.dateAdded"),
       cell: ({ row }) => formatDate(row.original.createdAt),
     },
     {
       accessorKey: "updatedAt",
       id: "updatedAt",
-      header: "Date Modified",
+      header: t("files.dateModified"),
       cell: ({ row }) => formatDate(row.original.updatedAt),
     },
     {
       accessorKey: "sizeBytes",
       id: "sizeBytes",
-      header: "File Size",
+      header: t("files.fileSize"),
       cell: ({ row }) => formatBytes(row.original.sizeBytes),
     },
   ];

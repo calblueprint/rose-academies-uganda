@@ -26,17 +26,17 @@ export default function LessonCard({
 
   return (
     <Card onClick={() => router.push(`/lessons/${lessonId}/files`)}>
-      {lessonImage ? (
-        <Image
-          src={lessonImage}
-          alt={lessonName}
-          width={350}
-          height={147.29}
-          style={{ objectFit: "cover" }}
-        />
-      ) : (
-        <ImagePlaceholder />
-      )}
+      <ImagePlaceholder>
+        {lessonImage && (
+          <Image
+            src={lessonImage}
+            alt={lessonName}
+            fill
+            sizes="21.875rem"
+            style={{ objectFit: "cover" }}
+          />
+        )}
+      </ImagePlaceholder>
       <Titleholder>
         <Title>{lessonName}</Title>
         <DescriptionText>{lessonDescription}</DescriptionText>

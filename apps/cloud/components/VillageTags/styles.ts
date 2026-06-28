@@ -8,7 +8,7 @@ export const VillageTag = styled.span<{
 }>`
   display: inline-flex;
   width: fit-content;
-  max-width: ${({ $variant }) => ($variant === "card" ? "7.3125rem" : "none")};
+  max-width: 100%;
   min-height: ${({ $variant }) =>
     $variant === "card" ? "1.4375rem" : "1.625rem"};
   padding: 0.25rem 0.75rem;
@@ -19,8 +19,7 @@ export const VillageTag = styled.span<{
 
   flex-shrink: 0;
 
-  border-radius: ${({ $variant }) =>
-    $variant === "card" ? "0.25rem" : "1.25rem"};
+  border-radius: 999px;
   background-color: ${({ $variant }) =>
     $variant === "card" ? COLORS.stem : COLORS.green20};
 
@@ -34,13 +33,12 @@ export const VillageTag = styled.span<{
   font-weight: 400;
 
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 `;
 
 export const TagGroup = styled.div`
   display: flex;
   gap: 0.75rem;
-  flex-wrap: nowrap;
-  overflow: hidden;
+  flex-wrap: wrap;
+  min-width: 0;
+  max-width: 100%;
 `;

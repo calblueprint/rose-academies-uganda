@@ -65,7 +65,7 @@ function GenericPreview({
         <GenericTitle>{fileName}</GenericTitle>
         {mimeType && <GenericMime>{mimeType}</GenericMime>}
         <GenericActions>
-          <GenericLink href={src} target="_blank" rel="noreferrer">
+          <GenericLink href={`${src}?download=1`} download={fileName}>
             Download
           </GenericLink>
         </GenericActions>

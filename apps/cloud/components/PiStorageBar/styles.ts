@@ -34,9 +34,9 @@ export const ProgressBar = styled.div`
   overflow: hidden;
 `;
 
-export const ProgressFill = styled.div<{ percent: number }>`
+export const ProgressFill = styled.div<{ $percent: number }>`
   height: 100%;
-  width: ${props => props.percent}%;
+  width: ${props => props.$percent}%;
   border-radius: 999px;
   background: ${COLORS.lightLightGreen};
 `;

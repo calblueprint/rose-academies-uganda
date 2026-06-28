@@ -13,7 +13,7 @@
   min-height: 100vh;
   align-items: center;
   justify-content: center;
-  font-family: var(--font-geist-sans);
+  font-family: var(--font-primary);
   background-color: var(--background);
 }
 
@@ -42,7 +42,7 @@
   font-size: 40px;
   font-weight: 600;
   line-height: 48px;
-  letter-spacing: -2.4px;
+  letter-spacing: 0;
   text-wrap: balance;
   color: var(--text-primary);
 }
@@ -118,7 +118,7 @@ a.secondary {
   .intro h1 {
     font-size: 32px;
     line-height: 40px;
-    letter-spacing: -1.92px;
+    letter-spacing: 0;
   }
 }
 

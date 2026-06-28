@@ -8,23 +8,26 @@ export const Outer = styled.main`
   padding: 1rem;
   justify-content: center;
   align-items: center;
-  background: ${COLORS.veryLightYellow};
+  background: transparent;
 `;
 
 export const Card = styled.section`
   display: flex;
-  padding: 3.5rem 2rem 3.5rem 2rem;
+  width: min(100%, 32rem);
+  padding: 3rem 2rem;
   flex-direction: column;
   align-items: center;
   gap: 1.75rem;
-  border-radius: 0.9375rem;
+  border: 1px solid ${COLORS.surfaceBorder};
+  border-radius: 20px;
   background: ${COLORS.white};
-  box-shadow:
-    0 15.9375rem 4.4375rem 0 rgba(0, 0, 0, 0),
-    0 10.1875rem 4.0625rem 0 rgba(0, 0, 0, 0.01),
-    0 5.75rem 3.4375rem 0 rgba(0, 0, 0, 0.03),
-    0 2.5625rem 2.5625rem 0 rgba(0, 0, 0, 0.04),
-    0 0.625rem 1.375rem 0 rgba(0, 0, 0, 0.05);
+  box-shadow: ${COLORS.surfaceShadow};
+`;
+
+export const TopRow = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
 `;
 
 export const HeaderSection = styled.div`
@@ -41,23 +44,22 @@ export const LogoContainer = styled.div`
 `;
 
 export const Title = styled.h1`
-  color: ${COLORS.veryDarkBlue};
+  color: ${COLORS.gray100};
   text-align: center;
-  font-size: 2rem;
+  font-size: clamp(1.9rem, 6vw, 2.625rem);
   font-style: normal;
-  font-weight: 400;
-  line-height: 3rem;
-  letter-spacing: 0.0125rem;
+  font-weight: var(--font-weight-action);
+  line-height: 1.08;
 `;
 
 export const Helper = styled.p`
-  color: ${COLORS.lightGrey};
+  color: ${COLORS.gray60};
   text-align: center;
-  font-size: 1.25rem;
+  font-size: 1.125rem;
   font-style: normal;
   font-weight: 400;
-  line-height: normal;
-  width: 20.5rem;
+  line-height: 1.5;
+  width: min(100%, 22rem);
 `;
 
 export const CodeSection = styled.div`
@@ -75,22 +77,23 @@ export const CodeInputSection = styled.div`
 `;
 
 export const CodeInput = styled.input<{ $error?: boolean }>`
-  width: 23.75rem;
+  width: min(23.75rem, calc(100vw - 4rem));
   height: 3.25rem;
-  background: ${COLORS.veryLightGrey};
-  border-radius: 0.5rem;
-  border: none;
+  background: ${COLORS.white};
+  border-radius: 9px;
+  border: 1px solid
+    ${props => (props.$error ? COLORS.red : COLORS.surfaceBorder)};
   padding: 0 0.75rem;
   outline: none;
-  font-family: "Google Sans";
+  font-family: var(--font-primary);
   font-size: 20px;
   font-style: normal;
   font-weight: 400;
-  line-height: 25px
+  line-height: 25px;
 
   &::placeholder {
-    color: var(--gray-60, #808582);
-    font-family: "Google Sans";
+    color: ${COLORS.gray60};
+    font-family: var(--font-primary);
     font-size: 1.125rem;
     font-style: normal;
     font-weight: 500;
@@ -99,33 +102,42 @@ export const CodeInput = styled.input<{ $error?: boolean }>`
   }
 
   &:focus {
-    border-radius: 8px;
-    border: 1.5px solid
-      ${props => (props.$error ? COLORS.red : COLORS.evergreen)};
+    border-color: ${props => (props.$error ? COLORS.red : COLORS.evergreen)};
+    box-shadow: 0 0 0 3px rgba(30, 66, 64, 0.18);
   }
 `;
 
 export const JoinButton = styled.button`
   display: flex;
-  width: 23.75rem;
+  width: min(23.75rem, calc(100vw - 4rem));
   height: 3.25rem;
   padding: 0.625rem;
   justify-content: center;
   align-items: center;
-  border-radius: 0.5rem;
+  border-radius: 9px;
   background: ${COLORS.evergreen};
   color: ${COLORS.white};
   text-align: center;
   font-size: 1.125rem;
   font-style: normal;
-  font-weight: 500;
+  font-weight: var(--font-weight-action);
   line-height: normal;
   text-decoration: none;
   border: none;
+  cursor: pointer;
+`;
+
+export const SetupLink = styled.a`
+  color: ${COLORS.evergreen};
+  font-size: 1rem;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 0.2rem;
 `;
 
 export const ErrorMessage = styled.p`
   width: 100%;
   color: ${COLORS.red};
   font-size: 1rem;
+  line-height: 1.4;
 `;

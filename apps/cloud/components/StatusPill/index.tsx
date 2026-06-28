@@ -1,3 +1,6 @@
+"use client";
+
+import { useLanguage } from "@/lib/i18n";
 import { Dot, Pill } from "./styles";
 
 export default function StatusPill({
@@ -5,7 +8,9 @@ export default function StatusPill({
 }: {
   status: "available" | "pending";
 }) {
-  const label = status === "available" ? "Synced" : "Pending Sync";
+  const { t } = useLanguage();
+  const label =
+    status === "available" ? t("status.synced") : t("status.pendingSync");
 
   return (
     <Pill $status={status}>

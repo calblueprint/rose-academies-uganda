@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation";
 import { getSupabaseServerClientReadOnly } from "@/api/supabase/server-readonly";
 import Header from "@/components/Header";
-import MissingDevicePage from "@/components/MissingDevicePage";
 import { DataContextProvider } from "@/context/DataContext";
 import { getCurrentDeviceId } from "@/lib/getCurrentUserDevice";
 
@@ -22,8 +21,8 @@ export default async function AuthedLayout({
     redirect("/login");
   }
 
-  // Teachers need a linked device before using app pages because offline sync
-  // actions depend on knowing which Raspberry Pi they are managing.
+  // A linked Classroom Hub is only required for sync/device-specific actions.
+  // New educators can prepare lessons and classrooms before their hub is ready.
   const deviceId = await getCurrentDeviceId({ userId: user.id });
 
   const { data, error } = await supabase
@@ -39,9 +38,13 @@ export default async function AuthedLayout({
   const displayName = data?.display_name ?? "User";
 
   return (
-    <DataContextProvider>
-      <Header displayName={displayName} />
-      {deviceId ? children : <MissingDevicePage />}
+    <DataContextProvider userId={user.id}>
+      <Header
+        displayName={displayName}
+        email={user.email ?? null}
+        deviceId={deviceId}
+      />
+      {children}
     </DataContextProvider>
   );
 }

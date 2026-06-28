@@ -3,10 +3,11 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getSupabaseBrowserClient } from "@/api/supabase/browser";
-import { uploadFile } from "@/api/supabase/files";
+import { getLessonFileSizeError, uploadFile } from "@/api/supabase/files";
 import FileTypeBadge from "@/components/FileTypeBadge";
 import { DataContext } from "@/context/DataContext";
 import { getCurrentUserOrThrow } from "@/lib/getCurrentUser";
+import { IconSvgs } from "@/lib/icons";
 import { randomPresetImage } from "@/lib/lessonPresets";
 import {
   ActionRow,
@@ -14,6 +15,13 @@ import {
   BrowseButton,
   CancelButton,
   Checkmark,
+  ClassroomCreateActions,
+  ClassroomCreatePanel,
+  ClassroomCreateRow,
+  ClassroomDropdownAction,
+  ClassroomDropdownEmpty,
+  ClassroomManageButton,
+  ClassroomSecondaryButton,
   CloseButton,
   CreateButton,
   DeleteFileButton,
@@ -30,6 +38,12 @@ import {
   FileQueueList,
   FileSubtext,
   HiddenCheckbox,
+  InfoTooltip,
+  JoinCodeActions,
+  JoinCodeField,
+  JoinCodeIconButton,
+  JoinCodeInfoButton,
+  JoinCodeInput,
   ModalCard,
   ModalHeader,
   ModalTitle,
@@ -41,6 +55,10 @@ import {
   ProgressFill,
   ProgressTrack,
   RequiredAsterisk,
+  SubmitStatus,
+  SubmitStatusBar,
+  SubmitStatusFill,
+  SubmitStatusText,
   TextArea,
   TextInput,
   ToggleThumb,
@@ -66,11 +84,48 @@ interface FileEntry {
 interface Group {
   id: number;
   name: string;
+  join_code?: string | null;
+  user_id?: string | null;
+}
+
+const JOIN_CODE_LENGTH = 6;
+const JOIN_CODE_PATTERN = /^[A-Z0-9]{6}$/;
+const ACCEPTED_FILE_TYPES =
+  ".jpg,.jpeg,.png,.pdf,.mp4,.ppt,.pptx,.pps,.ppsx,.ppx,.apk";
+
+function generateJoinCode() {
+  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let value = "";
+
+  for (let index = 0; index < JOIN_CODE_LENGTH; index++) {
+    value += alphabet[Math.floor(Math.random() * alphabet.length)];
+  }
+
+  return value;
+}
+
+function normalizeJoinCode(value: string) {
+  return value
+    .trim()
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, "")
+    .slice(0, JOIN_CODE_LENGTH);
+}
+
+function createClassroomId(existingIds: Set<number>) {
+  let id = 0;
+
+  do {
+    id = Math.floor(1_000_000_000 + Math.random() * 1_000_000_000);
+  } while (existingIds.has(id));
+
+  return id;
 }
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
+  deviceId?: string | null;
 }
 
 function formatBytes(bytes: number): string {
@@ -79,7 +134,11 @@ function formatBytes(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-export default function CreateLessonModal({ isOpen, onClose }: Props) {
+export default function CreateLessonModal({
+  isOpen,
+  onClose,
+  deviceId = null,
+}: Props) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [files, setFiles] = useState<FileEntry[]>([]);
@@ -91,6 +150,11 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
   const [groups, setGroups] = useState<Group[]>([]);
   const [selectedGroupIds, setSelectedGroupIds] = useState<number[]>([]);
   const [isVillageDropdownOpen, setIsVillageDropdownOpen] = useState(false);
+  const [isCreatingClassroom, setIsCreatingClassroom] = useState(false);
+  const [newClassroomName, setNewClassroomName] = useState("");
+  const [newClassroomCode, setNewClassroomCode] = useState(generateJoinCode());
+  const [classroomError, setClassroomError] = useState<string | null>(null);
+  const [isClassroomSaving, setIsClassroomSaving] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const data = useContext(DataContext);
@@ -98,19 +162,44 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
   const router = useRouter();
   const hasFiles = files.length > 0;
   const hasClassroom = selectedGroupIds.length > 0;
+  const hasLinkedHub = Boolean(deviceId);
+  const completedUploadCount = files.filter(
+    entry => entry.status === "done",
+  ).length;
+  const isUploadingFile = files.some(entry => entry.status === "uploading");
+  const uploadProgressPercent =
+    files.length > 0
+      ? Math.round(
+          ((completedUploadCount + (isUploadingFile ? 0.5 : 0)) /
+            files.length) *
+            100,
+        )
+      : 0;
+  const submitStatusText =
+    files.length === 0
+      ? "Creating lesson..."
+      : completedUploadCount >= files.length
+        ? "Finishing lesson..."
+        : `Uploading file ${Math.min(completedUploadCount + 1, files.length)} of ${files.length}...`;
+  const createButtonText = isSubmitting
+    ? files.length > 0
+      ? `Uploading ${Math.min(completedUploadCount + 1, files.length)} of ${files.length}...`
+      : "Creating..."
+    : "Create lesson";
   // Lessons need both files and a classroom before they can be sent to sync;
   // otherwise the Pi would receive content that cannot be shown usefully.
-  const canSendToSync = hasFiles && hasClassroom;
+  const canSendToSync = hasLinkedHub && hasFiles && hasClassroom;
   const villageDropdownRef = useRef<HTMLDivElement>(null);
+  const classroomCreatePanelRef = useRef<HTMLDivElement>(null);
 
   const [shouldFlashSyncRequirements, setShouldFlashSyncRequirements] =
     useState(false);
 
   useEffect(() => {
-    if (!canSendToSync && sendToOffline) {
+    if ((!canSendToSync || !hasLinkedHub) && sendToOffline) {
       setSendToOffline(false);
     }
-  }, [canSendToSync, sendToOffline]);
+  }, [canSendToSync, hasLinkedHub, sendToOffline]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -123,22 +212,8 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
   useEffect(() => {
     if (!isOpen) return;
 
-    const fetchGroups = async () => {
-      const { data: groupsData, error: groupsError } = await supabase
-        .from("Groups")
-        .select("id, name")
-        .order("name", { ascending: true });
-
-      if (groupsError) {
-        console.error("Failed to fetch groups:", groupsError);
-        return;
-      }
-
-      setGroups((groupsData as Group[]) || []);
-    };
-
-    fetchGroups();
-  }, [isOpen, supabase]);
+    setGroups(data.groups);
+  }, [data.groups, isOpen]);
 
   useEffect(() => {
     if (!isOpen || !isVillageDropdownOpen) return;
@@ -158,6 +233,15 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
     };
   }, [isOpen, isVillageDropdownOpen]);
 
+  useEffect(() => {
+    if (!isCreatingClassroom) return;
+
+    classroomCreatePanelRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest",
+    });
+  }, [isCreatingClassroom]);
+
   if (!isOpen) return null;
 
   function flashSyncRequirements() {
@@ -176,18 +260,105 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
     );
   }
 
+  function resetClassroomCreateForm() {
+    setNewClassroomName("");
+    setNewClassroomCode(generateJoinCode());
+    setClassroomError(null);
+    setIsCreatingClassroom(false);
+  }
+
+  async function isCodeUsedElsewhere(code: string) {
+    const { data: matchingClassrooms, error: matchingError } = await supabase
+      .from("Groups")
+      .select("id")
+      .ilike("join_code", code);
+
+    if (matchingError) throw matchingError;
+
+    return ((matchingClassrooms ?? []) as { id: number }[]).length > 0;
+  }
+
+  async function handleCreateClassroom() {
+    if (isClassroomSaving) return;
+
+    const trimmedName = newClassroomName.trim();
+    const normalizedCode = normalizeJoinCode(newClassroomCode);
+
+    if (!trimmedName) {
+      setClassroomError("Classroom name is required.");
+      return;
+    }
+
+    if (!JOIN_CODE_PATTERN.test(normalizedCode)) {
+      setClassroomError("Use exactly 6 letters or numbers.");
+      return;
+    }
+
+    setIsClassroomSaving(true);
+    setClassroomError(null);
+
+    try {
+      if (await isCodeUsedElsewhere(normalizedCode)) {
+        setClassroomError("That join code is already used.");
+        return;
+      }
+
+      const existingIds = new Set(groups.map(group => group.id));
+      const newClassroom: Group = {
+        id: createClassroomId(existingIds),
+        name: trimmedName,
+        join_code: normalizedCode,
+        user_id: data.userId,
+      };
+
+      const { error: insertError } = await supabase.from("Groups").insert({
+        id: newClassroom.id,
+        name: newClassroom.name,
+        join_code: newClassroom.join_code,
+        user_id: data.userId,
+      });
+
+      if (insertError) throw insertError;
+
+      setGroups(prev =>
+        [...prev, newClassroom].sort((a, b) =>
+          a.name.localeCompare(b.name, undefined, { sensitivity: "base" }),
+        ),
+      );
+      setSelectedGroupIds(prev =>
+        prev.includes(newClassroom.id) ? prev : [...prev, newClassroom.id],
+      );
+      await data.refresh();
+      resetClassroomCreateForm();
+    } catch (err) {
+      console.error("Failed to create classroom:", err);
+      setClassroomError("Unable to create classroom. Please try again.");
+    } finally {
+      setIsClassroomSaving(false);
+    }
+  }
+
   function removeFile(id: string) {
     setFiles(prev => prev.filter(entry => entry.id !== id));
   }
 
   function addFiles(fileList: FileList | null) {
     if (!fileList) return;
-    const newEntries: FileEntry[] = Array.from(fileList).map(file => ({
+    const selectedFiles = Array.from(fileList);
+    const fileSizeError = getLessonFileSizeError(selectedFiles);
+
+    if (fileSizeError) {
+      setError(fileSizeError);
+      return;
+    }
+
+    const newEntries: FileEntry[] = selectedFiles.map(file => ({
       id: `${Date.now()}-${Math.random()}`,
       file,
       status: "queued",
     }));
     setFiles(prev => [...prev, ...newEntries]);
+    setError(null);
   }
 
   function handleDragOver(e: React.DragEvent) {
@@ -215,6 +386,7 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
     setSelectedGroupIds([]);
     setIsVillageDropdownOpen(false);
     setTitleError(null);
+    resetClassroomCreateForm();
   }
 
   function handleClose() {
@@ -227,6 +399,16 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
     const trimmedTitle = title.trim();
 
     if (!trimmedTitle || isSubmitting) return;
+
+    const fileSizeError = getLessonFileSizeError(
+      files.map(entry => entry.file),
+    );
+
+    if (fileSizeError) {
+      setError(fileSizeError);
+      return;
+    }
+
     setIsSubmitting(true);
     setError(null);
 
@@ -249,17 +431,28 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
         return;
       }
       const user = await getCurrentUserOrThrow();
-      const { data: device, error: deviceError } = await supabase
-        .from("devices")
-        .select("id")
-        .eq("user_id", user.id)
-        .single();
+      let offlineDeviceId: string | null = null;
 
-      if (deviceError || !device?.id) {
-        throw deviceError ?? new Error("Unable to find device for user.");
+      if (sendToOffline) {
+        const { data: device, error: deviceError } = await supabase
+          .from("devices")
+          .select("id")
+          .eq("user_id", user.id)
+          .maybeSingle();
+
+        if (deviceError) throw deviceError;
+
+        if (!device?.id) {
+          setError(
+            "Link a Classroom Hub before sending lessons to sync, or turn off sync for now.",
+          );
+          setIsSubmitting(false);
+          return;
+        }
+
+        offlineDeviceId = device.id as string;
       }
 
-      const deviceId = device.id as string;
       // Lessons still keep one group_id for older queries, while LessonGroups
       // stores the full multi-classroom assignment set.
       const fallbackGroupId = selectedGroupIds[0] ?? 1;
@@ -321,7 +514,7 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
           .from("DeviceLessons")
           .upsert(
             {
-              device_id: deviceId,
+              device_id: offlineDeviceId,
               lesson_id: lesson.id,
               status: "pending",
             },
@@ -358,7 +551,7 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
     <Overlay onClick={handleClose}>
       <ModalCard onClick={e => e.stopPropagation()}>
         <ModalHeader>
-          <ModalTitle>Create New Lesson</ModalTitle>
+          <ModalTitle>Create new lesson</ModalTitle>
           <CloseButton
             type="button"
             onClick={handleClose}
@@ -443,7 +636,7 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
                 >
                   <path
                     d="M1 1.5L6 6.5L11 1.5"
-                    stroke="#808582"
+                    stroke="currentColor"
                     strokeWidth="1.5"
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -453,40 +646,158 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
 
               {isVillageDropdownOpen && (
                 <VillageDropdownMenu>
-                  {groups.map(group => {
-                    const isChecked = selectedGroupIds.includes(group.id);
+                  {groups.length > 0 ? (
+                    groups.map(group => {
+                      const isChecked = selectedGroupIds.includes(group.id);
 
-                    return (
-                      <VillageOption key={group.id}>
-                        <HiddenCheckbox
-                          type="checkbox"
-                          checked={isChecked}
-                          onChange={() => handleToggleGroup(group.id)}
-                          disabled={isSubmitting}
-                        />
+                      return (
+                        <VillageOption key={group.id}>
+                          <HiddenCheckbox
+                            type="checkbox"
+                            checked={isChecked}
+                            onChange={() => handleToggleGroup(group.id)}
+                            disabled={isSubmitting}
+                          />
 
-                        <VillageBox $checked={isChecked}>
-                          {isChecked && (
-                            <Checkmark viewBox="0 0 12 10" fill="none">
-                              <path
-                                d="M1 5L4.5 8.5L11 1"
-                                stroke="#FFF"
-                                strokeWidth="1.5"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
-                            </Checkmark>
-                          )}
-                        </VillageBox>
+                          <VillageBox $checked={isChecked}>
+                            {isChecked && (
+                              <Checkmark viewBox="0 0 12 10" fill="none">
+                                <path
+                                  d="M1 5L4.5 8.5L11 1"
+                                  stroke="#FFF"
+                                  strokeWidth="1.5"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                />
+                              </Checkmark>
+                            )}
+                          </VillageBox>
 
-                        <VillageOptionText>{group.name}</VillageOptionText>
-                      </VillageOption>
-                    );
-                  })}
+                          <VillageOptionText>{group.name}</VillageOptionText>
+                        </VillageOption>
+                      );
+                    })
+                  ) : (
+                    <ClassroomDropdownEmpty>
+                      No classrooms yet.
+                    </ClassroomDropdownEmpty>
+                  )}
+
+                  <ClassroomDropdownAction
+                    type="button"
+                    onClick={() => {
+                      setIsVillageDropdownOpen(false);
+                      setIsCreatingClassroom(true);
+                      setClassroomError(null);
+                    }}
+                    disabled={isSubmitting || isClassroomSaving}
+                  >
+                    New classroom
+                  </ClassroomDropdownAction>
+
+                  <ClassroomManageButton
+                    type="button"
+                    onClick={() => {
+                      handleClose();
+                      router.push("/app/classrooms");
+                    }}
+                  >
+                    Manage classrooms
+                  </ClassroomManageButton>
                 </VillageDropdownMenu>
               )}
             </VillageDropdownWrapper>
           </AssignedVillageRow>
+
+          {isCreatingClassroom && (
+            <ClassroomCreatePanel ref={classroomCreatePanelRef}>
+              <ClassroomCreateRow>
+                <TextInput
+                  placeholder="Classroom name"
+                  value={newClassroomName}
+                  onChange={e => setNewClassroomName(e.target.value)}
+                  disabled={isSubmitting || isClassroomSaving}
+                />
+                <JoinCodeField>
+                  <JoinCodeInput
+                    aria-label="Student join code"
+                    placeholder="Student join code"
+                    maxLength={JOIN_CODE_LENGTH}
+                    value={newClassroomCode}
+                    onChange={e =>
+                      setNewClassroomCode(normalizeJoinCode(e.target.value))
+                    }
+                    disabled={isSubmitting || isClassroomSaving}
+                  />
+                  <JoinCodeActions>
+                    <JoinCodeIconButton
+                      type="button"
+                      aria-label="Generate new student join code"
+                      onClick={() => setNewClassroomCode(generateJoinCode())}
+                      disabled={isSubmitting || isClassroomSaving}
+                    >
+                      {IconSvgs.refresh}
+                    </JoinCodeIconButton>
+                    <JoinCodeInfoButton
+                      type="button"
+                      aria-label="What is a student join code?"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        width="18"
+                        height="18"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                      >
+                        <circle
+                          cx="12"
+                          cy="12"
+                          r="9"
+                          stroke="currentColor"
+                          strokeWidth="1.8"
+                        />
+                        <path
+                          d="M12 11V16"
+                          stroke="currentColor"
+                          strokeWidth="1.8"
+                          strokeLinecap="round"
+                        />
+                        <path
+                          d="M12 8H12.01"
+                          stroke="currentColor"
+                          strokeWidth="2.4"
+                          strokeLinecap="round"
+                        />
+                      </svg>
+                      <InfoTooltip role="tooltip">
+                        Students enter this code on the Classroom Hub join page
+                        to see this classroom&apos;s lessons.
+                      </InfoTooltip>
+                    </JoinCodeInfoButton>
+                  </JoinCodeActions>
+                </JoinCodeField>
+              </ClassroomCreateRow>
+
+              <ClassroomCreateActions>
+                <ClassroomSecondaryButton
+                  type="button"
+                  onClick={resetClassroomCreateForm}
+                  disabled={isSubmitting || isClassroomSaving}
+                >
+                  Cancel
+                </ClassroomSecondaryButton>
+                <CreateButton
+                  type="button"
+                  onClick={handleCreateClassroom}
+                  disabled={isSubmitting || isClassroomSaving}
+                >
+                  {isClassroomSaving ? "Creating..." : "Create classroom"}
+                </CreateButton>
+              </ClassroomCreateActions>
+
+              {classroomError && <ErrorText>{classroomError}</ErrorText>}
+            </ClassroomCreatePanel>
+          )}
         </FieldSection>
 
         <FieldSection>
@@ -530,11 +841,9 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
               />
             </svg>
 
-            <DropZoneText>
-              Choose a file or drag &amp; drop it here
-            </DropZoneText>
+            <DropZoneText>Choose files or drag files here</DropZoneText>
             <DropZoneSubtext>
-              JPEG, PNG, PDF, and MP4 formats accepted
+              JPEG, PNG, PDF, MP4, PowerPoint, and APK formats accepted
             </DropZoneSubtext>
 
             <BrowseButton
@@ -545,14 +854,14 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
                 fileInputRef.current?.click();
               }}
             >
-              Browse File
+              Browse files
             </BrowseButton>
 
             <input
               ref={fileInputRef}
               type="file"
               multiple
-              accept=".jpg,.jpeg,.png,.pdf,.mp4"
+              accept={ACCEPTED_FILE_TYPES}
               style={{ display: "none" }}
               onChange={e => {
                 addFiles(e.target.files);
@@ -621,9 +930,11 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
 
         <OfflineRow>
           <OfflineTextColumn>
-            <OfflineLabel>Send lesson to sync</OfflineLabel>
+            <OfflineLabel>Save to Classroom Hub</OfflineLabel>
             <OfflineSupportingText $flashError={shouldFlashSyncRequirements}>
-              Add a file and select classroom to sync
+              {hasLinkedHub
+                ? "Make this lesson available offline after the next hub sync"
+                : "Link a Classroom Hub before saving lessons offline"}
             </OfflineSupportingText>
           </OfflineTextColumn>
 
@@ -632,7 +943,10 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
               type="checkbox"
               id="offline-toggle"
               checked={sendToOffline}
+              disabled={!hasLinkedHub}
               onChange={e => {
+                if (!hasLinkedHub) return;
+
                 if (e.target.checked && !canSendToSync) {
                   flashSyncRequirements();
                   return;
@@ -641,13 +955,28 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
                 setSendToOffline(e.target.checked);
               }}
             />
-            <ToggleTrack htmlFor="offline-toggle" $checked={sendToOffline}>
-              <ToggleThumb $checked={sendToOffline} />
+            <ToggleTrack
+              htmlFor="offline-toggle"
+              $checked={sendToOffline}
+              $disabled={!hasLinkedHub}
+            >
+              <ToggleThumb $checked={sendToOffline} $disabled={!hasLinkedHub} />
             </ToggleTrack>
           </ToggleWrapper>
         </OfflineRow>
 
         {error && <ErrorText>{error}</ErrorText>}
+
+        {isSubmitting && (
+          <SubmitStatus role="status" aria-live="polite">
+            <SubmitStatusText>{submitStatusText}</SubmitStatusText>
+            {files.length > 0 && (
+              <SubmitStatusBar>
+                <SubmitStatusFill $progress={uploadProgressPercent} />
+              </SubmitStatusBar>
+            )}
+          </SubmitStatus>
+        )}
 
         <ActionRow>
           <CancelButton
@@ -662,7 +991,7 @@ export default function CreateLessonModal({ isOpen, onClose }: Props) {
             onClick={handleSubmit}
             disabled={!title.trim() || isSubmitting}
           >
-            {isSubmitting ? "Creating..." : "Create Lesson"}
+            {createButtonText}
           </CreateButton>
         </ActionRow>
       </ModalCard>

@@ -8,7 +8,7 @@ export default function WifiStatus() {
     <Card>
       <IconWrapper>{IconSvgs.wifi}</IconWrapper>
       <Content>
-        <Title>Pi WiFi Status</Title>
+        <Title>Classroom Hub Wi-Fi</Title>
         <StatusText>Broadcasting</StatusText>
       </Content>
     </Card>

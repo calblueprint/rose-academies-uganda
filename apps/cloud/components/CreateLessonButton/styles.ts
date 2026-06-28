@@ -6,11 +6,11 @@ export const Button = styled.button`
   align-items: center;
   justify-content: center;
 
-  height: 2.75rem;
+  min-height: 3.25rem;
   padding: 0 1.25rem;
   gap: 0.5rem;
 
-  border-radius: 0.75rem;
+  border-radius: 9px;
   background: ${COLORS.evergreen};
 
   border: none;
@@ -22,5 +22,5 @@ export const Label = styled.span`
 
   font-size: var(--font-h6);
   line-height: 1;
-  font-weight: 400;
+  font-weight: var(--font-weight-action);
 `;

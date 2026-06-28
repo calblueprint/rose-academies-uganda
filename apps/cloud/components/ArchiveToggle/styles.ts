@@ -6,9 +6,10 @@ export const ArchiveButton = styled.button`
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  min-height: 2.5rem;
   padding: 8px 16px;
 
-  border-radius: 12px;
+  border-radius: 8px;
   border: 1px solid ${COLORS.gray40};
   background-color: ${COLORS.white};
 
@@ -48,6 +49,7 @@ export const ModalBackdrop = styled.div`
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.2);
+  padding: 1rem;
 
   display: flex;
   justify-content: center;
@@ -58,19 +60,24 @@ export const ModalBackdrop = styled.div`
 
 export const ModalContainer = styled.div`
   display: flex;
-  width: 500px;
+  width: min(100%, 31.25rem);
   padding: 32px 40px;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   gap: 16px;
   flex-shrink: 0;
+  box-sizing: border-box;
 
   border-radius: 16px;
   border: 1px solid rgba(0, 0, 0, 0.1);
   background: ${COLORS.white};
   box-shadow: 20px 20px 20px rgba(0, 0, 0, 0.08);
   backdrop-filter: blur(2px);
+
+  @media (max-width: 520px) {
+    padding: 24px 20px;
+  }
 `;
 
 export const ModalHeader = styled.div`
@@ -95,6 +102,11 @@ export const ButtonRow = styled.div`
   display: flex;
   gap: 12px;
   align-self: flex-end;
+
+  @media (max-width: 520px) {
+    align-self: stretch;
+    flex-direction: column-reverse;
+  }
 `;
 
 export const CancelButton = styled.button`

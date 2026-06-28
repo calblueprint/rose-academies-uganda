@@ -18,42 +18,48 @@ export const H1 = styled.h1<TextProps>`
   ${TextStyles}
   font-size: var(--font-h1);
   line-height: var(--lh-h1);
-  font-weight: ${({ $fontWeight }) => $fontWeight || 400};
+  font-weight: ${({ $fontWeight }) =>
+    $fontWeight || "var(--font-weight-page-title)"};
 `;
 
 export const H2 = styled.h2<TextProps>`
   ${TextStyles}
   font-size: var(--font-h2);
   line-height: var(--lh-h2);
-  font-weight: ${({ $fontWeight }) => $fontWeight || 400};
+  font-weight: ${({ $fontWeight }) =>
+    $fontWeight || "var(--font-weight-page-title)"};
 `;
 
 export const H3 = styled.h3<TextProps>`
   ${TextStyles}
   font-size: var(--font-h3);
   line-height: var(--lh-h3);
-  font-weight: ${({ $fontWeight }) => $fontWeight || 400};
+  font-weight: ${({ $fontWeight }) =>
+    $fontWeight || "var(--font-weight-page-title)"};
 `;
 
 export const H4 = styled.h4<TextProps>`
   ${TextStyles}
   font-size: var(--font-h4);
   line-height: var(--lh-h4);
-  font-weight: ${({ $fontWeight }) => $fontWeight || 400};
+  font-weight: ${({ $fontWeight }) =>
+    $fontWeight || "var(--font-weight-section-title)"};
 `;
 
 export const H5 = styled.h5<TextProps>`
   ${TextStyles}
   font-size: var(--font-h5);
   line-height: var(--lh-h5);
-  font-weight: ${({ $fontWeight }) => $fontWeight || 400};
+  font-weight: ${({ $fontWeight }) =>
+    $fontWeight || "var(--font-weight-section-title)"};
 `;
 
 export const H6 = styled.h6<TextProps>`
   ${TextStyles}
   font-size: var(--font-h6);
   line-height: var(--lh-h6);
-  font-weight: ${({ $fontWeight }) => $fontWeight || 400};
+  font-weight: ${({ $fontWeight }) =>
+    $fontWeight || "var(--font-weight-section-title)"};
 `;
 
 /* Subtitles */

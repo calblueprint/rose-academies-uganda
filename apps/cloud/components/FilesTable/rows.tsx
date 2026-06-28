@@ -1,9 +1,12 @@
+"use client";
+
 import type { FileRow } from "./index";
 import { MouseEvent } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { flexRender, Row } from "@tanstack/react-table";
 import FileTypeBadge from "@/components/FileTypeBadge";
+import { useLanguage } from "@/lib/i18n";
 import { IconSvgs } from "@/lib/icons";
 import * as style from "./styles";
 
@@ -30,6 +33,7 @@ function shouldIgnoreRowClick(event: MouseEvent<HTMLTableRowElement>) {
 }
 
 export function SortableRow({ row, canDrag, onRowClick }: SortableRowProps) {
+  const { t } = useLanguage();
   const {
     attributes,
     listeners,
@@ -77,7 +81,7 @@ export function SortableRow({ row, canDrag, onRowClick }: SortableRowProps) {
                 {...attributes}
                 {...listeners}
                 disabled={!canDrag}
-                aria-label="Drag to reorder file"
+                aria-label={t("files.drag")}
               >
                 {IconSvgs.dragDots}
               </style.DragHandle>
@@ -109,6 +113,8 @@ export function SortableRow({ row, canDrag, onRowClick }: SortableRowProps) {
 }
 
 export function StaticRow({ row, onRowClick }: StaticRowProps) {
+  const { t } = useLanguage();
+
   function handleRowClick(event: MouseEvent<HTMLTableRowElement>) {
     if (shouldIgnoreRowClick(event) || !onRowClick) {
       return;
@@ -134,7 +140,7 @@ export function StaticRow({ row, onRowClick }: StaticRowProps) {
               <style.DragHandle
                 type="button"
                 disabled
-                aria-label="Drag to reorder file"
+                aria-label={t("files.drag")}
               >
                 {IconSvgs.dragDots}
               </style.DragHandle>

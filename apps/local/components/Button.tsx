@@ -1,4 +1,5 @@
 import styled, { css } from "styled-components";
+import COLORS from "@/styles/colors";
 import { P2 } from "@/styles/text";
 
 interface ButtonProps {
@@ -25,9 +26,10 @@ If both provided, it will be a primaryColor button with secondaryColor text
 // Adjust default styles as needed
 const ButtonStyles = css<ButtonProps>`
   font-family: inherit;
-  border: 0.5px solid;
+  min-height: 2.75rem;
+  border: 1px solid;
   border-color: ${({ $secondaryColor, $primaryColor }) =>
-    $primaryColor ? "transparent" : $secondaryColor || "white"};
+    $primaryColor ? "transparent" : $secondaryColor || COLORS.surfaceBorder};
   background: ${({ $primaryColor }) => $primaryColor || "transparent"};
   color: ${({ $primaryColor, $secondaryColor }) =>
     $primaryColor ? "white" : $secondaryColor};
@@ -46,8 +48,7 @@ const ButtonStyles = css<ButtonProps>`
   }
 
   &:disabled {
-    background: "gray";
-    border-color: "gray";
+    opacity: 0.55;
     cursor: not-allowed;
   }
 `;
@@ -56,8 +57,9 @@ export const Button = styled(P2).attrs({ as: "button" })<ButtonProps>`
   ${ButtonStyles}
 
   width: ${({ $width }) => $width || "156px"};
-  height: 44px;
-  border-radius: 44px;
+  min-height: 2.75rem;
+  border-radius: 999px;
+  font-weight: var(--font-weight-section-title);
 `;
 
 export const BigButton = styled(Button)<ButtonProps>`

@@ -11,17 +11,28 @@ import ConfirmationModal from "@/components/modals/ConfirmationModal/Confirmatio
 import CreateLessonModal from "@/components/modals/CreateLessonModal/CreateLessonModal";
 import UploadLessonImageModal from "@/components/modals/UploadLessonImageModal/UploadLessonImageModal";
 import SearchBar from "@/components/SearchBar";
-import SortByDropdown, { SortOptionValue } from "@/components/SortByDropdown";
+import SortByDropdown, {
+  SortOption,
+  SortOptionValue,
+} from "@/components/SortByDropdown";
+import { useLanguage } from "@/lib/i18n";
 import { IconSvgs } from "@/lib/icons";
 import {
   CardWrapper,
+  ControlsLeft,
+  ControlsRight,
   Description,
+  EmptyState,
+  EmptyStateDescription,
+  EmptyStateTitle,
   GridToggle,
   Header,
   HeaderText,
+  LessonCountText,
   LessonsGrid,
   LessonsList,
   PageContainer,
+  ResultsHeader,
   SearchBarRow,
   Title,
   ToggleDivider,
@@ -35,6 +46,7 @@ type LessonsClientLesson = {
   image_path: string | null;
   created_at?: string;
   updated_at?: string;
+  classroomIds?: number[];
   villages?: string[];
 };
 
@@ -54,12 +66,17 @@ type LessonsClientProps = {
   layout?: "page" | "embedded";
   variant?: LessonsClientVariant;
   showSortButton?: boolean;
+  showClassroomFilter?: boolean;
+  sortOptions?: SortOption[];
+  sortStorageKey?: string;
+  emptyStateTitle?: string;
+  emptyStateDescription?: string;
 };
 
 export default function LessonsClient({
   initialLessons,
   lessonStatuses,
-  title = "Lessons Dashboard",
+  title = "Lessons",
   description,
   showCreateButton = true,
   showSearchBar = true,
@@ -70,8 +87,14 @@ export default function LessonsClient({
   layout = "page",
   variant = "dashboard",
   showSortButton = false,
+  showClassroomFilter = true,
+  sortOptions,
+  sortStorageKey = "lessonsSortBy",
+  emptyStateTitle = "No lessons yet.",
+  emptyStateDescription = "Lessons will appear here when they are available.",
 }: LessonsClientProps) {
   const router = useRouter();
+  const { t } = useLanguage();
 
   const [searchTerm, setSearchTerm] = useState("");
   const [view, setView] = useState<"grid" | "list">(defaultView);
@@ -88,8 +111,11 @@ export default function LessonsClient({
   const [lessons, setLessons] = useState(initialLessons);
   const [loadingLessonId, setLoadingLessonId] = useState<number | null>(null);
 
-  const [sortBy, setSortBy] = useState<SortOptionValue>("updated_desc");
-  const [selectedClassrooms, setSelectedClassrooms] = useState<string[]>([]);
+  const defaultSortBy = sortOptions?.[0]?.value ?? "updated_desc";
+  const [sortBy, setSortBy] = useState<SortOptionValue>(defaultSortBy);
+  const [selectedClassroomIds, setSelectedClassroomIds] = useState<number[]>(
+    [],
+  );
 
   useEffect(() => {
     setLessons(initialLessons);
@@ -99,30 +125,44 @@ export default function LessonsClient({
     if (typeof window === "undefined") return;
 
     const saved = localStorage.getItem(
-      "lessonsSortBy",
+      sortStorageKey,
     ) as SortOptionValue | null;
 
-    if (saved) {
+    const validValues = new Set(
+      (sortOptions ?? []).map(option => option.value),
+    );
+    const isValidSavedValue = saved
+      ? !sortOptions || validValues.has(saved)
+      : false;
+
+    if (saved && isValidSavedValue) {
       setSortBy(saved);
     }
-  }, []);
+  }, [sortOptions, sortStorageKey]);
 
   function handleSortChange(value: SortOptionValue) {
     setSortBy(value);
 
     if (typeof window !== "undefined") {
-      localStorage.setItem("lessonsSortBy", value);
+      localStorage.setItem(sortStorageKey, value);
     }
   }
 
   const availableClassrooms = useMemo(() => {
-    const classroomSet = new Set<string>();
+    const classroomMap = new Map<number, string>();
 
     lessons.forEach(lesson => {
-      lesson.villages?.forEach(village => classroomSet.add(village));
+      lesson.classroomIds?.forEach((classroomId, index) => {
+        classroomMap.set(
+          classroomId,
+          lesson.villages?.[index] ?? `Classroom ${classroomId}`,
+        );
+      });
     });
 
-    return [...classroomSet].sort((a, b) => a.localeCompare(b));
+    return [...classroomMap.entries()]
+      .map(([id, name]) => ({ id, name }))
+      .sort((a, b) => a.name.localeCompare(b.name));
   }, [lessons]);
 
   const filteredLessons = useMemo(() => {
@@ -132,8 +172,10 @@ export default function LessonsClient({
         .includes(searchTerm.toLowerCase());
 
       const matchesClassroom =
-        selectedClassrooms.length === 0 ||
-        lesson.villages?.some(village => selectedClassrooms.includes(village));
+        selectedClassroomIds.length === 0 ||
+        lesson.classroomIds?.some(classroomId =>
+          selectedClassroomIds.includes(classroomId),
+        );
 
       return matchesSearch && matchesClassroom;
     });
@@ -188,9 +230,61 @@ export default function LessonsClient({
         return aVal - bVal;
       }
 
+      if (sortBy === "name_asc") {
+        return a.name.localeCompare(b.name, undefined, {
+          sensitivity: "base",
+        });
+      }
+
+      if (sortBy === "name_desc") {
+        return b.name.localeCompare(a.name, undefined, {
+          sensitivity: "base",
+        });
+      }
+
       return 0;
     });
-  }, [lessons, searchTerm, sortBy, selectedClassrooms]);
+  }, [lessons, searchTerm, sortBy, selectedClassroomIds]);
+
+  const lessonCountText =
+    filteredLessons.length === lessons.length
+      ? `${lessons.length} ${
+          lessons.length === 1
+            ? t("lessons.lessonCountSingular")
+            : t("lessons.lessonCountPlural")
+        }`
+      : `${filteredLessons.length} ${t("lessons.of")} ${
+          lessons.length
+        } ${t("lessons.lessonCountPlural")}`;
+
+  const displayTitle =
+    variant === "archive"
+      ? t("archive.title")
+      : variant === "offline"
+        ? t("sync.lessonsToSync")
+        : title === "Lessons"
+          ? t("lessons.title")
+          : title;
+  const displayDescription =
+    variant === "archive"
+      ? t("archive.description")
+      : description ===
+          "Create lessons, assign classrooms, and choose what to sync for offline use."
+        ? t("lessons.description")
+        : description;
+  const displayEmptyStateTitle =
+    variant === "archive"
+      ? t("archive.emptyTitle")
+      : emptyStateTitle === "No lessons yet."
+        ? t("lessons.noLessons")
+        : emptyStateTitle;
+  const displayEmptyStateDescription =
+    variant === "archive"
+      ? t("archive.emptyDescription")
+      : emptyStateDescription ===
+          "Create your first lesson to add files and assign a classroom."
+        ? t("lessons.empty")
+        : emptyStateDescription;
 
   async function handleListAction(lessonId: number) {
     if (!listAction) return;
@@ -215,7 +309,10 @@ export default function LessonsClient({
     try {
       const { error } = await supabase
         .from("Lessons")
-        .update({ is_archived: false })
+        .update({
+          is_archived: false,
+          updated_at: new Date().toISOString(),
+        })
         .eq("id", lessonIdToRestore);
 
       if (error) throw error;
@@ -268,10 +365,12 @@ export default function LessonsClient({
       <Header $variant={variant}>
         <HeaderText>
           <Title $layout={layout} $variant={variant}>
-            {title}
+            {displayTitle}
           </Title>
 
-          {description && <Description>{description}</Description>}
+          {displayDescription && (
+            <Description>{displayDescription}</Description>
+          )}
         </HeaderText>
 
         {showCreateButton && (
@@ -283,6 +382,7 @@ export default function LessonsClient({
         <CreateLessonModal
           isOpen={isCreateOpen}
           onClose={() => setIsCreateOpen(false)}
+          deviceId={deviceId ?? null}
         />
       )}
 
@@ -290,13 +390,22 @@ export default function LessonsClient({
         isOpen={imageModalLessonId !== null}
         onClose={() => setImageModalLessonId(null)}
         lessonId={imageModalLessonId ?? 0}
+        onImageUpdated={(lessonId, imagePath) => {
+          setLessons(prev =>
+            prev.map(lesson =>
+              lesson.id === lessonId
+                ? { ...lesson, image_path: imagePath }
+                : lesson,
+            ),
+          );
+        }}
       />
 
       <ConfirmationModal
         isOpen={restoreConfirmLessonId !== null}
-        title="Restore Lesson"
-        description="This lesson will be restored..."
-        confirmText="Restore to Active"
+        title={t("lessons.restoreTitle")}
+        description={t("lessons.restoreDescription")}
+        confirmText={t("lessons.restoreConfirm")}
         onCancel={() => setRestoreConfirmLessonId(null)}
         onConfirm={handleRestoreConfirm}
         isLoading={
@@ -307,9 +416,9 @@ export default function LessonsClient({
 
       <ConfirmationModal
         isOpen={removeConfirmLessonId !== null}
-        title="Remove Lesson from Sync"
-        description="The lesson will still be saved..."
-        confirmText="Remove Lesson"
+        title={t("lessons.removeSyncTitle")}
+        description={t("lessons.removeSyncDescription")}
+        confirmText={t("lessons.removeConfirm")}
         onCancel={() => setRemoveConfirmLessonId(null)}
         onConfirm={handleRemoveConfirm}
         isLoading={
@@ -320,47 +429,83 @@ export default function LessonsClient({
 
       {(showSearchBar || showViewToggle || showSortButton) && (
         <SearchBarRow $variant={variant}>
-          {showSearchBar && (
-            <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
-          )}
+          <ControlsLeft>
+            {showSearchBar && (
+              <SearchBar
+                searchTerm={searchTerm}
+                setSearchTerm={setSearchTerm}
+              />
+            )}
+          </ControlsLeft>
 
-          {showSortButton && availableClassrooms.length > 0 && (
-            <ClassroomFilterDropdown
-              classrooms={availableClassrooms}
-              selectedClassrooms={selectedClassrooms}
-              onChange={setSelectedClassrooms}
-            />
-          )}
+          <ControlsRight>
+            {showSortButton &&
+              showClassroomFilter &&
+              availableClassrooms.length > 0 && (
+                <ClassroomFilterDropdown
+                  classrooms={availableClassrooms}
+                  selectedClassroomIds={selectedClassroomIds}
+                  onChange={setSelectedClassroomIds}
+                />
+              )}
 
-          {showSortButton && (
-            <SortByDropdown value={sortBy} onChange={handleSortChange} />
-          )}
+            {showSortButton && (
+              <SortByDropdown
+                options={sortOptions}
+                value={sortBy}
+                onChange={handleSortChange}
+              />
+            )}
 
-          {showViewToggle && (
-            <ViewToggleButton>
-              <GridToggle
-                $active={view === "grid"}
-                onClick={() => setView("grid")}
-              >
-                {view === "grid" ? IconSvgs.gridActive : IconSvgs.gridInactive}
-                <ToggleText>Card</ToggleText>
-              </GridToggle>
+            {showViewToggle && (
+              <ViewToggleButton>
+                <GridToggle
+                  $active={view === "grid"}
+                  onClick={() => setView("grid")}
+                >
+                  {view === "grid"
+                    ? IconSvgs.gridActive
+                    : IconSvgs.gridInactive}
+                  <ToggleText>{t("common.card")}</ToggleText>
+                </GridToggle>
 
-              <ToggleDivider />
+                <ToggleDivider />
 
-              <GridToggle
-                $active={view === "list"}
-                onClick={() => setView("list")}
-              >
-                {view === "list" ? IconSvgs.listActive : IconSvgs.listInactive}
-                <ToggleText>List</ToggleText>
-              </GridToggle>
-            </ViewToggleButton>
-          )}
+                <GridToggle
+                  $active={view === "list"}
+                  onClick={() => setView("list")}
+                >
+                  {view === "list"
+                    ? IconSvgs.listActive
+                    : IconSvgs.listInactive}
+                  <ToggleText>{t("common.list")}</ToggleText>
+                </GridToggle>
+              </ViewToggleButton>
+            )}
+          </ControlsRight>
         </SearchBarRow>
       )}
 
-      {view === "grid" ? (
+      {variant === "dashboard" && filteredLessons.length > 0 && (
+        <ResultsHeader>
+          <LessonCountText>{lessonCountText}</LessonCountText>
+        </ResultsHeader>
+      )}
+
+      {filteredLessons.length === 0 ? (
+        <EmptyState>
+          <EmptyStateTitle>
+            {lessons.length === 0
+              ? displayEmptyStateTitle
+              : t("lessons.noMatches")}
+          </EmptyStateTitle>
+          <EmptyStateDescription>
+            {lessons.length === 0
+              ? displayEmptyStateDescription
+              : t("lessons.tryDifferent")}
+          </EmptyStateDescription>
+        </EmptyState>
+      ) : view === "grid" ? (
         <LessonsGrid $variant={variant}>
           {filteredLessons.map(lesson => (
             <div key={lesson.id}>

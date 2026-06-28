@@ -9,11 +9,13 @@ function getFileExtension(fileName: string): string {
 function getFileBadgeColor(fileName: string): string {
   const ext = fileName.split(".").pop()?.toLowerCase() ?? "";
 
-  if (ext === "pdf") return "#C0392B";
-  if (["jpg", "jpeg", "png"].includes(ext)) return "#2980B9";
-  if (["mp4"].includes(ext)) return "#7D3C98";
+  if (ext === "pdf") return "#AF2028";
+  if (["jpg", "jpeg", "png"].includes(ext)) return "#1E5B78";
+  if (["mp4"].includes(ext)) return "#5A4B78";
+  if (["ppt", "pptx", "pps", "ppsx", "ppx"].includes(ext)) return "#A85400";
+  if (ext === "apk") return "#1F5A2A";
 
-  return "#808582";
+  return "#4B4A49";
 }
 
 export default function FileTypeBadge({ fileName }: { fileName: string }) {

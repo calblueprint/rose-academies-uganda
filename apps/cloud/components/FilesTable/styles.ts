@@ -7,12 +7,12 @@ const FILE_TABLE_COLUMNS =
 
 const TABLE_LINE_LEFT = "1.03131rem";
 const TABLE_LINE_RIGHT = "1.80481rem";
-const TABLE_LINE_COLOR = COLORS.gray40;
+const TABLE_LINE_COLOR = COLORS.green20;
 
 export const TableSection = styled.section`
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.5rem;
   align-self: stretch;
 `;
 
@@ -22,14 +22,11 @@ export const TableCard = styled.div`
   flex-direction: column;
   align-items: flex-start;
   align-self: stretch;
-  border-radius: 0.75rem;
+  border: 1px solid ${COLORS.surfaceBorder};
+  border-radius: 8px;
   background: ${COLORS.white};
-  box-shadow:
-    0 738.424px 207.295px 0 rgba(145, 145, 145, 0),
-    0 472.344px 188.731px 0 rgba(145, 145, 145, 0.01),
-    0 266.08px 159.854px 0 rgba(145, 145, 145, 0.05),
-    0 118.602px 118.602px 0 rgba(145, 145, 145, 0.09),
-    0 29.908px 64.973px 0 rgba(145, 145, 145, 0.1);
+  box-shadow: ${COLORS.surfaceShadowSoft};
+  overflow-x: auto;
 `;
 
 export const StatusText = styled(Body).attrs({
@@ -40,6 +37,7 @@ export const StatusText = styled(Body).attrs({
 
 export const StyledTable = styled.table`
   width: 100%;
+  min-width: 46rem;
   border-collapse: separate;
   border-spacing: 0;
   table-layout: fixed;
@@ -73,7 +71,7 @@ export const HeaderCell = styled.th<{ $align?: "left" | "right" | "center" }>`
 `;
 
 export const HeaderText = styled(H6).attrs({
-  $color: COLORS.gray100,
+  $color: COLORS.gray80,
 })``;
 
 export const SortButton = styled.button`
@@ -136,7 +134,7 @@ export const BodyCell = styled.td<{ $align?: "left" | "right" | "center" }>`
 `;
 
 export const BodyText = styled(Body).attrs({
-  $color: COLORS.veryDarkBlue,
+  $color: COLORS.gray80,
 })`
   overflow: hidden;
   text-overflow: ellipsis;
@@ -227,7 +225,7 @@ export const FooterText = styled(Subtitle2).attrs({
 `;
 
 export const FooterStrong = styled.span`
-  color: ${COLORS.veryDarkBlue};
+  color: ${COLORS.gray80};
   font-weight: 600;
 `;
 
@@ -241,7 +239,7 @@ export const TopControls = styled.div`
 `;
 
 export const Title = styled(H6).attrs({
-  $color: COLORS.veryDarkBlue,
+  $color: COLORS.gray80,
 })``;
 
 export const ButtonGroup = styled.div`

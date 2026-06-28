@@ -3,8 +3,10 @@
 import type { Group, Lesson, LocalFile } from "@/types/schema";
 import React, { createContext, useCallback, useEffect, useState } from "react";
 import supabase from "@/api/supabase/client";
+import { fetchVisibleClassrooms } from "@/lib/classrooms";
 
 interface DataContextType {
+  userId: string;
   groups: Group[];
   lessons: Lesson[];
   files: LocalFile[];
@@ -14,6 +16,7 @@ interface DataContextType {
 const EMPTY_ARRAY: never[] = [];
 
 export const DataContext = createContext<DataContextType>({
+  userId: "",
   groups: EMPTY_ARRAY as Group[],
   lessons: EMPTY_ARRAY as Lesson[],
   files: EMPTY_ARRAY as LocalFile[],
@@ -22,8 +25,10 @@ export const DataContext = createContext<DataContextType>({
 
 export function DataContextProvider({
   children,
+  userId,
 }: {
   children: React.ReactNode;
+  userId: string;
 }) {
   const [groups, setGroups] = useState<Group[]>([]);
   const [lessons, setLessons] = useState<Lesson[]>([]);
@@ -36,19 +41,18 @@ export function DataContextProvider({
 
   const fetchData = useCallback(async () => {
     const [
-      { data: groupsData, error: groupsError },
       { data: lessonsData, error: lessonsError },
       { data: lessonFilesData, error: lessonFilesError },
+      visibleClassrooms,
     ] = await Promise.all([
-      supabase.from("Groups").select("*"),
-      supabase.from("Lessons").select("*"),
+      supabase.from("Lessons").select("*").eq("user_id", userId),
       supabase.from("LessonFiles").select(`
         lesson_id,
         Files (*)
       `),
+      fetchVisibleClassrooms(supabase, userId),
     ]);
 
-    if (groupsError) throw groupsError;
     if (lessonsError) throw lessonsError;
     if (lessonFilesError) throw lessonFilesError;
 
@@ -63,10 +67,10 @@ export function DataContextProvider({
           lesson_id: row.lesson_id,
         })) ?? [];
 
-    setGroups(groupsData ?? []);
+    setGroups(visibleClassrooms);
     setLessons(lessonsData ?? []);
     setFiles(flattenedFiles);
-  }, []);
+  }, [userId]);
 
   useEffect(() => {
     let isMounted = true;
@@ -90,6 +94,7 @@ export function DataContextProvider({
   }, [fetchData]);
 
   const value: DataContextType = {
+    userId,
     groups,
     lessons,
     files,

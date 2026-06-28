@@ -1,5 +1,6 @@
 "use client";
 
+import { useLanguage } from "@/lib/i18n";
 import { ButtonContainer, ButtonText, IconWrapper } from "./styles";
 
 type DeleteSelectedFilesButtonProps = {
@@ -34,6 +35,8 @@ export default function DeleteSelectedFilesButton({
   onClick,
   disabled,
 }: DeleteSelectedFilesButtonProps) {
+  const { t } = useLanguage();
+
   if (selectedCount === 0) {
     return null;
   }
@@ -41,8 +44,8 @@ export default function DeleteSelectedFilesButton({
 
   const label =
     selectedCount === 1
-      ? `Delete ${selectedCount} file`
-      : `Delete ${selectedCount} files`;
+      ? `${t("files.deleteSingular")}`
+      : `${t("files.deletePlural")} (${selectedCount})`;
 
   return (
     <ButtonContainer

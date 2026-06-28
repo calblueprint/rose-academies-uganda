@@ -3,29 +3,36 @@
 import React from "react";
 import { usePathname, useRouter } from "next/navigation";
 import ActionButton from "@/components/ActionButton";
+import { useLanguage } from "@/lib/i18n";
 import COLORS from "@/styles/colors";
 
 export default function ExitClassButton() {
   const router = useRouter();
   const pathname = usePathname();
+  const { t } = useLanguage();
 
-  let buttonText = "Sign Out";
+  let buttonText = t("header.signOut");
 
   if (pathname.startsWith("/sync")) {
-    buttonText = "View Lessons";
+    buttonText = t("header.viewLessons");
   }
 
   return (
     <ActionButton
-      onClick={() => router.push("/join")}
+      onClick={() => {
+        void fetch("/api/join", { method: "DELETE" }).finally(() => {
+          router.push("/join");
+          router.refresh();
+        });
+      }}
       backgroundColor={COLORS.evergreen}
       textColor={COLORS.white}
       iconColor={COLORS.white}
-      iconType={"refresh"}
+      iconType={pathname.startsWith("/sync") ? "gridActive" : "exitClass"}
       text={buttonText}
-      title="Click to refresh status"
+      title={t("header.leaveClassroom")}
       animationDuration="1s"
-      borderColor="#e5e7eb"
+      borderColor={COLORS.surfaceBorder}
     />
   );
 }

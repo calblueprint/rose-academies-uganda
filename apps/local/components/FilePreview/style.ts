@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import COLORS from "@/styles/colors";
 
 export const PreviewContainer = styled.div`
   width: 100%;
@@ -6,7 +7,7 @@ export const PreviewContainer = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f5f5f5;
+  background: ${COLORS.pageWash};
 `;
 
 export const PreviewImage = styled.img`
@@ -27,23 +28,25 @@ export const GenericBox = styled.div`
   max-width: 480px;
   width: 100%;
   padding: 24px;
-  background: #ffffff;
+  background: ${COLORS.white};
+  border: 1px solid ${COLORS.surfaceBorder};
   border-radius: 12px;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+  box-shadow: ${COLORS.surfaceShadow};
   text-align: center;
 `;
 
 export const GenericTitle = styled.h2`
   margin: 0 0 8px;
   font-size: 18px;
-  font-weight: 600;
+  font-weight: var(--font-weight-section-title);
+  color: ${COLORS.gray100};
   word-break: break-word;
 `;
 
 export const GenericMime = styled.p`
   margin: 0 0 16px;
   font-size: 14px;
-  color: #666666;
+  color: ${COLORS.gray60};
 `;
 
 export const GenericActions = styled.div`
@@ -57,10 +60,10 @@ export const GenericLink = styled.a`
   font-size: 14px;
   font-weight: 500;
   text-decoration: none;
-  background: #0f766e;
-  color: #ffffff;
+  background: ${COLORS.evergreen};
+  color: ${COLORS.white};
 
   &:hover {
-    background: #115e57;
+    opacity: 0.9;
   }
 `;

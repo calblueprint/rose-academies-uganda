@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import COLORS from "@/styles/colors";
 
 export const ModalBackdrop = styled.div`
   position: fixed;
@@ -9,19 +10,20 @@ export const ModalBackdrop = styled.div`
   z-index: 9999;
 
   backdrop-filter: blur(6px);
-  background-color: rgba(0, 0, 0, 0.25);
+  background: rgba(0, 0, 0, 0.32);
 `;
 
 export const ModalPanel = styled.div`
-  background: #ffffff;
+  background: ${COLORS.white};
   width: min(1048px, 100% - 32px);
   height: min(80vh, 100% - 32px);
 
-  border-radius: 12px;
+  border: 1px solid ${COLORS.surfaceBorder};
+  border-radius: 16px;
   overflow: hidden;
   display: flex;
 
-  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.25);
+  box-shadow: ${COLORS.surfaceShadow};
 `;
 
 export const ModalContent = styled.div`

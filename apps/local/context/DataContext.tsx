@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useEffect, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import { fetchLocalDatabase } from "@/api/sqlite/queries/query";
 import { Group, Lesson, LocalFile } from "@/types/schema";
 
@@ -31,10 +32,28 @@ export function DataContextProvider({
   children: React.ReactNode;
 }) {
   const [data, setData] = useState<DataContextType | null>(null);
+  const pathname = usePathname();
+  const router = useRouter();
 
   useEffect(() => {
     async function fetchData() {
+      if (pathname === "/join" || pathname === "/setup") {
+        setData(null);
+        return;
+      }
+
       try {
+        const sessionResponse = await fetch("/api/join", {
+          cache: "no-store",
+        });
+        const session = (await sessionResponse.json()) as { joined?: boolean };
+
+        if (!session.joined) {
+          setData(null);
+          router.replace("/join");
+          return;
+        }
+
         const data = (await fetchLocalDatabase()) as LocalDatabaseResponse;
 
         setData({
@@ -48,8 +67,8 @@ export function DataContextProvider({
       }
     }
 
-    fetchData();
-  }, []);
+    void fetchData();
+  }, [pathname, router]);
 
   return <DataContext.Provider value={data}>{children}</DataContext.Provider>;
 }

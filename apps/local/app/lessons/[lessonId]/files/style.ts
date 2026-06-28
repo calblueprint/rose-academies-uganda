@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import COLORS from "@/styles/colors";
 
 export const PageContainer = styled.div`
   display: flex;
@@ -12,15 +13,15 @@ export const PageContainer = styled.div`
   min-height: 100dvh;
   padding: 13px clamp(16px, 5vw, 116px);
 
-  background-color: #fafafa;
+  background: transparent;
 `;
 
 export const Title = styled.h2`
-  color: #000000;
+  color: ${COLORS.gray100};
   font-size: 36px;
   font-style: normal;
-  font-weight: 400;
-  line-height: normal;
+  font-weight: var(--font-weight-page-title);
+  line-height: 1.15;
   padding-top: 23px;
 `;
 
@@ -45,12 +46,27 @@ export const TableWrapper = styled.div`
 
 export const EmptyState = styled.div`
   margin-top: 23px;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 1.5rem;
+  border: 1px dashed rgba(30, 66, 64, 0.18);
+  border-radius: 8px;
+  background: ${COLORS.white};
+  color: ${COLORS.gray60};
+  box-shadow: ${COLORS.surfaceShadowSoft};
+  font-family: var(--font-primary);
+  font-size: 0.95rem;
+  line-height: 1.45;
 `;
 
 export const DescriptionText = styled.p`
   font-size: 1.125rem;
   font-weight: 500;
-  color: #808582;
-  line-height: normal;
+  color: ${COLORS.gray60};
+  line-height: 1.45;
   margin-top: 12px;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  white-space: pre-wrap;
 `;

@@ -4,7 +4,7 @@ import COLORS from "@/styles/colors";
 export const PageContainer = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 1.09rem;
+  gap: 1rem;
   align-self: stretch;
 
   width: 100%;
@@ -13,22 +13,22 @@ export const PageContainer = styled.div`
   margin: 0 auto;
 
   min-height: 100vh;
-  padding: 13px clamp(16px, 5vw, 116px);
+  padding: 1.38rem clamp(16px, 5vw, 116px) 0;
   background: transparent;
 `;
 
 export const Title = styled.h1`
   margin: 0;
-  color: ${COLORS.black};
+  color: ${COLORS.gray100};
   font-size: 2.25rem;
-  line-height: normal;
-  font-weight: 400;
+  line-height: 1.15;
+  font-weight: var(--font-weight-page-title);
 `;
 
 export const LessonsGrid = styled.div`
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
   gap: 0.9375rem;
-  flex-wrap: wrap;
   width: 100%;
 `;
 
@@ -42,32 +42,37 @@ export const LessonsList = styled.div`
 export const SearchBarRow = styled.div`
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 0.5rem;
+  padding: 0.5rem 0;
   width: 100%;
+
+  @media (max-width: 760px) {
+    align-items: stretch;
+    flex-direction: column;
+  }
 `;
 
 export const ViewToggleButton = styled.div`
   display: flex;
   height: 44px;
-  padding: 10px 14px;
-  align-items: flex-start;
+  padding: 10px 12px;
+  align-items: center;
   gap: 10px;
 
-  border-radius: 16px;
-  border-top: 0.437px solid var(--gray, #d9d9d9);
-  border-right: 0.873px solid var(--gray, #d9d9d9);
-  border-bottom: 1.31px solid var(--gray, #d9d9d9);
-  border-left: 0.873px solid var(--gray, #d9d9d9);
+  border-radius: 8px;
+  border: 1px solid ${COLORS.surfaceBorder};
 
-  background: var(--white, #fff);
+  background: ${COLORS.white};
+  box-shadow: ${COLORS.surfaceShadowSoft};
 `;
 
 export const ToggleDivider = styled.div`
-  width: 0.07813rem;
+  width: 1px;
   height: 1.5625rem;
 
-  background: var(--gray, #d9d9d9);
-  border-radius: 0.08rem;
+  background: ${COLORS.green20};
+  border-radius: 1px;
 `;
 
 export const ToggleText = styled.div`
@@ -91,10 +96,7 @@ export const GridToggle = styled.div<ToggleProps>`
   line-height: normal;
 
   ${ToggleText} {
-    color: ${({ $active }) =>
-      $active
-        ? "var(--evergreen-100, #1E4240)"
-        : "var(--gray-40, var(--gray, #D9D9D9))"};
+    color: ${({ $active }) => ($active ? COLORS.evergreen : COLORS.gray60)};
   }
 `;
 
@@ -108,9 +110,20 @@ export const ListToggle = styled.div<ToggleProps>`
   line-height: normal;
 
   ${ToggleText} {
-    color: ${({ $active }) =>
-      $active
-        ? "var(--evergreen-100, #1E4240)"
-        : "var(--gray-40, var(--gray, #D9D9D9))"};
+    color: ${({ $active }) => ($active ? COLORS.evergreen : COLORS.gray60)};
   }
+`;
+
+export const EmptyState = styled.div`
+  width: 100%;
+  box-sizing: border-box;
+  padding: 1.5rem;
+  border: 1px dashed rgba(30, 66, 64, 0.18);
+  border-radius: 8px;
+  background: ${COLORS.white};
+  color: ${COLORS.gray60};
+  box-shadow: ${COLORS.surfaceShadowSoft};
+  font-family: var(--font-primary);
+  font-size: 0.95rem;
+  line-height: 1.45;
 `;

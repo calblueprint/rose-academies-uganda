@@ -21,12 +21,20 @@ export type FileRow = {
   name: string;
   size_bytes: number | null;
   storage_path: string | null;
+  hash: string | null;
   lesson_id: number | null;
+  created_at?: string | null;
+  updated_at?: string | null;
 };
 
 export type LessonFileRow = {
   lesson_id: number;
   file_id: number;
+};
+
+export type LessonGroupRow = {
+  lesson_id: number;
+  group_id: number;
 };
 
 // DeviceLessons controls which lessons a Raspberry Pi should keep available
@@ -47,6 +55,7 @@ export type SyncPayload = {
   lessons: Lesson[];
   files: FileRow[];
   lessonFiles: LessonFileRow[];
+  lessonGroups: LessonGroupRow[];
 };
 
 // These are the different options for syncing progress

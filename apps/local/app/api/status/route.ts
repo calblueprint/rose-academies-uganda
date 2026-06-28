@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { exec } from "child_process";
 import os from "os";
 import { promisify } from "util";
+import { getLocalReadiness } from "@/lib/setup/readiness";
 
 const execPromise = promisify(exec);
 
@@ -49,28 +50,29 @@ async function checkWithNmcli(): Promise<{
 }
 
 export async function GET(): Promise<NextResponse> {
-  // If running on Linux (e.g., Raspberry Pi) prefer nmcli
+  const readiness = getLocalReadiness();
   const platform = os.platform();
+  let wifiStatus: Awaited<ReturnType<typeof checkWithNmcli>> | null = null;
+
   try {
     if (platform === "linux") {
       try {
-        const result = await checkWithNmcli();
-        return NextResponse.json(result, { status: 200 });
+        wifiStatus = await checkWithNmcli();
       } catch (nmErr) {
         console.warn("nmcli check failed", nmErr);
-        return NextResponse.json(
-          {
-            operational: false,
-            message: "Unable to check WiFi status (fallback)",
-          },
-          { status: 500 },
-        );
       }
     }
 
     return NextResponse.json(
-      { operational: false, message: "Unable to check WiFi status (fallback)" },
-      { status: 500 },
+      {
+        operational: true,
+        message: readiness.ready
+          ? `Connected to the Classroom Hub. ${readiness.groups} classroom${readiness.groups === 1 ? "" : "s"} and ${readiness.lessons} lesson${readiness.lessons === 1 ? "" : "s"} are synced.`
+          : "Connected to the Classroom Hub. No synced classroom lessons are ready yet.",
+        readiness,
+        wifi: wifiStatus,
+      },
+      { status: 200 },
     );
   } catch (error) {
     console.error("Error checking WiFi status:", error);

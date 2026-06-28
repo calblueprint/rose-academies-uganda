@@ -5,6 +5,7 @@ import path from "path";
 import { Readable } from "stream";
 import { pipeline } from "stream/promises";
 import mime from "mime-types";
+import { inspectLocalFile } from "@/lib/offline/fileIntegrity";
 
 const DEFAULT_MIME_TYPE = "application/octet-stream";
 
@@ -52,7 +53,9 @@ export async function downloadFiles(
   const printedLessons = new Set<number>();
 
   for (const file of files) {
-    if (!file.storage_path) continue;
+    if (!file.storage_path) {
+      throw new Error(`Missing storage URL for ${file.name} (${file.id}).`);
+    }
 
     const linkedLessonIds = fileToLessonIds.get(file.id) ?? [];
 
@@ -91,6 +94,21 @@ export async function downloadFiles(
       await pipeline(nodeReadable, fs.createWriteStream(stagedPath));
     } catch (err) {
       throw new Error(`Streaming failed for ${file.storage_path}, ${err}`);
+    }
+
+    const inspection = await inspectLocalFile(stagedPath);
+
+    if (file.size_bytes !== null && inspection.sizeBytes !== file.size_bytes) {
+      throw new Error(
+        `Size verification failed for ${file.name}: expected ${file.size_bytes} bytes, received ${inspection.sizeBytes}.`,
+      );
+    }
+
+    if (
+      file.hash &&
+      inspection.sha256.toLowerCase() !== file.hash.toLowerCase()
+    ) {
+      throw new Error(`Hash verification failed for ${file.name}.`);
     }
   }
 

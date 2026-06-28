@@ -12,11 +12,12 @@ export const Overlay = styled.div`
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  padding: 1rem;
 `;
 
 export const Card = styled.div`
-  width: 28.06rem;
-  height: 21.8rem;
+  width: min(100%, 28.06rem);
+  min-height: 21.8rem;
   padding: 2rem 2.5rem;
   display: flex;
   flex-direction: column;
@@ -26,9 +27,14 @@ export const Card = styled.div`
 
   background: ${COLORS.white};
   border-radius: 1rem;
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  box-shadow: 20px 20px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid ${COLORS.surfaceBorder};
+  box-shadow: ${COLORS.surfaceShadow};
   position: relative;
+  box-sizing: border-box;
+
+  @media (max-width: 520px) {
+    padding: 2rem 1.25rem 1.5rem;
+  }
 `;
 
 export const CloseButton = styled.button`
@@ -46,12 +52,12 @@ export const CloseButton = styled.button`
 
   border-radius: 1.8125rem;
   border: none;
-  background: #f4f5f7;
+  background: ${COLORS.pageWash};
   cursor: pointer;
 
   font-size: 0.75rem;
   line-height: 1;
-  color: #000000;
+  color: ${COLORS.gray100};
 `;
 
 export const IconWrapper = styled.div`
@@ -63,19 +69,19 @@ export const IconWrapper = styled.div`
 export const Title = styled.h3`
   margin: 0;
   text-align: center;
-  font-family: var(--font-gilroy);
+  font-family: var(--font-primary);
   font-size: 1.5rem;
-  font-weight: 400;
-  color: ${COLORS.black};
+  font-weight: var(--font-weight-section-title);
+  color: ${COLORS.gray100};
   align-self: stretch;
 `;
 
 export const Body = styled.p`
   margin: 0;
   text-align: center;
-  font-family: var(--font-gilroy);
+  font-family: var(--font-primary);
   font-size: 1.25rem;
-  font-weight: 400;
+  font-weight: 500;
   color: ${COLORS.gray60};
   align-self: stretch;
 `;
@@ -85,6 +91,11 @@ export const ActionsRow = styled.div`
   display: flex;
   justify-content: center;
   gap: 0.625rem;
+
+  @media (max-width: 520px) {
+    align-items: stretch;
+    flex-direction: column;
+  }
 `;
 
 export const ContinueButton = styled.button`
@@ -92,15 +103,15 @@ export const ContinueButton = styled.button`
   justify-content: center;
   align-items: center;
 
-  height: 3rem;
-  padding: 0.875rem 3rem;
-  border-radius: 0.5rem;
+  min-height: 3.25rem;
+  padding: 0 1.5rem;
+  border-radius: 9px;
   border: none;
   cursor: pointer;
 
-  font-family: var(--font-gilroy);
+  font-family: var(--font-primary);
   font-size: 1rem;
-  font-weight: 400;
+  font-weight: var(--font-weight-action);
   background: ${COLORS.evergreen};
 `;
 
@@ -113,18 +124,18 @@ export const TryLaterButton = styled.button`
   justify-content: center;
   align-items: center;
 
-  height: 3rem;
-  padding: 0.875rem 3rem;
-  border-radius: 0.5rem;
-  border: none;
+  min-height: 3.25rem;
+  padding: 0 1.5rem;
+  border-radius: 9px;
+  border: 1px solid ${COLORS.surfaceBorder};
   cursor: pointer;
 
-  font-family: var(--font-gilroy);
+  font-family: var(--font-primary);
   font-size: 1rem;
-  font-weight: 400;
+  font-weight: var(--font-weight-section-title);
 
-  background: ${COLORS.whiteSmoke};
-  color: ${COLORS.black};
+  background: ${COLORS.white};
+  color: ${COLORS.gray80};
 `;
 
 export const SyncAgainButton = styled(TryLaterButton)`

@@ -47,11 +47,15 @@ export default async function LessonsPage() {
     throw new Error(groupsError.message);
   }
 
+  const groupsById = Object.fromEntries(
+    (groupRows ?? []).map(group => [group.id, group]),
+  );
   const groupNamesById = Object.fromEntries(
     (groupRows ?? []).map(group => [group.id, group.name]),
   );
 
   const villagesByLessonId: Record<number, string[]> = {};
+  const classroomIdsByLessonId: Record<number, number[]> = {};
 
   for (const row of lessonGroupRows ?? []) {
     const villageName = groupNamesById[row.group_id];
@@ -63,27 +67,36 @@ export default async function LessonsPage() {
     }
 
     villagesByLessonId[row.lesson_id].push(villageName);
+
+    if (!classroomIdsByLessonId[row.lesson_id]) {
+      classroomIdsByLessonId[row.lesson_id] = [];
+    }
+
+    classroomIdsByLessonId[row.lesson_id].push(row.group_id);
   }
 
   const lessonsWithVillages = (lessons ?? []).map(lesson => ({
     ...lesson,
-    villages: villagesByLessonId[lesson.id] ?? [],
+    classroomIds:
+      classroomIdsByLessonId[lesson.id] ??
+      (groupsById[lesson.group_id] ? [lesson.group_id] : []),
+    villages:
+      villagesByLessonId[lesson.id] ??
+      (groupsById[lesson.group_id] ? [groupsById[lesson.group_id].name] : []),
   }));
 
   // DeviceLessons stores the offline-library state for the user's Pi. The main
   // lessons dashboard uses it only to show whether each lesson is pending or
   // already available offline.
   const deviceId = await getCurrentDeviceId({ userId: user.id });
-  if (!deviceId) return null;
+  const { data: deviceLessons, error: deviceLessonsError } = deviceId
+    ? await supabase
+        .from("DeviceLessons")
+        .select("lesson_id, status")
+        .eq("device_id", deviceId)
+    : { data: [], error: null };
 
-  const { data: deviceLessons, error: deviceLessonsError } = await supabase
-    .from("DeviceLessons")
-    .select("lesson_id, status")
-    .eq("device_id", deviceId);
-
-  if (deviceLessonsError) {
-    throw new Error(deviceLessonsError.message);
-  }
+  if (deviceLessonsError) throw new Error(deviceLessonsError.message);
 
   const lessonStatuses = Object.fromEntries(
     (deviceLessons ?? [])
@@ -95,8 +108,12 @@ export default async function LessonsPage() {
     <LessonsClient
       initialLessons={lessonsWithVillages}
       lessonStatuses={lessonStatuses}
+      description="Create lessons, assign classrooms, and choose what to sync for offline use."
       variant="dashboard"
+      deviceId={deviceId}
       showSortButton
+      emptyStateTitle="No lessons yet."
+      emptyStateDescription="Create your first lesson to add files and assign a classroom."
     />
   );
 }

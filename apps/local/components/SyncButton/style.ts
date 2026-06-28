@@ -12,23 +12,23 @@ const spin = keyframes`
 
 export const ButtonWrapper = styled.button`
   display: flex;
-  font-family: var(--font-gilroy);
+  font-family: var(--font-primary);
 
-  width: 450px;
-  height: 50px;
+  width: min(450px, 100%);
+  min-height: 52px;
   padding: 12px 20px;
   flex-direction: row;
   justify-content: center;
   align-items: center;
   gap: 8px;
 
-  border-radius: 20px;
+  border-radius: 9px;
   background: ${COLORS.evergreen};
   border: none;
   cursor: pointer;
   color: ${COLORS.white};
   font-size: 16px;
-  font-weight: 400;
+  font-weight: var(--font-weight-action);
 
   transition: opacity 0.2s ease;
 

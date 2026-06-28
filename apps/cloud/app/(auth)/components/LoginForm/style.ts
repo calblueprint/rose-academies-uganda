@@ -6,33 +6,79 @@ export const Main = styled.main`
   display: flex;
   justify-content: center;
   align-items: center;
-  background: ${COLORS.veryLightYellow};
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(222, 227, 209, 0.72),
+      transparent 32rem
+    ),
+    ${COLORS.pageWash};
   padding: 4rem 1rem;
 `;
 
 export const Card = styled.div`
   display: flex;
-  padding: 3.25rem 2.25rem;
+  width: min(100%, 30rem);
+  padding: 3rem 2.25rem;
   flex-direction: column;
   align-items: center;
-  gap: 1.75rem;
-  border-radius: 0.9375rem;
+  gap: 1.35rem;
+  border: 1px solid ${COLORS.surfaceBorder};
+  border-radius: 1rem;
   background: ${COLORS.white};
-  box-shadow:
-    0 112px 31px 0 rgba(0, 0, 0, 0),
-    0 72px 29px 0 rgba(0, 0, 0, 0.01),
-    0 40px 24px 0 rgba(0, 0, 0, 0.03),
-    0 18px 18px 0 rgba(0, 0, 0, 0.04),
-    0 4px 10px 0 rgba(0, 0, 0, 0.05);
+  box-shadow: ${COLORS.surfaceShadow};
+`;
+
+export const TopRow = styled.div`
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
 `;
 
 export const Title = styled.h1`
   margin: 0;
   text-align: center;
-  color: ${COLORS.veryDarkBlue};
+  color: ${COLORS.gray100};
   font-size: var(--font-h3);
   line-height: var(--lh-h3);
+  font-weight: 700;
+`;
+
+export const Subtitle = styled.p`
+  width: min(100%, 23.75rem);
+  margin: -0.65rem 0 0;
+  text-align: center;
+  color: ${COLORS.gray60};
+  font-size: var(--font-subtitle-2);
+  line-height: var(--lh-subtitle-2);
   font-weight: 400;
+`;
+
+export const ModeSwitch = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  width: min(100%, 23.75rem);
+  padding: 0.25rem;
+  border: 1px solid ${COLORS.surfaceBorder};
+  border-radius: 0.75rem;
+  background: ${COLORS.pageWash};
+`;
+
+export const ModeButton = styled.button<{ $active: boolean }>`
+  display: flex;
+  min-height: 2.5rem;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 0.55rem;
+  background: ${({ $active }) => ($active ? COLORS.white : "transparent")};
+  color: ${({ $active }) => ($active ? COLORS.evergreen : COLORS.gray60)};
+  box-shadow: ${({ $active }) =>
+    $active ? "0 8px 18px rgba(30, 66, 64, 0.08)" : "none"};
+  font-size: var(--font-subtitle-2);
+  line-height: var(--lh-subtitle-2);
+  font-weight: 600;
+  cursor: pointer;
 `;
 
 export const Form = styled.form`
@@ -45,7 +91,7 @@ export const Form = styled.form`
 
 export const Input = styled.input`
   display: flex;
-  width: 23.75rem;
+  width: min(100%, 23.75rem);
   height: 3.25rem;
   padding: 0.625rem 1rem;
   align-items: center;
@@ -77,9 +123,51 @@ export const Input = styled.input`
   }
 `;
 
+export const PasswordField = styled.div`
+  position: relative;
+  width: min(100%, 23.75rem);
+`;
+
+export const PasswordInput = styled(Input)`
+  width: 100%;
+  padding-right: 3.25rem;
+`;
+
+export const PasswordToggle = styled.button`
+  position: absolute;
+  top: 50%;
+  right: 0.75rem;
+  display: inline-flex;
+  width: 2rem;
+  height: 2rem;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: ${COLORS.gray60};
+  cursor: pointer;
+  transform: translateY(-50%);
+
+  &:hover {
+    background: ${COLORS.whiteSmoke};
+    color: ${COLORS.evergreen};
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px ${COLORS.gray40};
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+`;
+
 export const Button = styled.button`
   display: flex;
-  width: 23.75rem;
+  width: min(100%, 23.75rem);
   height: 3.25rem;
   padding: 0.625rem;
   justify-content: center;
@@ -92,7 +180,7 @@ export const Button = styled.button`
 
   font-size: var(--font-subtitle-1);
   line-height: var(--lh-subtitle-1);
-  font-weight: 400;
+  font-weight: 700;
 
   cursor: pointer;
   transition: opacity 0.15s ease;
@@ -107,7 +195,7 @@ export const HelperText = styled.p`
   max-width: 23.75rem;
   text-align: center;
 
-  color: ${COLORS.lightGrey};
+  color: ${COLORS.gray60};
 
   font-size: var(--font-h5);
   line-height: var(--lh-h5);
@@ -126,7 +214,7 @@ export const LogoWrap = styled.div`
 `;
 
 export const Error = styled.p`
-  width: 23.75rem;
+  width: min(100%, 23.75rem);
   margin: 0;
 
   color: ${COLORS.red};
@@ -134,4 +222,24 @@ export const Error = styled.p`
   font-size: var(--font-subtitle-2);
   line-height: var(--lh-subtitle-2);
   font-weight: 400;
+`;
+
+export const Success = styled.p`
+  width: min(100%, 23.75rem);
+  margin: 0;
+  padding: 0.875rem 1rem;
+  border-radius: 0.75rem;
+  background: ${COLORS.green10};
+  color: ${COLORS.activeGreen};
+  font-size: var(--font-subtitle-2);
+  line-height: var(--lh-subtitle-2);
+  font-weight: 600;
+`;
+
+export const SuccessPanel = styled.div`
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
 `;

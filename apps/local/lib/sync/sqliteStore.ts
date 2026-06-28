@@ -4,6 +4,7 @@ import type {
   Group,
   Lesson,
   LessonFileRow,
+  LessonGroupRow,
 } from "@/lib/sync/types";
 
 // The local app reads from SQLite even when the Pi has no internet. These
@@ -17,6 +18,13 @@ export function createSchema(db: DB) {
       PRIMARY KEY (lesson_id, file_id),
       FOREIGN KEY (lesson_id) REFERENCES lessons(id),
       FOREIGN KEY (file_id) REFERENCES files(id)
+    )`,
+    `CREATE TABLE IF NOT EXISTS lesson_groups (
+      lesson_id INTEGER NOT NULL,
+      group_id INTEGER NOT NULL,
+      PRIMARY KEY (lesson_id, group_id),
+      FOREIGN KEY (lesson_id) REFERENCES lessons(id),
+      FOREIGN KEY (group_id) REFERENCES groups(id)
     )`,
     `CREATE TABLE IF NOT EXISTS groups (
       id INTEGER PRIMARY KEY,
@@ -36,6 +44,9 @@ export function createSchema(db: DB) {
       name TEXT,
       size_bytes INTEGER,
       storage_path TEXT,
+      hash TEXT,
+      created_at TEXT,
+      updated_at TEXT,
       lesson_id INTEGER,
       FOREIGN KEY (lesson_id) REFERENCES lessons(id)
     )`,
@@ -64,6 +75,18 @@ export function createSchema(db: DB) {
   try {
     db.prepare(`ALTER TABLE files ADD COLUMN local_path TEXT`).run();
   } catch {}
+
+  try {
+    db.prepare(`ALTER TABLE files ADD COLUMN hash TEXT`).run();
+  } catch {}
+
+  try {
+    db.prepare(`ALTER TABLE files ADD COLUMN created_at TEXT`).run();
+  } catch {}
+
+  try {
+    db.prepare(`ALTER TABLE files ADD COLUMN updated_at TEXT`).run();
+  } catch {}
 }
 
 export function insertIntoSQLite(
@@ -72,6 +95,7 @@ export function insertIntoSQLite(
   lessons: Lesson[],
   files: FileRow[],
   lessonFiles: LessonFileRow[],
+  lessonGroups: LessonGroupRow[],
 ) {
   // Each entity type is inserted in a transaction so partial writes do not leave
   // a table halfway updated if one row fails.
@@ -82,6 +106,15 @@ export function insertIntoSQLite(
     for (const r of rows) stmt.run(r.id, r.name, r.join_code);
   });
   insertGroups(groups);
+
+  if (groups.length > 0) {
+    const placeholders = groups.map(() => "?").join(",");
+    db.prepare(`DELETE FROM groups WHERE id NOT IN (${placeholders})`).run(
+      ...groups.map(group => group.id),
+    );
+  } else {
+    db.prepare("DELETE FROM groups").run();
+  }
 
   const insertLessons = db.transaction((rows: Lesson[]) => {
     const stmt = db.prepare(
@@ -95,10 +128,19 @@ export function insertIntoSQLite(
 
   const insertFiles = db.transaction((rows: FileRow[]) => {
     const stmt = db.prepare(
-      "INSERT OR REPLACE INTO files (id, name, size_bytes, storage_path, lesson_id) VALUES (?, ?, ?, ?, ?)",
+      "INSERT OR REPLACE INTO files (id, name, size_bytes, storage_path, hash, created_at, updated_at, lesson_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
     );
     for (const r of rows) {
-      stmt.run(r.id, r.name, r.size_bytes, r.storage_path, r.lesson_id);
+      stmt.run(
+        r.id,
+        r.name,
+        r.size_bytes,
+        r.storage_path,
+        r.hash,
+        r.created_at ?? null,
+        r.updated_at ?? r.created_at ?? null,
+        r.lesson_id,
+      );
     }
   });
   insertFiles(files);
@@ -116,6 +158,18 @@ export function insertIntoSQLite(
   // local join table before inserting the latest links.
   db.prepare("DELETE FROM lesson_files").run();
   insertLessonFiles(lessonFiles);
+
+  const insertLessonGroups = db.transaction((rows: LessonGroupRow[]) => {
+    const stmt = db.prepare(
+      "INSERT OR REPLACE INTO lesson_groups (lesson_id, group_id) VALUES (?, ?)",
+    );
+    for (const r of rows) {
+      stmt.run(r.lesson_id, r.group_id);
+    }
+  });
+
+  db.prepare("DELETE FROM lesson_groups").run();
+  insertLessonGroups(lessonGroups);
 }
 
 export function startLocalSyncRun(db: DB, startedAt: string) {

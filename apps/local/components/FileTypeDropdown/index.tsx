@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
+import { useLanguage } from "@/lib/i18n";
 import { IconSvgs } from "@/lib/icons";
 import {
   DropdownMenu,
@@ -11,19 +12,13 @@ import {
 
 export type FileTypeFilter = "all" | "images" | "pdf" | "other";
 
-const OPTIONS: { value: FileTypeFilter; label: string }[] = [
-  { value: "all", label: "File Type" },
-  { value: "images", label: "Images" },
-  { value: "pdf", label: "PDF" },
-  { value: "other", label: "Other" },
-];
-
 type Props = {
   selectedType: FileTypeFilter;
   onChange: (type: FileTypeFilter) => void;
 };
 
 export default function FileTypeDropdown({ selectedType, onChange }: Props) {
+  const { t } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -46,8 +41,15 @@ export default function FileTypeDropdown({ selectedType, onChange }: Props) {
     };
   }, [isOpen]);
 
+  const options: { value: FileTypeFilter; label: string }[] = [
+    { value: "all", label: t("files.type") },
+    { value: "images", label: t("files.images") },
+    { value: "pdf", label: t("files.pdf") },
+    { value: "other", label: t("files.other") },
+  ];
+
   const selectedLabel =
-    OPTIONS.find(o => o.value === selectedType)?.label ?? "All Files";
+    options.find(o => o.value === selectedType)?.label ?? t("files.type");
 
   return (
     <div ref={containerRef} style={{ position: "relative" }}>
@@ -58,7 +60,7 @@ export default function FileTypeDropdown({ selectedType, onChange }: Props) {
 
       {isOpen && (
         <DropdownMenu>
-          {OPTIONS.map(option => (
+          {options.map(option => (
             <DropdownOption
               key={option.value}
               type="button"

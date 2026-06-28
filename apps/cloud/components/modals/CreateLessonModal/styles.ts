@@ -14,7 +14,8 @@ export const Overlay = styled.div`
 
 export const ModalCard = styled.div`
   background: ${COLORS.white};
-  border-radius: 12px;
+  border: 1px solid ${COLORS.surfaceBorder};
+  border-radius: 16px;
   width: 100%;
   max-width: 480px;
   max-height: 90vh;
@@ -23,9 +24,7 @@ export const ModalCard = styled.div`
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
-  box-shadow:
-    0 20px 60px rgba(0, 0, 0, 0.12),
-    0 4px 16px rgba(0, 0, 0, 0.08);
+  box-shadow: ${COLORS.surfaceShadow};
 `;
 
 export const ModalHeader = styled.div`
@@ -39,8 +38,8 @@ export const ModalTitle = styled.h2`
   margin: 0;
 
   font-size: 1.5rem;
-  font-weight: 500;
-  line-height: normal;
+  font-weight: var(--font-weight-section-title);
+  line-height: 1.2;
 `;
 
 export const CloseButton = styled.button`
@@ -51,12 +50,12 @@ export const CloseButton = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
-  color: ${COLORS.lightGrey};
+  color: ${COLORS.gray60};
   border-radius: 4px;
   transition: color 0.15s;
 
   &:hover:not(:disabled) {
-    color: ${COLORS.veryDarkBlue};
+    color: ${COLORS.gray100};
   }
 
   &:disabled {
@@ -88,6 +87,11 @@ export const AssignedVillageRow = styled.div`
   justify-content: space-between;
   gap: 16px;
   width: 100%;
+
+  @media (max-width: 520px) {
+    align-items: flex-start;
+    flex-direction: column;
+  }
 `;
 
 export const VillageDropdownWrapper = styled.div`
@@ -95,25 +99,34 @@ export const VillageDropdownWrapper = styled.div`
   display: flex;
   flex-direction: column;
   align-items: flex-end;
+  width: min(240px, 100%);
 `;
 
 export const VillageSelectTrigger = styled.button<{ $flashError?: boolean }>`
-  display: inline-flex;
+  display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
 
   height: 44px;
+  width: 100%;
   padding: 10px 16px;
 
   border-radius: 8px;
   border: 1px solid
-    ${({ $flashError }) => ($flashError ? COLORS.rose100 : COLORS.gray40)};
+    ${({ $flashError }) =>
+      $flashError ? COLORS.rose100 : COLORS.surfaceBorder};
 
   background: ${COLORS.white};
+  color: ${COLORS.gray60};
   cursor: pointer;
 
   transition: border-color 0.15s ease;
+
+  &:focus-visible {
+    outline: 3px solid rgba(30, 66, 64, 0.18);
+    border-color: ${COLORS.evergreen};
+  }
 `;
 
 export const VillageSelectTriggerText = styled.span`
@@ -131,22 +144,18 @@ export const VillageDropdownMenu = styled.div`
   z-index: 20;
 
   display: flex;
-  width: 182px;
-  padding: 16px 48px 18px 18px;
+  width: 100%;
+  padding: 0.75rem;
   flex-direction: column;
   justify-content: center;
   align-items: flex-start;
-  gap: 15px;
+  gap: 0.625rem;
   box-sizing: border-box;
 
   border-radius: 8px;
-  background: #fff;
-  box-shadow:
-    0 29px 8px 0 rgba(0, 0, 0, 0),
-    0 19px 7px 0 rgba(0, 0, 0, 0.01),
-    0 10px 6px 0 rgba(0, 0, 0, 0.05),
-    0 5px 5px 0 rgba(0, 0, 0, 0.09),
-    0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  border: 1px solid ${COLORS.surfaceBorder};
+  background: ${COLORS.white};
+  box-shadow: ${COLORS.surfaceShadowSoft};
 `;
 
 export const VillageOption = styled.label`
@@ -166,8 +175,8 @@ export const VillageBox = styled.div<{ $checked: boolean }>`
   align-items: center;
   justify-content: center;
 
-  border: 1px solid ${COLORS.lightGrey};
-  background: ${({ $checked }) => ($checked ? "#808582" : "transparent")};
+  border: 1px solid ${COLORS.gray60};
+  background: ${({ $checked }) => ($checked ? COLORS.gray60 : "transparent")};
 
   transition: all 0.15s ease;
 `;
@@ -178,17 +187,109 @@ export const Checkmark = styled.svg`
 `;
 
 export const VillageOptionText = styled.span`
-  font-family: "Google Sans", sans-serif;
-  font-size: 12px;
+  font-family: var(--font-primary);
+  font-size: 13px;
   font-weight: 400;
-  color: ${COLORS.lightGrey};
+  color: ${COLORS.gray80};
   line-height: normal;
+  min-width: 0;
+  overflow-wrap: anywhere;
+`;
+
+export const ClassroomDropdownEmpty = styled.div`
+  color: ${COLORS.gray60};
+  font-size: 0.8125rem;
+  line-height: 1.35;
+`;
+
+export const ClassroomDropdownAction = styled.button`
+  width: 100%;
+  min-height: 2.25rem;
+  border: 1px solid ${COLORS.surfaceBorder};
+  border-radius: 8px;
+  background: ${COLORS.white};
+  color: ${COLORS.evergreen};
+  cursor: pointer;
+  font-family: var(--font-primary);
+  font-size: 0.875rem;
+
+  &:hover:not(:disabled) {
+    border-color: ${COLORS.evergreen};
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+`;
+
+export const ClassroomManageButton = styled.button`
+  border: none;
+  background: transparent;
+  color: ${COLORS.gray60};
+  cursor: pointer;
+  padding: 0.25rem 0;
+  font-family: var(--font-primary);
+  font-size: 0.8125rem;
+  text-align: left;
+
+  &:hover {
+    color: ${COLORS.evergreen};
+  }
+`;
+
+export const ClassroomCreatePanel = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  padding: 0.875rem;
+  border: 1px solid ${COLORS.surfaceBorder};
+  border-radius: 8px;
+  background: ${COLORS.pageWash};
+`;
+
+export const ClassroomCreateRow = styled.div`
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.8fr);
+  gap: 0.625rem;
+
+  @media (max-width: 520px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+export const ClassroomCreateActions = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+`;
+
+export const ClassroomSecondaryButton = styled.button`
+  padding: 0.625rem 0.875rem;
+  background: ${COLORS.white};
+  border: 1px solid ${COLORS.surfaceBorder};
+  border-radius: 8px;
+  color: ${COLORS.gray80};
+  cursor: pointer;
+  font-family: var(--font-primary);
+  font-size: 0.875rem;
+
+  &:hover:not(:disabled) {
+    border-color: ${COLORS.evergreen};
+    color: ${COLORS.evergreen};
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 `;
 
 export const TextInput = styled.input`
   width: 100%;
   padding: 0.6875rem 1rem;
-  border: 1px solid ${COLORS.gray40};
+  border: 1px solid ${COLORS.surfaceBorder};
   border-radius: 8px;
 
   font-size: var(--font-subtitle-3);
@@ -206,6 +307,7 @@ export const TextInput = styled.input`
 
   &:focus {
     border-color: ${COLORS.evergreen};
+    box-shadow: 0 0 0 3px rgba(30, 66, 64, 0.18);
   }
 
   &:disabled {
@@ -214,10 +316,90 @@ export const TextInput = styled.input`
   }
 `;
 
+export const JoinCodeField = styled.div`
+  position: relative;
+  min-width: 0;
+`;
+
+export const JoinCodeInput = styled(TextInput)`
+  padding-right: 5.25rem;
+`;
+
+export const JoinCodeActions = styled.div`
+  position: absolute;
+  top: 50%;
+  right: 0.45rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.125rem;
+  transform: translateY(-50%);
+`;
+
+export const JoinCodeIconButton = styled.button`
+  display: inline-flex;
+  width: 2rem;
+  height: 2rem;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: ${COLORS.gray60};
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background: ${COLORS.whiteSmoke};
+    color: ${COLORS.evergreen};
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(30, 66, 64, 0.18);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+`;
+
+export const InfoTooltip = styled.span`
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 0.5rem);
+  z-index: 30;
+  width: min(14rem, 70vw);
+  padding: 0.625rem 0.75rem;
+  border: 1px solid ${COLORS.surfaceBorder};
+  border-radius: 8px;
+  background: ${COLORS.white};
+  box-shadow: ${COLORS.surfaceShadowSoft};
+  color: ${COLORS.gray80};
+  font-family: var(--font-primary);
+  font-size: 0.8125rem;
+  font-weight: 400;
+  line-height: 1.35;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(0.25rem);
+  transition:
+    opacity 0.15s ease,
+    transform 0.15s ease;
+`;
+
+export const JoinCodeInfoButton = styled(JoinCodeIconButton)`
+  position: relative;
+
+  &:hover ${InfoTooltip}, &:focus-visible ${InfoTooltip} {
+    opacity: 1;
+    transform: translateY(0);
+  }
+`;
+
 export const TextArea = styled.textarea`
   width: 100%;
   padding: 0.6875rem 1rem;
-  border: 1px solid ${COLORS.gray40};
+  border: 1px solid ${COLORS.surfaceBorder};
   border-radius: 8px;
 
   font-family: inherit;
@@ -238,6 +420,7 @@ export const TextArea = styled.textarea`
 
   &:focus {
     border-color: ${COLORS.evergreen};
+    box-shadow: 0 0 0 3px rgba(30, 66, 64, 0.18);
   }
 
   &:disabled {
@@ -256,7 +439,7 @@ export const DropZone = styled.div<{
         ? COLORS.rose100
         : $isDragging
           ? COLORS.evergreen
-          : COLORS.gray40};
+          : COLORS.surfaceBorder};
 
   border-radius: 8px;
   padding: 1.5rem 1rem;
@@ -294,7 +477,7 @@ export const DropZoneSubtext = styled.p`
 export const BrowseButton = styled.button`
   padding: 0.5rem 1.25rem;
   background: ${COLORS.white};
-  border: 1px solid ${COLORS.gray40};
+  border: 1px solid ${COLORS.surfaceBorder};
   border-radius: 8px;
 
   font-size: var(--font-subtitle-2);
@@ -305,7 +488,8 @@ export const BrowseButton = styled.button`
   transition: border-color 0.15s;
 
   &:hover:not(:disabled) {
-    border-color: ${COLORS.veryDarkBlue};
+    border-color: ${COLORS.evergreen};
+    color: ${COLORS.evergreen};
   }
 
   &:disabled {
@@ -343,7 +527,7 @@ export const DeleteFileButton = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
-  color: ${COLORS.lightGrey};
+  color: ${COLORS.gray60};
   border-radius: 4px;
   flex-shrink: 0;
   margin-left: auto;
@@ -441,25 +625,32 @@ export const HiddenCheckbox = styled.input`
   height: 0;
 `;
 
-export const ToggleTrack = styled.label<{ $checked: boolean }>`
+export const ToggleTrack = styled.label<{
+  $checked: boolean;
+  $disabled?: boolean;
+}>`
   display: block;
   position: relative;
   width: 44px;
   height: 24px;
-  background: ${({ $checked }) =>
-    $checked ? COLORS.evergreen : COLORS.gray40};
+  background: ${({ $checked, $disabled }) =>
+    $disabled ? COLORS.gray40 : $checked ? COLORS.evergreen : COLORS.gray40};
   border-radius: 12px;
-  cursor: pointer;
+  cursor: ${({ $disabled }) => ($disabled ? "not-allowed" : "pointer")};
+  opacity: ${({ $disabled }) => ($disabled ? 0.6 : 1)};
   transition: background 0.2s;
 `;
 
-export const ToggleThumb = styled.div<{ $checked: boolean }>`
+export const ToggleThumb = styled.div<{
+  $checked: boolean;
+  $disabled?: boolean;
+}>`
   position: absolute;
   top: 2px;
   left: ${({ $checked }) => ($checked ? "22px" : "2px")};
   width: 20px;
   height: 20px;
-  background: ${COLORS.white};
+  background: ${({ $disabled }) => ($disabled ? COLORS.gray10 : COLORS.white)};
   border-radius: 50%;
   transition: left 0.2s;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
@@ -471,6 +662,40 @@ export const ErrorText = styled.p`
   margin: 0;
 `;
 
+export const SubmitStatus = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border: 1px solid ${COLORS.surfaceBorder};
+  border-radius: 8px;
+  background: ${COLORS.pageWash};
+`;
+
+export const SubmitStatusText = styled.p`
+  margin: 0;
+  font-size: var(--font-subtitle-3);
+  line-height: var(--lh-subtitle-3);
+  font-weight: 500;
+  color: ${COLORS.gray100};
+`;
+
+export const SubmitStatusBar = styled.div`
+  width: 100%;
+  height: 0.375rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: ${COLORS.gray40};
+`;
+
+export const SubmitStatusFill = styled.div<{ $progress: number }>`
+  width: ${({ $progress }) => Math.max(8, Math.min($progress, 100))}%;
+  height: 100%;
+  border-radius: inherit;
+  background: ${COLORS.activeGreen};
+  transition: width 0.2s ease;
+`;
+
 export const ActionRow = styled.div`
   display: flex;
   gap: 0.75rem;
@@ -479,20 +704,23 @@ export const ActionRow = styled.div`
 `;
 
 export const CancelButton = styled.button`
-  padding: 0.625rem 1.5rem;
+  min-height: 3.25rem;
+  padding: 0 1.5rem;
   background: ${COLORS.white};
-  border: 1px solid ${COLORS.gray40};
-  border-radius: 8px;
+  border: 1px solid ${COLORS.surfaceBorder};
+  border-radius: 9px;
 
   font-size: var(--font-subtitle-2);
   line-height: var(--lh-subtitle-2);
+  font-weight: var(--font-weight-section-title);
   color: ${COLORS.gray80};
 
   cursor: pointer;
   transition: border-color 0.15s;
 
   &:hover:not(:disabled) {
-    border-color: ${COLORS.veryDarkBlue};
+    border-color: ${COLORS.evergreen};
+    color: ${COLORS.evergreen};
   }
 
   &:disabled {
@@ -502,14 +730,15 @@ export const CancelButton = styled.button`
 `;
 
 export const CreateButton = styled.button`
-  padding: 0.625rem 1.5rem;
+  min-height: 3.25rem;
+  padding: 0 1.5rem;
   background: ${COLORS.evergreen};
   border: none;
-  border-radius: 8px;
+  border-radius: 9px;
 
   font-size: var(--font-subtitle-2);
   line-height: var(--lh-subtitle-2);
-  font-weight: 500;
+  font-weight: var(--font-weight-action);
   color: ${COLORS.white};
 
   cursor: pointer;

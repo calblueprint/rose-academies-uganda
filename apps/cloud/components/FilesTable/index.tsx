@@ -31,6 +31,7 @@ import {
   SortingState,
   useReactTable,
 } from "@tanstack/react-table";
+import { useLanguage } from "@/lib/i18n";
 import { getFileTableColumns } from "./columns";
 import { formatBytes, haveSameIds, reindexFiles } from "./helpers";
 import { SortableRow, StaticRow } from "./rows";
@@ -173,6 +174,7 @@ export default function FilesTable({
   onSelectionChange,
   onRowClick,
 }: FilesTableProps) {
+  const { t } = useLanguage();
   const [sorting, setSorting] = useState<SortingState>([]);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [isMounted, setIsMounted] = useState(false);
@@ -255,8 +257,9 @@ export default function FilesTable({
       getFileTableColumns({
         isDeleting,
         isReordering,
+        t,
       }),
-    [isDeleting, isReordering],
+    [isDeleting, isReordering, t],
   );
 
   // TanStack Table owns sorting, row selection, and row rendering helpers.
@@ -292,6 +295,7 @@ export default function FilesTable({
   const hasNoFiles = files.length === 0;
   const hasNoSearchResults = files.length > 0 && filteredFiles.length === 0;
   const isInteractiveDisabled = isDeleting || isReordering;
+  const shouldShowReorderHint = files.length > 1 && isManualOrderMode;
 
   // Notify the parent only when selected IDs actually change to avoid update loops.
   useEffect(() => {
@@ -325,6 +329,10 @@ export default function FilesTable({
 
   return (
     <style.TableSection>
+      {shouldShowReorderHint && (
+        <style.StatusText>{t("files.drag")}</style.StatusText>
+      )}
+
       {sorting.length > 0 && (
         <style.StatusText>
           Sorting is active. Clear sorting to drag and manually reorder files.
@@ -340,13 +348,11 @@ export default function FilesTable({
       <style.TableCard>
         {hasNoFiles ? (
           <style.EmptyState>
-            <style.EmptyText>
-              No files have been added to this lesson yet.
-            </style.EmptyText>
+            <style.EmptyText>{t("lessons.noFilesAttached")}</style.EmptyText>
           </style.EmptyState>
         ) : hasNoSearchResults ? (
           <style.EmptyState>
-            <style.EmptyText>No files match your search.</style.EmptyText>
+            <style.EmptyText>{t("files.noMatches")}</style.EmptyText>
           </style.EmptyState>
         ) : isMounted ? (
           <DndContext
@@ -382,7 +388,8 @@ export default function FilesTable({
         {!hasNoFiles && !hasNoSearchResults && (
           <style.FooterRow>
             <style.FooterText>
-              {selectedCount} of {files.length} selected
+              {selectedCount} {t("lessons.of")} {files.length}{" "}
+              {t("common.selected")}
             </style.FooterText>
 
             <style.FooterText $column="size">

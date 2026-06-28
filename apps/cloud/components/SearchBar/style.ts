@@ -16,15 +16,19 @@ export const SearchBarField = styled.div`
   width: 100%;
   min-width: 0;
   height: 44px;
-  padding: 4.367px 20.96px;
+  padding: 0.25rem 1rem;
   justify-content: space-between;
   align-items: center;
-  border-radius: 16px;
-  border-top: 0.437px solid ${COLORS.gray40};
-  border-right: 0.873px solid ${COLORS.gray40};
-  border-bottom: 1.31px solid ${COLORS.gray40};
-  border-left: 0.873px solid ${COLORS.gray40};
+  border-radius: 8px;
+  border: 1px solid ${COLORS.surfaceBorder};
   background: ${COLORS.white};
+  box-shadow: ${COLORS.surfaceShadowSoft};
+  box-sizing: border-box;
+
+  &:focus-within {
+    border-color: ${COLORS.evergreen};
+    box-shadow: 0 0 0 2px ${COLORS.green20};
+  }
 `;
 
 export const SearchInput = styled(Subtitle2).attrs({

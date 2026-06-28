@@ -1,10 +1,12 @@
 "use client";
 
-import React, { useContext, useState } from "react";
+import React, { FormEvent, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import RoseLogo from "@/assets/images/rose-academies-logo.png";
-import { DataContext } from "@/context/DataContext";
+import LanguageSelector from "@/components/LanguageSelector";
+import { useLanguage } from "@/lib/i18n";
 import {
   Card,
   CodeInput,
@@ -16,62 +18,101 @@ import {
   JoinButton,
   LogoContainer,
   Outer,
+  SetupLink,
   Title,
+  TopRow,
 } from "./style";
 
 export default function JoinPage() {
   const router = useRouter();
+  const { t } = useLanguage();
   const [joinCode, setJoinCode] = useState("");
   const [error, setError] = useState("");
-  const data = useContext(DataContext);
+  const [isJoining, setIsJoining] = useState(false);
 
-  const groups = data?.groups ?? [];
+  function normalizeJoinCode(value: string) {
+    return value
+      .trim()
+      .toUpperCase()
+      .replace(/[^A-Z0-9]/g, "")
+      .slice(0, 6);
+  }
 
-  function handleJoin(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
+  async function handleJoin(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (isJoining) return;
 
-    const group = groups.find(
-      g => g.join_code.toLowerCase() === joinCode.toLowerCase(),
-    );
-    const groupId = group ? group.id : null;
-
-    if (!joinCode || !groupId) {
-      setError("Invalid code");
+    if (!joinCode.trim()) {
+      setError(t("join.invalidCode"));
       return;
     }
 
-    // If the join code is valid, navigate to the main app page
-    router.push(`/groups/${groupId}/lessons`);
+    setIsJoining(true);
     setError("");
-    setJoinCode("");
-  }
 
-  if (!data) {
-    return <div>Loading...</div>;
+    try {
+      const response = await fetch("/api/join", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ joinCode }),
+      });
+      const result = (await response.json()) as {
+        groupId?: number;
+        error?: string;
+      };
+
+      if (!response.ok || !result.groupId) {
+        setError(result.error ?? t("join.invalidCode"));
+        return;
+      }
+
+      setJoinCode("");
+      router.push(`/groups/${result.groupId}/lessons`);
+      router.refresh();
+    } catch {
+      setError(t("join.unableToJoin"));
+    } finally {
+      setIsJoining(false);
+    }
   }
 
   return (
     <Outer>
       <Card>
+        <TopRow>
+          <LanguageSelector />
+        </TopRow>
         <HeaderSection>
           <LogoContainer>
             <Image src={RoseLogo} alt="Rose Academies Logo" unoptimized />
           </LogoContainer>
-          <Title>Join Your Class</Title>
-          <Helper>Enter the join code provided by your instructor</Helper>
+          <Title>{t("join.title")}</Title>
+          <Helper>{t("join.helper")}</Helper>
         </HeaderSection>
-        <CodeSection>
+        <CodeSection as="form" onSubmit={handleJoin}>
           <CodeInputSection>
             <CodeInput
               id="joinCode"
               name="joinCode"
-              placeholder="Code"
-              onChange={e => setJoinCode(e.target.value)}
+              placeholder={t("join.placeholder")}
+              value={joinCode}
+              onChange={e => {
+                setJoinCode(normalizeJoinCode(e.target.value));
+                if (error) setError("");
+              }}
+              maxLength={6}
               $error={error !== ""}
+              autoComplete="off"
+              disabled={isJoining}
             />
             {error && <ErrorMessage>{error}</ErrorMessage>}
           </CodeInputSection>
-          <JoinButton onClick={e => handleJoin(e)}>Join</JoinButton>
+          <JoinButton type="submit" disabled={isJoining}>
+            {isJoining ? t("join.joining") : t("join.join")}
+          </JoinButton>
+          <SetupLink as={Link} href="/setup">
+            {t("join.setupLink")}
+          </SetupLink>
         </CodeSection>
       </Card>
     </Outer>

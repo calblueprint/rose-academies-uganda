@@ -4,12 +4,18 @@ import CloudSyncButton from "@/components/CloudSyncButton";
 import PiStorageBar from "@/components/PiStorageBar";
 import { Actions, Wrapper } from "./styles";
 
-export default function StorageAndSync({ userId }: { userId: string }) {
+export default function StorageAndSync({
+  userId,
+  deviceId,
+}: {
+  userId: string;
+  deviceId?: string | null;
+}) {
   return (
     <Wrapper>
-      <PiStorageBar userId={userId} />
+      <PiStorageBar userId={userId} deviceId={deviceId} />
       <Actions>
-        <CloudSyncButton userId={userId} />
+        <CloudSyncButton userId={userId} deviceId={deviceId} />
       </Actions>
     </Wrapper>
   );

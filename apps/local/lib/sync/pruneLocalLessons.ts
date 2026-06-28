@@ -61,6 +61,9 @@ export function pruneLocalLessons(db: DB, latestLessons: Lesson[]) {
   db.prepare(
     `DELETE FROM lesson_files WHERE lesson_id IN (${placeholders})`,
   ).run(...lessonIdsToDelete);
+  db.prepare(
+    `DELETE FROM lesson_groups WHERE lesson_id IN (${placeholders})`,
+  ).run(...lessonIdsToDelete);
 
   // Clear the denormalized lesson pointer before deleting lessons so older rows
   // do not keep references to content no longer assigned to this Pi.

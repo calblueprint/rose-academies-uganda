@@ -2,9 +2,14 @@ import { getSupabaseServerClientReadOnly } from "@/api/supabase/server-readonly"
 import LessonsClient from "@/app/(authed)/app/lessons/LessonsClient";
 import CloudSyncButton from "@/components/CloudSyncButton";
 import SyncSummaryCard from "@/components/SyncSummaryCard";
+import TranslatedText from "@/components/TranslatedText";
 import { getCurrentDeviceId } from "@/lib/getCurrentUserDevice";
 import {
   Content,
+  EmptyHubCard,
+  EmptyHubSteps,
+  EmptyHubText,
+  EmptyHubTitle,
   PageHeader,
   PageSubtitle,
   PageTitle,
@@ -34,7 +39,42 @@ export default async function OfflineLibraryPage() {
   if (!user) throw new Error("User not authenticated");
 
   const deviceId = await getCurrentDeviceId({ userId: user.id });
-  if (!deviceId) return null;
+  if (!deviceId) {
+    return (
+      <PageWrapper>
+        <Content>
+          <PageHeader>
+            <PageTitle>
+              <TranslatedText tKey="sync.title" />
+            </PageTitle>
+            <PageSubtitle>
+              <TranslatedText tKey="sync.emptySubtitle" />
+            </PageSubtitle>
+          </PageHeader>
+
+          <EmptyHubCard>
+            <EmptyHubTitle>
+              <TranslatedText tKey="sync.noHubTitle" />
+            </EmptyHubTitle>
+            <EmptyHubText>
+              <TranslatedText tKey="sync.noHubText" />
+            </EmptyHubText>
+            <EmptyHubSteps>
+              <li>
+                <TranslatedText tKey="sync.noHubStep1" />
+              </li>
+              <li>
+                <TranslatedText tKey="sync.noHubStep2" />
+              </li>
+              <li>
+                <TranslatedText tKey="sync.noHubStep3" />
+              </li>
+            </EmptyHubSteps>
+          </EmptyHubCard>
+        </Content>
+      </PageWrapper>
+    );
+  }
 
   // The offline library is derived from DeviceLessons, not every lesson owned
   // by the user, because it represents what this specific Pi should sync.
@@ -87,16 +127,19 @@ export default async function OfflineLibraryPage() {
     <PageWrapper>
       <Content>
         <PageHeader>
-          <PageTitle>Sync Lessons</PageTitle>
+          <PageTitle>
+            <TranslatedText tKey="sync.title" />
+          </PageTitle>
           <PageSubtitle>
-            Manage which lessons are sent to village devices.
+            <TranslatedText tKey="sync.subtitle" />
           </PageSubtitle>
         </PageHeader>
 
         <SyncCardsRow>
-          <CloudSyncButton userId={user.id} />
+          <CloudSyncButton userId={user.id} deviceId={deviceId} />
           <SyncSummaryCard
             userId={user.id}
+            deviceId={deviceId}
             availableCount={availableCount}
             pendingCount={pendingCount}
           />

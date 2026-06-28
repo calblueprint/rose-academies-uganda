@@ -11,7 +11,7 @@ export default function NotFound() {
       <h1>Not Found</h1>
       <p>This page does not exist.</p>
       <p>
-        <Link href="/app/lessons">Go to Lessons</Link>
+        <Link href="/app">Go to Dashboard</Link>
       </p>
     </main>
   );

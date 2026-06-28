@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useLanguage } from "@/lib/i18n";
 import { IconSvgs } from "@/lib/icons";
 import {
   ClearButton,
@@ -20,22 +21,25 @@ type Props = {
 export default function SearchBar({
   searchTerm,
   setSearchTerm,
-  placeholder = "Search for lesson",
+  placeholder,
 }: Props) {
+  const { t } = useLanguage();
+  const resolvedPlaceholder = placeholder ?? t("search.lessonPlaceholder");
+
   return (
     <SearchBarField>
       <SearchBarContainer>
         {IconSvgs.search}
         <SearchInput
           type="text"
-          placeholder={placeholder}
+          placeholder={resolvedPlaceholder}
           value={searchTerm}
           onChange={e => setSearchTerm(e.target.value)}
         />
       </SearchBarContainer>
       {searchTerm && (
         <ClearButton
-          aria-label="Clear search"
+          aria-label={t("search.clear")}
           onClick={() => setSearchTerm("")}
         >
           {IconSvgs.delete}

@@ -6,11 +6,12 @@ export const EditButton = styled.button`
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  min-height: 2.5rem;
   padding: 8px 16px;
   background-color: ${COLORS.evergreen};
   color: ${COLORS.white};
   border: none;
-  border-radius: 12px;
+  border-radius: 8px;
   cursor: pointer;
   white-space: nowrap;
   transition:

@@ -14,6 +14,7 @@ export type Group = {
   id: number;
   join_code: string;
   name: string;
+  user_id?: string | null;
 };
 
 /**
@@ -73,4 +74,5 @@ export type LocalFile = {
   storage_path: string;
   hash: string;
   lesson_id: number | null;
+  mime_type?: string | null;
 };

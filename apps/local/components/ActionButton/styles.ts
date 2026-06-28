@@ -1,4 +1,5 @@
 import styled, { css, keyframes } from "styled-components";
+import COLORS from "@/styles/colors";
 
 const rotate = keyframes`
   from {
@@ -20,16 +21,21 @@ export const StyledActionButton = styled.button<ActionButtonProps>`
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 12px 20px;
-  border-radius: 11.25px;
+  min-height: 2.75rem;
+  padding: 0 1rem;
+  border-radius: 999px;
   border: none;
   background-color: ${({ $backgroundColor }) => $backgroundColor};
   color: ${({ $textColor }) => $textColor};
   border: ${({ $borderColor }) =>
-    $borderColor ? `1px solid ${$borderColor}` : "none"};
-  // font-family: var(--font-gilroy);
+    $borderColor ? `1px solid ${$borderColor}` : "1px solid transparent"};
+  box-shadow: ${({ $backgroundColor }) =>
+    $backgroundColor === COLORS.evergreen
+      ? "none"
+      : "0 8px 24px rgba(30, 66, 64, 0.06)"};
+  font-family: var(--font-primary);
   font-size: 1rem;
-  font-weight: 500;
+  font-weight: var(--font-weight-action);
   cursor: pointer;
   transition: all 0.3s ease;
 
@@ -77,7 +83,7 @@ export const ActionTextContainer = styled.div`
 `;
 
 export const ActionText = styled.span`
-  font-size: 16px;
-  font-weight: 400;
-  line-height: normal;
+  font-size: 0.9375rem;
+  font-weight: var(--font-weight-section-title);
+  line-height: 1;
 `;

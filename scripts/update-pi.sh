@@ -22,13 +22,21 @@ sudo install -m 0755 \
   "$REPO_DIR/scripts/rose-first-boot.sh" \
   /usr/local/sbin/rose-first-boot
 
+sudo tee /etc/sysctl.d/90-rose-web-port.conf > /dev/null <<'EOF'
+net.ipv4.ip_unprivileged_port_start=80
+EOF
+sudo sysctl --system >/dev/null
+
 sudo mkdir -p /etc/systemd/system/rose-web.service.d
 sudo tee /etc/systemd/system/rose-web.service.d/allow-wifi-sudo.conf > /dev/null <<'EOF'
 [Service]
 # The setup page calls the narrowly-allowlisted Wi-Fi helper through sudo.
 # NoNewPrivileges blocks sudo from elevating, so keep it disabled for this
-# service until the helper is moved behind a root-owned system service.
+# service. Clear capability sandboxing from older installs because it blocks
+# sudo from changing to root uid/gid.
 NoNewPrivileges=false
+AmbientCapabilities=
+CapabilityBoundingSet=
 EOF
 
 sudo tee /etc/systemd/system/rose-first-boot.service > /dev/null <<'EOF'

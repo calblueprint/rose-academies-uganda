@@ -250,6 +250,14 @@ sudo visudo -cf "$SUDOERS_TMP"
 sudo install -m 0440 "$SUDOERS_TMP" /etc/sudoers.d/rose-wifi-manager
 rm -f "$SUDOERS_TMP"
 
+echo "Allowing the non-root web service to bind port 80..."
+
+sudo tee /etc/sysctl.d/90-rose-web-port.conf > /dev/null <<EOF
+net.ipv4.ip_unprivileged_port_start=80
+EOF
+
+sudo sysctl --system >/dev/null
+
 echo "Installing WiFi fallback service..."
 
 sudo tee /etc/systemd/system/rose-first-boot.service > /dev/null <<EOF
@@ -297,11 +305,10 @@ User=$USER
 WorkingDirectory=$APP_DIR
 Environment="LOCAL_FILES_DIR=$FILES_DIR"
 Environment="PORT=80"
-AmbientCapabilities=CAP_NET_BIND_SERVICE
-CapabilityBoundingSet=CAP_NET_BIND_SERVICE
 # The setup page calls the narrowly-allowlisted Wi-Fi helper through sudo.
 # NoNewPrivileges blocks sudo from elevating, so keep it disabled for this
-# service until the helper is moved behind a root-owned system service.
+# service. Do not set CapabilityBoundingSet here; sudo needs setuid/setgid
+# during the Wi-Fi setup helper handoff.
 NoNewPrivileges=false
 ExecStart=/usr/bin/bash -lc 'cd $APP_DIR && corepack pnpm start'
 Restart=on-failure

@@ -1,63 +1,99 @@
 "use client";
 
-import { FormEvent, useContext, useMemo, useState } from "react";
+import { FormEvent, useContext, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import supabase from "@/api/supabase/client";
+import CreateButton from "@/components/CreateLessonButton";
 import ConfirmationModal from "@/components/modals/ConfirmationModal/ConfirmationModal";
+import {
+  ModalCard,
+  CloseButton as ModalCloseButton,
+  ModalHeader,
+  ModalTitle,
+  Overlay,
+} from "@/components/modals/CreateLessonModal/styles";
+import SearchBar from "@/components/SearchBar";
+import StatusPill from "@/components/StatusPill";
 import { DataContext } from "@/context/DataContext";
-import { fetchVisibleClassrooms } from "@/lib/classrooms";
+import { ClassroomOverview, fetchClassroomOverviews } from "@/lib/classrooms";
 import { useLanguage } from "@/lib/i18n";
 import { IconSvgs } from "@/lib/icons";
-import { deleteOwnedClassroom } from "./actions";
+import { deleteOwnedClassroom, removeLessonFromClassroom } from "./actions";
 import {
   ActionButton,
-  ButtonRow,
-  CodeActions,
+  ClassroomCountText,
+  ClassroomHeaderContent,
+  ClassroomHeaderMain,
+  ClassroomManageActions,
+  ClassroomNameBlock,
+  ClassroomNameInput,
+  ClassroomNameTitle,
   CodeDisplay,
-  CodeEditDisplay,
+  CodeLabel,
   CodeText,
-  CopiedText,
+  CreateClassroomForm,
+  CreateClassroomModalActions,
+  CreateClassroomModalIntro,
   DangerIconButton,
-  DeleteActionSlot,
+  EditFieldError,
   EmptyState,
   ErrorText,
   Field,
   FieldHint,
   FieldLabel,
-  Form,
+  GridToggle,
   Header,
   HeaderText,
   Input,
   JoinCodeFieldRow,
   JoinCodeInput,
+  LessonCountPill,
+  LessonMeta,
+  LessonPreviewItem,
+  LessonPreviewLink,
+  LessonPreviewList,
+  LessonPreviewMoreButton,
+  LessonPreviewSectionHeader,
+  LessonPreviewSectionTitle,
+  LessonPreviewTitle,
+  LessonRemoveButton,
+  ListClassroomHeader,
+  ListClassroomSection,
   MutedText,
+  OverviewCard,
+  OverviewGrid,
+  OverviewHeader,
+  OverviewList,
+  OverviewSection,
+  OverviewToolbar,
   PageContainer,
   PrimaryButton,
-  RowActions,
-  Section,
-  Table,
-  TableCell,
-  TableHeader,
-  TableRow,
-  TableWrapper,
   Title,
+  ToggleDivider,
+  ToggleText,
+  ViewToggleButton,
 } from "./style";
 
-type Classroom = {
-  id: number;
-  name: string;
-  join_code: string | null;
-  user_id?: string | null;
-};
+type Classroom = ClassroomOverview;
 
 type ClassroomsClientProps = {
   initialClassrooms: Classroom[];
   userId: string;
+  deviceId: string | null;
 };
 
 type DeleteCandidate = {
   classroom: Classroom;
   affectedLessonIds: number[];
+};
+
+type RemoveLessonCandidate = {
+  classroom: Classroom;
+  lesson: Classroom["lessons"][number];
+};
+
+type JoinCodeChangeCandidate = {
+  classroom: Classroom;
 };
 
 const JOIN_CODE_LENGTH = 6;
@@ -90,35 +126,6 @@ function createClassroomId(existingIds: Set<number>) {
   } while (existingIds.has(id));
 
   return id;
-}
-
-function CopyIcon() {
-  return (
-    <svg
-      aria-hidden="true"
-      focusable="false"
-      width="18"
-      height="18"
-      viewBox="0 0 24 24"
-      fill="none"
-    >
-      <rect
-        x="8"
-        y="8"
-        width="11"
-        height="11"
-        rx="2"
-        stroke="currentColor"
-        strokeWidth="1.8"
-      />
-      <path
-        d="M5 15V7C5 5.9 5.9 5 7 5H15"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
 }
 
 function EditIcon() {
@@ -188,14 +195,29 @@ function TrashIcon() {
 export default function ClassroomsClient({
   initialClassrooms,
   userId,
+  deviceId,
 }: ClassroomsClientProps) {
   const router = useRouter();
   const data = useContext(DataContext);
   const { t } = useLanguage();
+  const tr = (
+    key: string,
+    replacements: Record<string, string | number> = {},
+  ) =>
+    Object.entries(replacements).reduce(
+      (value, [name, replacement]) =>
+        value.replaceAll(`{${name}}`, String(replacement)),
+      t(key),
+    );
   const [classrooms, setClassrooms] = useState(initialClassrooms);
   const [name, setName] = useState("");
   const [joinCode, setJoinCode] = useState(generateJoinCode());
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [draftNames, setDraftNames] = useState<Record<number, string>>(() =>
+    Object.fromEntries(
+      initialClassrooms.map(classroom => [classroom.id, classroom.name]),
+    ),
+  );
   const [draftCodes, setDraftCodes] = useState<Record<number, string>>(() =>
     Object.fromEntries(
       initialClassrooms.map(classroom => [
@@ -204,15 +226,26 @@ export default function ClassroomsClient({
       ]),
     ),
   );
-  const [copiedId, setCopiedId] = useState<number | null>(null);
+  const [editErrors, setEditErrors] = useState<Record<number, string>>({});
   const [deleteCandidate, setDeleteCandidate] =
     useState<DeleteCandidate | null>(null);
+  const [removeLessonCandidate, setRemoveLessonCandidate] =
+    useState<RemoveLessonCandidate | null>(null);
+  const [joinCodeChangeCandidate, setJoinCodeChangeCandidate] =
+    useState<JoinCodeChangeCandidate | null>(null);
   const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [removingLessonId, setRemovingLessonId] = useState<number | null>(null);
   const [preparingDeleteId, setPreparingDeleteId] = useState<number | null>(
     null,
   );
+  const [overviewView, setOverviewView] = useState<"grid" | "list">("grid");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [expandedClassroomIds, setExpandedClassroomIds] = useState<Set<number>>(
+    new Set(),
+  );
   const [error, setError] = useState("");
   const [savingId, setSavingId] = useState<number | "new" | null>(null);
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
 
   const sortedClassrooms = useMemo(
     () =>
@@ -221,6 +254,56 @@ export default function ClassroomsClient({
       ),
     [classrooms],
   );
+
+  const filteredClassrooms = useMemo(() => {
+    const normalizedSearchTerm = searchTerm.trim().toLowerCase();
+
+    if (!normalizedSearchTerm) return sortedClassrooms;
+
+    return sortedClassrooms.filter(classroom => {
+      const searchableText = [
+        classroom.name,
+        classroom.join_code ?? "",
+        ...classroom.lessons.map(lesson => lesson.name),
+      ]
+        .join(" ")
+        .toLowerCase();
+
+      return searchableText.includes(normalizedSearchTerm);
+    });
+  }, [searchTerm, sortedClassrooms]);
+
+  const canCreateClassroom =
+    name.trim().length > 0 &&
+    JOIN_CODE_PATTERN.test(normalizeJoinCode(joinCode));
+
+  const classroomCountText =
+    filteredClassrooms.length === sortedClassrooms.length
+      ? `${sortedClassrooms.length} ${
+          sortedClassrooms.length === 1
+            ? t("classrooms.classroomCountSingular")
+            : t("classrooms.classroomCountPlural")
+        }`
+      : `${filteredClassrooms.length} ${t("lessons.of")} ${
+          sortedClassrooms.length
+        } ${t("classrooms.classroomCountPlural")}`;
+
+  useEffect(() => {
+    if (!isCreateOpen) return;
+    document.documentElement.style.overflowY = "hidden";
+    return () => {
+      document.documentElement.style.overflowY = "";
+    };
+  }, [isCreateOpen]);
+
+  function closeCreateModal() {
+    if (savingId === "new") return;
+
+    setIsCreateOpen(false);
+    setName("");
+    setJoinCode(generateJoinCode());
+    setError("");
+  }
 
   function isDuplicateCode(code: string, currentClassroomId?: number) {
     return classrooms.some(
@@ -247,8 +330,17 @@ export default function ClassroomsClient({
   }
 
   async function refreshClassrooms() {
-    const nextClassrooms = await fetchVisibleClassrooms(supabase, userId);
+    const nextClassrooms = await fetchClassroomOverviews(
+      supabase,
+      userId,
+      deviceId,
+    );
     setClassrooms(nextClassrooms);
+    setDraftNames(
+      Object.fromEntries(
+        nextClassrooms.map(classroom => [classroom.id, classroom.name]),
+      ),
+    );
     setDraftCodes(
       Object.fromEntries(
         nextClassrooms.map(classroom => [
@@ -268,17 +360,17 @@ export default function ClassroomsClient({
     const normalizedCode = normalizeJoinCode(joinCode);
 
     if (!trimmedName) {
-      setError("Classroom name is required.");
+      setError(t("classrooms.nameRequired"));
       return;
     }
 
     if (!JOIN_CODE_PATTERN.test(normalizedCode)) {
-      setError("Use exactly 6 letters or numbers for the join code.");
+      setError(t("classrooms.joinCodeExact"));
       return;
     }
 
     if (isDuplicateCode(normalizedCode)) {
-      setError("That join code is already used by another classroom.");
+      setError(t("classrooms.joinCodeUsedByAnother"));
       return;
     }
 
@@ -287,7 +379,7 @@ export default function ClassroomsClient({
 
     try {
       if (await isCodeUsedElsewhere(normalizedCode)) {
-        setError("That join code is already used by another classroom.");
+        setError(t("classrooms.joinCodeUsedByAnother"));
         return;
       }
 
@@ -303,75 +395,184 @@ export default function ClassroomsClient({
 
       setName("");
       setJoinCode(generateJoinCode());
+      setIsCreateOpen(false);
       await refreshClassrooms();
     } catch (createError) {
       console.error("Failed to create classroom:", createError);
-      setError("Unable to create classroom. Please try again.");
+      setError(t("classrooms.createFailed"));
     } finally {
       setSavingId(null);
     }
   }
 
-  async function handleSaveCode(classroom: Classroom) {
+  function startEditingClassroom(classroom: Classroom) {
+    setDraftNames(prev => ({ ...prev, [classroom.id]: classroom.name }));
+    setDraftCodes(prev => ({
+      ...prev,
+      [classroom.id]: classroom.join_code ?? "",
+    }));
+    setEditErrors(prev => {
+      const next = { ...prev };
+      delete next[classroom.id];
+      return next;
+    });
+    setEditingId(classroom.id);
+  }
+
+  function cancelEditingClassroom(classroom: Classroom) {
+    setEditingId(null);
+    setDraftNames(prev => ({ ...prev, [classroom.id]: classroom.name }));
+    setDraftCodes(prev => ({
+      ...prev,
+      [classroom.id]: classroom.join_code ?? "",
+    }));
+    setEditErrors(prev => {
+      const next = { ...prev };
+      delete next[classroom.id];
+      return next;
+    });
+  }
+
+  async function handleSaveClassroom(
+    classroom: Classroom,
+    options: { confirmedJoinCodeChange?: boolean } = {},
+  ) {
+    const trimmedName = (draftNames[classroom.id] ?? "").trim();
     const normalizedCode = normalizeJoinCode(draftCodes[classroom.id] ?? "");
     const currentCode = classroom.join_code ?? "";
 
-    if (!JOIN_CODE_PATTERN.test(normalizedCode)) {
-      setError("Use exactly 6 letters or numbers for the join code.");
+    if (!trimmedName) {
+      setError(t("classrooms.nameRequired"));
       return;
     }
 
-    if (normalizedCode === currentCode) {
+    if (!JOIN_CODE_PATTERN.test(normalizedCode)) {
+      setEditErrors(prev => ({
+        ...prev,
+        [classroom.id]: t("lessonModal.joinCodeLength"),
+      }));
+      return;
+    }
+
+    if (trimmedName === classroom.name && normalizedCode === currentCode) {
       setEditingId(null);
+      setEditErrors(prev => {
+        const next = { ...prev };
+        delete next[classroom.id];
+        return next;
+      });
       return;
     }
 
     if (
+      normalizedCode !== currentCode &&
       currentCode &&
-      !window.confirm(
-        "Change this classroom's join code? Students will need the new code the next time they join.",
-      )
+      !options.confirmedJoinCodeChange
     ) {
+      setJoinCodeChangeCandidate({ classroom });
       return;
     }
 
     if (isDuplicateCode(normalizedCode, classroom.id)) {
-      setError("That join code is already used by another classroom.");
+      setEditErrors(prev => ({
+        ...prev,
+        [classroom.id]: t("lessonModal.joinCodeUsed"),
+      }));
       return;
     }
 
     setSavingId(classroom.id);
     setError("");
+    setEditErrors(prev => {
+      const next = { ...prev };
+      delete next[classroom.id];
+      return next;
+    });
 
     try {
       if (await isCodeUsedElsewhere(normalizedCode, classroom.id)) {
-        setError("That join code is already used by another classroom.");
+        setEditErrors(prev => ({
+          ...prev,
+          [classroom.id]: t("lessonModal.joinCodeUsed"),
+        }));
         return;
       }
 
       const { error: updateError } = await supabase
         .from("Groups")
-        .update({ join_code: normalizedCode })
+        .update({ name: trimmedName, join_code: normalizedCode })
         .eq("id", classroom.id);
 
       if (updateError) throw updateError;
 
       setEditingId(null);
+      setEditErrors(prev => {
+        const next = { ...prev };
+        delete next[classroom.id];
+        return next;
+      });
       await refreshClassrooms();
+      setJoinCodeChangeCandidate(null);
     } catch (updateError) {
-      console.error("Failed to update classroom join code:", updateError);
-      setError("Unable to update join code. Please try again.");
+      console.error("Failed to update classroom:", updateError);
+      setError(t("classrooms.updateFailed"));
     } finally {
       setSavingId(null);
     }
   }
 
-  async function handleCopy(classroom: Classroom) {
-    if (!classroom.join_code) return;
+  async function handleConfirmJoinCodeChange() {
+    if (!joinCodeChangeCandidate) return;
 
-    await navigator.clipboard.writeText(classroom.join_code);
-    setCopiedId(classroom.id);
-    window.setTimeout(() => setCopiedId(null), 1500);
+    await handleSaveClassroom(joinCodeChangeCandidate.classroom, {
+      confirmedJoinCodeChange: true,
+    });
+  }
+
+  async function handleRemoveLessonFromClassroom(
+    classroom: Classroom,
+    lessonId: number,
+  ) {
+    setError("");
+
+    try {
+      const result = await removeLessonFromClassroom({
+        classroomId: classroom.id,
+        lessonId,
+      });
+
+      if (!result.success) {
+        console.error("Failed to remove lesson from classroom:", result.error);
+        setError(result.error);
+        return false;
+      }
+
+      await refreshClassrooms();
+      return true;
+    } catch (removeError) {
+      console.error("Failed to remove lesson from classroom:", removeError);
+      setError(t("classrooms.removeLessonFailed"));
+      return false;
+    }
+  }
+
+  async function handleConfirmRemoveLesson() {
+    if (!removeLessonCandidate) return;
+
+    const { classroom, lesson } = removeLessonCandidate;
+
+    setRemovingLessonId(lesson.id);
+
+    const didRemove = await handleRemoveLessonFromClassroom(
+      classroom,
+      lesson.id,
+    );
+
+    if (didRemove) {
+      setRemoveLessonCandidate(null);
+    }
+
+    setRemovingLessonId(null);
   }
 
   async function getClassroomLessonIds(classroomId: number) {
@@ -422,7 +623,7 @@ export default function ClassroomsClient({
 
   async function handleRequestDeleteClassroom(classroom: Classroom) {
     if (classroom.user_id !== userId) {
-      setError("Only classrooms created by this account can be deleted.");
+      setError(t("classrooms.deleteOwnOnly"));
       return;
     }
 
@@ -434,7 +635,7 @@ export default function ClassroomsClient({
       setDeleteCandidate({ classroom, affectedLessonIds });
     } catch (readError) {
       console.error("Failed to prepare classroom deletion:", readError);
-      setError("Unable to check this classroom. Please try again.");
+      setError(t("classrooms.checkFailed"));
     } finally {
       setPreparingDeleteId(null);
     }
@@ -453,15 +654,34 @@ export default function ClassroomsClient({
 
       if (!result.success) {
         console.error("Failed to delete classroom:", result.error);
-        setError("Unable to delete classroom. Please try again.");
+        setError(t("classrooms.deleteFailed"));
         return;
       }
 
       setDeleteCandidate(null);
-      await refreshClassrooms();
+      setClassrooms(prev =>
+        prev.filter(existingClassroom => existingClassroom.id !== classroom.id),
+      );
+      setDraftNames(prev => {
+        const next = { ...prev };
+        delete next[classroom.id];
+        return next;
+      });
+      setDraftCodes(prev => {
+        const next = { ...prev };
+        delete next[classroom.id];
+        return next;
+      });
+      setExpandedClassroomIds(prev => {
+        const next = new Set(prev);
+        next.delete(classroom.id);
+        return next;
+      });
+      await data.refresh();
+      router.refresh();
     } catch (deleteError) {
       console.error("Failed to delete classroom:", deleteError);
-      setError("Unable to delete classroom. Please try again.");
+      setError(t("classrooms.deleteFailed"));
     } finally {
       setDeletingId(null);
     }
@@ -469,19 +689,251 @@ export default function ClassroomsClient({
 
   const deleteModalDescription = deleteCandidate
     ? deleteCandidate.affectedLessonIds.length > 0
-      ? `${
+      ? tr(
           deleteCandidate.affectedLessonIds.length === 1
-            ? "1 lesson uses"
-            : `${deleteCandidate.affectedLessonIds.length} lessons use`
-        } this classroom. ${
-          deleteCandidate.affectedLessonIds.length === 1 ? "It" : "They"
-        } will be removed from sync until assigned to another classroom.\n\nSync afterwards to remove ${
-          deleteCandidate.affectedLessonIds.length === 1
-            ? "that lesson"
-            : "those lessons"
-        } from the classroom device.`
-      : "This classroom will be removed. Lessons already assigned to other classrooms will not change."
+            ? "classrooms.deleteDescriptionWithLesson"
+            : "classrooms.deleteDescriptionWithLessons",
+          { count: deleteCandidate.affectedLessonIds.length },
+        )
+      : t("classrooms.deleteDescriptionNoLessons")
     : "";
+
+  function getVisibleLessons(classroom: Classroom) {
+    if (editingId === classroom.id || expandedClassroomIds.has(classroom.id)) {
+      return classroom.lessons;
+    }
+
+    return classroom.lessons.slice(0, 3);
+  }
+
+  function toggleExpandedClassroom(classroomId: number) {
+    setExpandedClassroomIds(prev => {
+      const next = new Set(prev);
+
+      if (next.has(classroomId)) {
+        next.delete(classroomId);
+      } else {
+        next.add(classroomId);
+      }
+
+      return next;
+    });
+  }
+
+  function renderLessonRows(classroom: Classroom, variant?: "card" | "list") {
+    const visibleLessons = getVisibleLessons(classroom);
+    const hiddenCount = classroom.lessons.length - visibleLessons.length;
+    const isExpanded = expandedClassroomIds.has(classroom.id);
+    const isEditing = editingId === classroom.id;
+
+    return (
+      <LessonPreviewList>
+        <LessonPreviewSectionHeader>
+          <LessonPreviewSectionTitle>
+            {t("classrooms.lessons")}
+          </LessonPreviewSectionTitle>
+          {renderLessonCount(classroom)}
+        </LessonPreviewSectionHeader>
+
+        {classroom.lessons.length === 0 && (
+          <EmptyState>{t("classrooms.noLessonsAssigned")}</EmptyState>
+        )}
+
+        {visibleLessons.map(lesson => (
+          <LessonPreviewItem key={lesson.id} $variant={variant}>
+            <LessonPreviewLink href={`/app/lessons/${lesson.id}`}>
+              <LessonPreviewTitle>{lesson.name}</LessonPreviewTitle>
+            </LessonPreviewLink>
+            <LessonMeta>
+              <StatusPill status={lesson.syncStatus ?? "dashboard"} />
+              {isEditing && (
+                <LessonRemoveButton
+                  type="button"
+                  aria-label={`${t("classrooms.removeLesson")}: ${lesson.name}`}
+                  title={t("classrooms.removeLesson")}
+                  onClick={() =>
+                    setRemoveLessonCandidate({ classroom, lesson })
+                  }
+                >
+                  ×
+                </LessonRemoveButton>
+              )}
+            </LessonMeta>
+          </LessonPreviewItem>
+        ))}
+
+        {(hiddenCount > 0 || isExpanded) && !isEditing && (
+          <LessonPreviewMoreButton
+            type="button"
+            onClick={() => toggleExpandedClassroom(classroom.id)}
+          >
+            {isExpanded
+              ? t("common.showLess")
+              : `${t("common.morePrefix")}${hiddenCount} ${t("common.moreSuffix")}`}
+          </LessonPreviewMoreButton>
+        )}
+      </LessonPreviewList>
+    );
+  }
+
+  function renderClassroomJoinCodeControls(classroom: Classroom) {
+    const isEditing = editingId === classroom.id;
+    const draftCode = draftCodes[classroom.id] ?? "";
+    const editError = editErrors[classroom.id];
+
+    if (isEditing) {
+      const joinCodeInputId = `classroom-code-${classroom.id}`;
+
+      return (
+        <CodeDisplay>
+          <CodeLabel htmlFor={joinCodeInputId} as="label">
+            {t("classrooms.joinCode")}
+          </CodeLabel>
+          <JoinCodeFieldRow>
+            <JoinCodeInput
+              id={joinCodeInputId}
+              value={draftCode}
+              maxLength={JOIN_CODE_LENGTH}
+              onChange={event => {
+                setDraftCodes(prev => ({
+                  ...prev,
+                  [classroom.id]: normalizeJoinCode(event.target.value),
+                }));
+                if (editError) {
+                  setEditErrors(prev => {
+                    const next = { ...prev };
+                    delete next[classroom.id];
+                    return next;
+                  });
+                }
+              }}
+              aria-label={`${t("classrooms.joinCode")}: ${classroom.name}`}
+            />
+            <ActionButton
+              type="button"
+              onClick={() => {
+                setDraftCodes(prev => ({
+                  ...prev,
+                  [classroom.id]: generateJoinCode(),
+                }));
+                setEditErrors(prev => {
+                  const next = { ...prev };
+                  delete next[classroom.id];
+                  return next;
+                });
+              }}
+              aria-label={t("classrooms.newCode")}
+              title={t("classrooms.newCode")}
+              $compact
+            >
+              {IconSvgs.refresh}
+            </ActionButton>
+          </JoinCodeFieldRow>
+          {editError && <EditFieldError>{editError}</EditFieldError>}
+        </CodeDisplay>
+      );
+    }
+
+    return (
+      <CodeDisplay>
+        <CodeLabel>{t("classrooms.joinCode")}</CodeLabel>
+        <CodeText>{classroom.join_code ?? t("classrooms.noCode")}</CodeText>
+      </CodeDisplay>
+    );
+  }
+
+  function renderClassroomManageActions(classroom: Classroom) {
+    if (editingId === classroom.id) {
+      return (
+        <ClassroomManageActions>
+          <PrimaryButton
+            type="button"
+            disabled={savingId === classroom.id}
+            onClick={() => handleSaveClassroom(classroom)}
+            $compact
+          >
+            {savingId === classroom.id ? t("common.saving") : t("common.save")}
+          </PrimaryButton>
+          <ActionButton
+            type="button"
+            onClick={() => cancelEditingClassroom(classroom)}
+            $inline
+          >
+            {t("common.cancel")}
+          </ActionButton>
+        </ClassroomManageActions>
+      );
+    }
+
+    return (
+      <ClassroomManageActions>
+        <ActionButton
+          type="button"
+          onClick={() => startEditingClassroom(classroom)}
+          aria-label={`${t("classrooms.editClassroom")}: ${classroom.name}`}
+          title={t("classrooms.editClassroom")}
+          $compact
+        >
+          <EditIcon />
+        </ActionButton>
+        {classroom.user_id === userId && (
+          <DangerIconButton
+            type="button"
+            onClick={() => void handleRequestDeleteClassroom(classroom)}
+            disabled={
+              deletingId === classroom.id || preparingDeleteId === classroom.id
+            }
+            aria-label={`${t("classrooms.delete")}: ${classroom.name}`}
+            title={
+              preparingDeleteId === classroom.id
+                ? t("classrooms.checking")
+                : t("classrooms.delete")
+            }
+            $compact
+          >
+            <TrashIcon />
+          </DangerIconButton>
+        )}
+      </ClassroomManageActions>
+    );
+  }
+
+  function renderLessonCount(classroom: Classroom) {
+    return (
+      <LessonCountPill>
+        {classroom.lessons.length === 1
+          ? t("classrooms.lessonSingular")
+          : tr("classrooms.lessonPlural", {
+              count: classroom.lessons.length,
+            })}
+      </LessonCountPill>
+    );
+  }
+
+  function renderClassroomName(classroom: Classroom) {
+    const isEditing = editingId === classroom.id;
+    const nameInputId = `classroom-name-${classroom.id}`;
+
+    return (
+      <ClassroomNameBlock $editing={isEditing}>
+        {isEditing ? (
+          <ClassroomNameInput
+            id={nameInputId}
+            value={draftNames[classroom.id] ?? ""}
+            onChange={event =>
+              setDraftNames(prev => ({
+                ...prev,
+                [classroom.id]: event.target.value,
+              }))
+            }
+            aria-label={`Classroom name for ${classroom.name}`}
+          />
+        ) : (
+          <ClassroomNameTitle>{classroom.name}</ClassroomNameTitle>
+        )}
+      </ClassroomNameBlock>
+    );
+  }
 
   return (
     <PageContainer>
@@ -490,217 +942,114 @@ export default function ClassroomsClient({
           <Title>{t("classrooms.title")}</Title>
           <MutedText>{t("classrooms.description")}</MutedText>
         </HeaderText>
+        <CreateButton
+          onClick={() => {
+            setError("");
+            setName("");
+            setJoinCode(generateJoinCode());
+            setIsCreateOpen(true);
+          }}
+          label={t("classrooms.create")}
+        />
       </Header>
 
-      <Section>
-        <Form onSubmit={handleCreate}>
-          <Field>
-            <FieldLabel htmlFor="classroom-name">
-              {t("classrooms.name")}
-            </FieldLabel>
-            <Input
-              id="classroom-name"
-              value={name}
-              onChange={event => setName(event.target.value)}
-              placeholder={t("classrooms.namePlaceholder")}
-            />
-          </Field>
-
-          <Field>
-            <FieldLabel htmlFor="classroom-code">
-              {t("classrooms.joinCode")}
-            </FieldLabel>
-            <JoinCodeFieldRow>
-              <JoinCodeInput
-                id="classroom-code"
-                value={joinCode}
-                maxLength={JOIN_CODE_LENGTH}
-                onChange={event =>
-                  setJoinCode(normalizeJoinCode(event.target.value))
-                }
-                placeholder={t("classrooms.joinCodePlaceholder")}
-              />
-              <ActionButton
-                type="button"
-                onClick={() => setJoinCode(generateJoinCode())}
-                aria-label={t("classrooms.newCode")}
-                title={t("classrooms.newCode")}
-                $compact
-              >
-                {IconSvgs.refresh}
-              </ActionButton>
-            </JoinCodeFieldRow>
-            <FieldHint>{t("classrooms.hint")}</FieldHint>
-          </Field>
-
-          <ButtonRow>
-            <PrimaryButton type="submit" disabled={savingId === "new"}>
-              {savingId === "new"
-                ? t("common.creating")
-                : t("classrooms.create")}
-            </PrimaryButton>
-          </ButtonRow>
-        </Form>
-
-        {error && <ErrorText>{error}</ErrorText>}
-      </Section>
-
-      <TableWrapper>
-        <Table aria-label={t("classrooms.tableLabel")}>
-          <thead>
-            <tr>
-              <TableHeader $width="45%">{t("common.classroom")}</TableHeader>
-              <TableHeader
-                $align="right"
-                $contentWidth="var(--join-code-column-width)"
-              >
-                <span>{t("classrooms.joinCode")}</span>
-              </TableHeader>
-            </tr>
-          </thead>
-          <tbody>
-            {sortedClassrooms.map(classroom => {
-              const isEditing = editingId === classroom.id;
-              const draftCode = draftCodes[classroom.id] ?? "";
-
-              return (
-                <TableRow key={classroom.id}>
-                  <TableCell>
-                    <strong>{classroom.name}</strong>
-                  </TableCell>
-                  <TableCell $align="right">
-                    {isEditing ? (
-                      <CodeEditDisplay>
-                        <JoinCodeInput
-                          value={draftCode}
-                          maxLength={JOIN_CODE_LENGTH}
-                          onChange={event =>
-                            setDraftCodes(prev => ({
-                              ...prev,
-                              [classroom.id]: normalizeJoinCode(
-                                event.target.value,
-                              ),
-                            }))
-                          }
-                          aria-label={`Join code for ${classroom.name}`}
-                        />
-                        <RowActions>
-                          <ActionButton
-                            type="button"
-                            onClick={() =>
-                              setDraftCodes(prev => ({
-                                ...prev,
-                                [classroom.id]: generateJoinCode(),
-                              }))
-                            }
-                            aria-label={t("classrooms.newCode")}
-                            title={t("classrooms.newCode")}
-                            $compact
-                          >
-                            {IconSvgs.refresh}
-                          </ActionButton>
-                          <PrimaryButton
-                            type="button"
-                            disabled={savingId === classroom.id}
-                            onClick={() => handleSaveCode(classroom)}
-                            $compact
-                          >
-                            {savingId === classroom.id
-                              ? t("common.saving")
-                              : t("common.save")}
-                          </PrimaryButton>
-                          <ActionButton
-                            type="button"
-                            onClick={() => {
-                              setEditingId(null);
-                              setDraftCodes(prev => ({
-                                ...prev,
-                                [classroom.id]: classroom.join_code ?? "",
-                              }));
-                            }}
-                          >
-                            {t("common.cancel")}
-                          </ActionButton>
-                        </RowActions>
-                      </CodeEditDisplay>
-                    ) : (
-                      <CodeDisplay>
-                        <CodeText>
-                          {classroom.join_code ?? t("classrooms.noCode")}
-                        </CodeText>
-                        <CodeActions>
-                          <ActionButton
-                            type="button"
-                            onClick={() => handleCopy(classroom)}
-                            disabled={!classroom.join_code}
-                            aria-label={`Copy join code for ${classroom.name}`}
-                            title={
-                              copiedId === classroom.id
-                                ? t("common.copied")
-                                : t("classrooms.copyCode")
-                            }
-                            $compact
-                          >
-                            <CopyIcon />
-                          </ActionButton>
-                          <CopiedText
-                            $visible={copiedId === classroom.id}
-                            aria-live="polite"
-                          >
-                            {t("common.copied")}
-                          </CopiedText>
-                          <ActionButton
-                            type="button"
-                            onClick={() => setEditingId(classroom.id)}
-                            aria-label={`Edit join code for ${classroom.name}`}
-                            title={t("classrooms.editCode")}
-                            $compact
-                          >
-                            <EditIcon />
-                          </ActionButton>
-                          {classroom.user_id === userId ? (
-                            <DangerIconButton
-                              type="button"
-                              onClick={() =>
-                                void handleRequestDeleteClassroom(classroom)
-                              }
-                              disabled={
-                                deletingId === classroom.id ||
-                                preparingDeleteId === classroom.id
-                              }
-                              aria-label={`Delete classroom ${classroom.name}`}
-                              title={
-                                preparingDeleteId === classroom.id
-                                  ? t("classrooms.checking")
-                                  : t("classrooms.delete")
-                              }
-                              $compact
-                            >
-                              <TrashIcon />
-                            </DangerIconButton>
-                          ) : (
-                            <DeleteActionSlot aria-hidden="true" />
-                          )}
-                        </CodeActions>
-                      </CodeDisplay>
-                    )}
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </tbody>
-        </Table>
-      </TableWrapper>
+      {error && !isCreateOpen && <ErrorText>{error}</ErrorText>}
 
       {sortedClassrooms.length === 0 && (
         <EmptyState>{t("classrooms.empty")}</EmptyState>
+      )}
+
+      {sortedClassrooms.length > 0 && (
+        <OverviewSection>
+          <OverviewToolbar>
+            <SearchBar
+              searchTerm={searchTerm}
+              setSearchTerm={setSearchTerm}
+              placeholder={t("classrooms.searchPlaceholder")}
+            />
+            <ViewToggleButton>
+              <GridToggle
+                type="button"
+                $active={overviewView === "grid"}
+                onClick={() => setOverviewView("grid")}
+              >
+                {overviewView === "grid"
+                  ? IconSvgs.gridActive
+                  : IconSvgs.gridInactive}
+                <ToggleText>{t("common.card")}</ToggleText>
+              </GridToggle>
+
+              <ToggleDivider />
+
+              <GridToggle
+                type="button"
+                $active={overviewView === "list"}
+                onClick={() => setOverviewView("list")}
+              >
+                {overviewView === "list"
+                  ? IconSvgs.listActive
+                  : IconSvgs.listInactive}
+                <ToggleText>{t("common.list")}</ToggleText>
+              </GridToggle>
+            </ViewToggleButton>
+          </OverviewToolbar>
+
+          {filteredClassrooms.length > 0 && (
+            <ClassroomCountText>{classroomCountText}</ClassroomCountText>
+          )}
+
+          {filteredClassrooms.length === 0 ? (
+            <EmptyState>
+              <strong>{t("classrooms.noMatches")}</strong>
+              <span>{t("classrooms.tryDifferent")}</span>
+            </EmptyState>
+          ) : overviewView === "grid" ? (
+            <OverviewGrid>
+              {filteredClassrooms.map(classroom => (
+                <OverviewCard key={classroom.id}>
+                  <OverviewHeader>
+                    <ClassroomHeaderContent>
+                      {renderClassroomName(classroom)}
+                      {renderClassroomJoinCodeControls(classroom)}
+                    </ClassroomHeaderContent>
+                    <ClassroomHeaderMain>
+                      {renderClassroomManageActions(classroom)}
+                    </ClassroomHeaderMain>
+                  </OverviewHeader>
+
+                  {renderLessonRows(classroom)}
+                </OverviewCard>
+              ))}
+            </OverviewGrid>
+          ) : (
+            <OverviewList>
+              {filteredClassrooms.map(classroom => (
+                <ListClassroomSection key={classroom.id}>
+                  <ListClassroomHeader>
+                    <ClassroomHeaderContent>
+                      {renderClassroomName(classroom)}
+                      {renderClassroomJoinCodeControls(classroom)}
+                    </ClassroomHeaderContent>
+                    <ClassroomHeaderMain>
+                      {renderClassroomManageActions(classroom)}
+                    </ClassroomHeaderMain>
+                  </ListClassroomHeader>
+
+                  {renderLessonRows(classroom, "list")}
+                </ListClassroomSection>
+              ))}
+            </OverviewList>
+          )}
+        </OverviewSection>
       )}
 
       <ConfirmationModal
         isOpen={deleteCandidate !== null}
         title={
           deleteCandidate
-            ? `Delete ${deleteCandidate.classroom.name}?`
+            ? tr("classrooms.deleteTitle", {
+                classroom: deleteCandidate.classroom.name,
+              })
             : `${t("classrooms.delete")}?`
         }
         description={deleteModalDescription}
@@ -713,6 +1062,140 @@ export default function ClassroomsClient({
         }}
         onConfirm={() => void handleConfirmDeleteClassroom()}
       />
+
+      <ConfirmationModal
+        isOpen={removeLessonCandidate !== null}
+        title={t("classrooms.removeLessonTitle")}
+        description={
+          removeLessonCandidate
+            ? tr("classrooms.removeLessonDescription", {
+                lesson: removeLessonCandidate.lesson.name,
+                classroom: removeLessonCandidate.classroom.name,
+              })
+            : ""
+        }
+        confirmText={t("classrooms.removeLessonConfirm")}
+        isLoading={removingLessonId !== null}
+        onCancel={() => {
+          if (removingLessonId === null) setRemoveLessonCandidate(null);
+        }}
+        onConfirm={() => void handleConfirmRemoveLesson()}
+      />
+
+      <ConfirmationModal
+        isOpen={joinCodeChangeCandidate !== null}
+        title={t("classrooms.changeJoinCodeTitle")}
+        description={t("classrooms.changeJoinCodeDescription")}
+        confirmText={t("classrooms.changeJoinCodeConfirm")}
+        isLoading={savingId === joinCodeChangeCandidate?.classroom.id}
+        onCancel={() => {
+          if (savingId === null) setJoinCodeChangeCandidate(null);
+        }}
+        onConfirm={() => void handleConfirmJoinCodeChange()}
+      />
+
+      {isCreateOpen && (
+        <Overlay onClick={closeCreateModal}>
+          <ModalCard onClick={event => event.stopPropagation()}>
+            <ModalHeader>
+              <ModalTitle>{t("classrooms.create")}</ModalTitle>
+              <ModalCloseButton
+                type="button"
+                onClick={closeCreateModal}
+                disabled={savingId === "new"}
+                aria-label={t("common.closeModal")}
+              >
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 16 16"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M12 4L4 12M4 4L12 12"
+                    stroke="currentColor"
+                    strokeWidth="1.75"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </ModalCloseButton>
+            </ModalHeader>
+
+            <CreateClassroomModalIntro>
+              {t("classrooms.createModalIntro")}
+            </CreateClassroomModalIntro>
+
+            <CreateClassroomForm onSubmit={handleCreate}>
+              <Field>
+                <FieldLabel htmlFor="classroom-name">
+                  {t("classrooms.name")}
+                </FieldLabel>
+                <Input
+                  id="classroom-name"
+                  value={name}
+                  onChange={event => {
+                    setName(event.target.value);
+                    if (error) setError("");
+                  }}
+                  placeholder={t("classrooms.namePlaceholder")}
+                  disabled={savingId === "new"}
+                />
+              </Field>
+
+              <Field>
+                <FieldLabel htmlFor="classroom-code">
+                  {t("classrooms.joinCode")}
+                </FieldLabel>
+                <JoinCodeFieldRow>
+                  <JoinCodeInput
+                    id="classroom-code"
+                    value={joinCode}
+                    maxLength={JOIN_CODE_LENGTH}
+                    onChange={event => {
+                      setJoinCode(normalizeJoinCode(event.target.value));
+                      if (error) setError("");
+                    }}
+                    placeholder={t("classrooms.joinCodePlaceholder")}
+                    disabled={savingId === "new"}
+                  />
+                  <ActionButton
+                    type="button"
+                    onClick={() => setJoinCode(generateJoinCode())}
+                    disabled={savingId === "new"}
+                    aria-label={t("classrooms.newCode")}
+                    title={t("classrooms.newCode")}
+                    $compact
+                  >
+                    {IconSvgs.refresh}
+                  </ActionButton>
+                </JoinCodeFieldRow>
+                <FieldHint>{t("classrooms.hint")}</FieldHint>
+              </Field>
+
+              {error && <ErrorText>{error}</ErrorText>}
+
+              <CreateClassroomModalActions>
+                <ActionButton
+                  type="button"
+                  onClick={closeCreateModal}
+                  disabled={savingId === "new"}
+                >
+                  {t("common.cancel")}
+                </ActionButton>
+                <PrimaryButton
+                  type="submit"
+                  disabled={savingId === "new" || !canCreateClassroom}
+                >
+                  {savingId === "new"
+                    ? t("common.creating")
+                    : t("classrooms.create")}
+                </PrimaryButton>
+              </CreateClassroomModalActions>
+            </CreateClassroomForm>
+          </ModalCard>
+        </Overlay>
+      )}
     </PageContainer>
   );
 }

@@ -103,6 +103,27 @@ export const DownloadLink = styled.a`
   }
 `;
 
+export const PreviewButton = styled.button`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 0;
+  border-radius: 999px;
+  color: ${COLORS.gray80};
+  background: transparent;
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    background: ${COLORS.white};
+    color: ${COLORS.evergreen};
+    outline: none;
+  }
+`;
+
 export const FileLeft = styled.div`
   display: flex;
   align-items: center;
@@ -135,39 +156,54 @@ export const FileMeta = styled.div`
   min-width: 0;
 `;
 
-export const ActionButton = styled.button<{ $variant: "remove" | "restore" }>`
-  display: flex;
+export const ActionButton = styled.button<{
+  $variant: "remove" | "restore";
+  $presentation?: "button" | "icon";
+}>`
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
+  gap: 0.4rem;
 
-  border: none;
-  min-height: 2.25rem;
+  width: ${({ $presentation }) => ($presentation === "icon" ? "2rem" : "auto")};
+  min-height: 2rem;
   border: 1px solid ${COLORS.surfaceBorder};
-  border-radius: 8px;
+  border-radius: ${({ $presentation }) =>
+    $presentation === "icon" ? "999px" : "8px"};
   cursor: pointer;
 
-  font: inherit;
+  font-family: var(--font-primary);
   color: ${COLORS.gray80};
+  background: ${({ $presentation }) =>
+    $presentation === "icon" ? COLORS.gray10 : COLORS.white};
+  padding: ${({ $presentation }) =>
+    $presentation === "icon" ? "0" : "0.25rem 0.58rem"};
 
-  background: ${({ $variant }) =>
-    $variant === "remove" ? COLORS.white : COLORS.gray10};
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
 
-  padding: ${({ $variant }) =>
-    $variant === "remove" ? "0.27469rem 0.824rem" : "0.5rem 0.75rem"};
   &:hover:not(:disabled),
   &:focus-visible:not(:disabled),
   &:active:not(:disabled) {
     border-color: ${({ $variant }) =>
-      $variant === "remove" ? COLORS.rose80 : COLORS.evergreen};
+      $variant === "remove" ? COLORS.rose11 : COLORS.evergreen};
     color: ${({ $variant }) =>
-      $variant === "remove" ? COLORS.rose100 : COLORS.evergreen};
+      $variant === "remove" ? "#b84f73" : COLORS.evergreen};
     background: ${({ $variant }) =>
-      $variant === "remove" ? COLORS.rose10 : COLORS.white};
+      $variant === "remove" ? "#fff4f8" : COLORS.gray10};
+    outline: none;
   }
   &:disabled {
     opacity: 0.7;
     cursor: not-allowed;
+  }
+
+  svg {
+    width: 0.75rem;
+    height: 0.75rem;
+    flex-shrink: 0;
   }
 `;
 
@@ -193,7 +229,8 @@ export const ExpandButton = styled.button`
 
 export const ActionLabel = styled(Body).attrs({
   $fontWeight: 500,
-  $color: COLORS.gray80,
 })`
+  color: inherit;
+  font-size: 0.78rem;
   line-height: 1;
 `;

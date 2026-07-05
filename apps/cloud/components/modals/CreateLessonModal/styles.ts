@@ -266,7 +266,8 @@ export const ClassroomCreateActions = styled.div`
 `;
 
 export const ClassroomSecondaryButton = styled.button`
-  padding: 0.625rem 0.875rem;
+  min-height: 2.25rem;
+  padding: 0 0.85rem;
   background: ${COLORS.white};
   border: 1px solid ${COLORS.surfaceBorder};
   border-radius: 8px;
@@ -278,6 +279,28 @@ export const ClassroomSecondaryButton = styled.button`
   &:hover:not(:disabled) {
     border-color: ${COLORS.evergreen};
     color: ${COLORS.evergreen};
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+`;
+
+export const ClassroomPrimaryButton = styled.button`
+  min-height: 2.25rem;
+  padding: 0 0.85rem;
+  background: ${COLORS.evergreen};
+  border: 0;
+  border-radius: 8px;
+  color: ${COLORS.white};
+  cursor: pointer;
+  font-family: var(--font-primary);
+  font-size: 0.875rem;
+  font-weight: var(--font-weight-action);
+
+  &:hover:not(:disabled) {
+    opacity: 0.9;
   }
 
   &:disabled {

@@ -45,7 +45,7 @@ export type Lesson = {
   name: string;
   description: string | null;
   image_path: string | null;
-  group_id: number;
+  group_id: number | null;
   is_archived: boolean;
   created_at: string;
   updated_at: string;

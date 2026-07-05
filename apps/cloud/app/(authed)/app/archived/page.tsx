@@ -34,7 +34,7 @@ export default async function ArchivedLessonsPage() {
       initialLessons={lessons ?? []}
       lessonStatuses={{}}
       title="Archived Lessons"
-      description="Restore lessons when you want them back in the dashboard or sync list."
+      description="Restore lessons when you want them back in the dashboard or hub update list."
       showCreateButton={false}
       showSearchBar
       showSortButton

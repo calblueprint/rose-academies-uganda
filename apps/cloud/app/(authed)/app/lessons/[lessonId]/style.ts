@@ -36,21 +36,23 @@ export const PageContainer = styled.div`
 export const LessonInformation = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.15rem;
   width: 100%;
   max-width: 67.5rem;
   margin: 0 auto;
-  padding: 1.44rem clamp(16px, 4vw, 24px) 0;
+  padding: 1.44rem clamp(16px, 4vw, 24px) 3rem;
   box-sizing: border-box;
 `;
 
 export const LessonTitle = styled.h1`
   color: var(--gray-100, #000);
-  font-size: 36px;
+  font-size: clamp(1.75rem, 4vw, 2.25rem);
   font-style: normal;
   font-weight: var(--font-weight-page-title);
   line-height: 1.15;
   margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
 `;
 
 export const LessonDescription = styled.p`
@@ -71,7 +73,7 @@ export const SearchBarRow = styled.div`
   align-items: center;
   justify-content: space-between;
   gap: 1.25rem;
-  padding: 0.5rem 0 0.25rem;
+  padding: 0.35rem 0 0.25rem;
 
   @media (max-width: 760px) {
     align-items: stretch;
@@ -84,14 +86,65 @@ export const TitleRow = styled.div`
   align-items: flex-start;
   gap: 0.75rem;
   min-width: 0;
+  flex: 1;
+
+  @media (max-width: 760px) {
+    flex-wrap: wrap;
+  }
 `;
 
 export const LessonMetadata = styled.div`
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(16rem, 0.65fr);
+  gap: 1rem;
+  min-width: 0;
+  padding: 1rem;
+  border: 1px solid ${COLORS.green20};
+  border-radius: 8px;
+  background: ${COLORS.pageWash};
+  box-shadow: none;
+
+  @media (max-width: 780px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+export const MetadataEditSlot = styled.div`
+  position: absolute;
+  top: 0.65rem;
+  right: 0.65rem;
+
+  @media (max-width: 780px) {
+    position: static;
+    order: -1;
+    justify-self: flex-end;
+  }
+`;
+
+export const MetadataBlock = styled.div`
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.85rem;
-  min-width: 0;
-  padding: 0.1rem 0 0.35rem;
+  gap: 0.5rem;
+
+  &:first-of-type {
+    padding-right: 6.25rem;
+  }
+
+  @media (max-width: 780px) {
+    &:first-of-type {
+      padding-right: 0;
+    }
+  }
+`;
+
+export const MetadataLabel = styled.span`
+  color: ${COLORS.evergreen};
+  font-family: var(--font-primary);
+  font-size: 0.78rem;
+  font-weight: var(--font-weight-action);
+  line-height: 1.2;
 `;
 
 export const ClassroomSection = styled.div`

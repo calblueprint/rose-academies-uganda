@@ -10,6 +10,7 @@ import {
 } from "@/api/supabase/files";
 import FileTypeBadge from "@/components/FileTypeBadge";
 import { DataContext } from "@/context/DataContext";
+import { useLanguage } from "@/lib/i18n";
 import {
   ActionRow,
   BrowseButton,
@@ -69,6 +70,7 @@ export default function UploadFilesModal({
   lessonId,
   onFilesUploaded,
 }: Props) {
+  const { t } = useLanguage();
   const [files, setFiles] = useState<FileEntry[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
@@ -186,8 +188,8 @@ export default function UploadFilesModal({
         const names = duplicateNames.join(", ");
         setError(
           duplicateNames.length === 1
-            ? `"${names}" is already in this lesson.`
-            : `These files are already in this lesson: ${names}`,
+            ? `"${names}" ${t("lessonModal.duplicateFileSingleSuffix")}`
+            : `${t("lessonModal.duplicateFilePluralPrefix")} ${names}`,
         );
         setIsSubmitting(false);
         return;
@@ -222,6 +224,14 @@ export default function UploadFilesModal({
         .update({ updated_at: new Date().toISOString() })
         .eq("id", lessonId);
 
+      const { error: deviceLessonError } = await supabase
+        .from("DeviceLessons")
+        .update({ status: "pending" })
+        .eq("lesson_id", lessonId)
+        .neq("status", "pending_removal");
+
+      if (deviceLessonError) throw deviceLessonError;
+
       await data.refresh();
 
       await new Promise(resolve => setTimeout(resolve, 800));
@@ -238,7 +248,7 @@ export default function UploadFilesModal({
         ),
       );
 
-      setError("Failed to upload files. Please try again.");
+      setError(t("lessonModal.uploadFilesFailed"));
       setIsSubmitting(false);
     }
   }
@@ -247,12 +257,12 @@ export default function UploadFilesModal({
     <Overlay onClick={handleClose}>
       <ModalCard onClick={e => e.stopPropagation()}>
         <ModalHeader>
-          <ModalTitle>Upload Files</ModalTitle>
+          <ModalTitle>{t("lessonModal.uploadFiles")}</ModalTitle>
           <CloseButton
             type="button"
             onClick={handleClose}
             disabled={isSubmitting}
-            aria-label="Close modal"
+            aria-label={t("common.closeModal")}
           >
             ✕
           </CloseButton>
@@ -265,10 +275,8 @@ export default function UploadFilesModal({
           onDrop={handleDrop}
           onClick={() => !isSubmitting && fileInputRef.current?.click()}
         >
-          <DropZoneText>Choose files or drag files here</DropZoneText>
-          <DropZoneSubtext>
-            JPEG, PNG, PDF, MP4, PowerPoint, and APK formats accepted
-          </DropZoneSubtext>
+          <DropZoneText>{t("lessonModal.chooseFiles")}</DropZoneText>
+          <DropZoneSubtext>{t("lessonModal.fileFormats")}</DropZoneSubtext>
 
           <BrowseButton
             type="button"
@@ -278,7 +286,7 @@ export default function UploadFilesModal({
               fileInputRef.current?.click();
             }}
           >
-            Browse files
+            {t("files.upload")}
           </BrowseButton>
 
           <input
@@ -305,9 +313,12 @@ export default function UploadFilesModal({
                     <FileNameText>{entry.file.name}</FileNameText>
                     <FileSubtext>
                       {formatBytes(entry.file.size)}
-                      {entry.status === "uploading" && " • Uploading..."}
-                      {entry.status === "done" && " • Completed"}
-                      {entry.status === "error" && " • Failed"}
+                      {entry.status === "uploading" &&
+                        ` • ${t("lessonModal.uploading")}...`}
+                      {entry.status === "done" &&
+                        ` • ${t("lessonModal.completed")}`}
+                      {entry.status === "error" &&
+                        ` • ${t("lessonModal.failed")}`}
                     </FileSubtext>
                   </FileInfo>
 
@@ -335,14 +346,16 @@ export default function UploadFilesModal({
 
         <ActionRow>
           <CancelButton onClick={handleClose} disabled={isSubmitting}>
-            Cancel
+            {t("common.cancel")}
           </CancelButton>
 
           <SaveButton
             onClick={handleSubmit}
             disabled={files.length === 0 || isSubmitting}
           >
-            {isSubmitting ? "Uploading..." : "Upload"}
+            {isSubmitting
+              ? `${t("lessonModal.uploading")}...`
+              : t("files.upload")}
           </SaveButton>
         </ActionRow>
       </ModalCard>

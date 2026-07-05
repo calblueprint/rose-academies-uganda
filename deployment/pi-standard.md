@@ -30,13 +30,13 @@ ROSE_SKIP_GIT=true bash scripts/setup-pi.sh
 ## Educator WiFi onboarding
 
 Provisioned devices create a unique fallback network named
-`Rose-Setup-XXXX`, where the suffix is derived from the device ID. The setup
-network uses the password `rosehub1` during this MVP.
+`Rose-Hub-XXXX`, where the suffix is derived from the device ID. The setup
+network uses the password `rosehub!` during this MVP.
 
 When the Pi boots somewhere without a saved WiFi connection:
 
 1. Wait up to one minute for the setup network to appear.
-2. Join `Rose-Setup-XXXX` from the educator's tablet.
+2. Join `Rose-Hub-XXXX` from the educator's tablet.
 3. Wait for the setup page to open automatically. If it does not, open
    `http://rosehub.local/setup`.
 4. Choose a nearby internet WiFi network and enter its password.
@@ -110,7 +110,7 @@ next time `scripts/setup-pi.sh` runs.
 Golden-image installs remove those values before capture. On the first boot of
 each copied card, `rose-first-boot.service` recreates `DEVICE_ID`,
 `NEXT_PUBLIC_DEVICE_ID`, `DEVICE_PAIRING_CODE`, `CLASSROOM_SESSION_SECRET`, and
-the unique `Rose-Setup-XXXX` hotspot name.
+the unique `Rose-Hub-XXXX` hotspot name.
 
 ### Diagnostics
 

@@ -10,6 +10,12 @@ export const Overlay = styled.div`
   align-items: center;
   justify-content: center;
   padding: 1rem;
+  overflow-y: auto;
+
+  @media (max-height: 760px) {
+    align-items: flex-start;
+    padding: 1.25rem 1rem;
+  }
 `;
 
 export const ModalCard = styled.div`
@@ -17,14 +23,17 @@ export const ModalCard = styled.div`
   border: 1px solid ${COLORS.surfaceBorder};
   border-radius: 16px;
   width: 100%;
-  max-width: 480px;
-  max-height: 90vh;
-  overflow-y: auto;
-  padding: 2rem;
+  max-width: 620px;
+  overflow: visible;
+  padding: 2rem 2.25rem;
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
   box-shadow: ${COLORS.surfaceShadow};
+
+  @media (max-width: 560px) {
+    padding: 1.5rem 1.25rem;
+  }
 `;
 
 export const ModalHeader = styled.div`
@@ -78,15 +87,15 @@ export const FieldLabel = styled.label`
 `;
 
 export const AssignedVillageRow = styled.div`
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(16rem, 20rem);
   align-items: center;
-  justify-content: space-between;
-  gap: 16px;
+  gap: 1rem;
   width: 100%;
 
-  @media (max-width: 520px) {
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
     align-items: flex-start;
-    flex-direction: column;
   }
 `;
 
@@ -95,7 +104,7 @@ export const VillageDropdownWrapper = styled.div`
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  width: min(240px, 100%);
+  width: 100%;
 `;
 
 export const VillageSelectTrigger = styled.button`
@@ -136,10 +145,11 @@ export const VillageDropdownMenu = styled.div`
   z-index: 20;
 
   display: flex;
-  width: 100%;
+  width: min(100%, 20rem);
+  max-height: min(20rem, 48vh);
+  overflow-y: auto;
   padding: 0.75rem;
   flex-direction: column;
-  justify-content: center;
   align-items: flex-start;
   gap: 0.625rem;
   box-sizing: border-box;
@@ -148,6 +158,11 @@ export const VillageDropdownMenu = styled.div`
   border: 1px solid ${COLORS.surfaceBorder};
   background: ${COLORS.white};
   box-shadow: ${COLORS.surfaceShadowSoft};
+
+  @media (max-width: 640px) {
+    width: 100%;
+    max-height: min(18rem, 45vh);
+  }
 `;
 
 export const VillageOption = styled.label`

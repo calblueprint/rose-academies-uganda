@@ -21,6 +21,10 @@ export function pruneLocalLessons(db: DB, latestLessons: Lesson[]) {
 
   const lessonIdsToDelete = lessonsToDelete.map(l => l.id);
 
+  if (lessonIdsToDelete.length === 0) {
+    return;
+  }
+
   const filesToDelete = db
     .prepare<number[], { id: number; local_path: string | null }>(
       `
@@ -41,10 +45,6 @@ export function pruneLocalLessons(db: DB, latestLessons: Lesson[]) {
       console.log("[SYNC] Deleting file:", file.local_path);
       fs.unlinkSync(file.local_path);
     }
-  }
-
-  if (lessonIdsToDelete.length === 0) {
-    return;
   }
 
   const placeholders = lessonIdsToDelete.map(() => "?").join(",");

@@ -49,7 +49,9 @@ const SyncModal: React.FC<SyncModalProps> = ({
   return (
     <Overlay>
       <Card>
-        <CloseButton onClick={onClose}>{IconSvgs.Cross}</CloseButton>
+        <CloseButton onClick={onClose} aria-label={t("common.closeModal")}>
+          {IconSvgs.Cross}
+        </CloseButton>
 
         <IconWrapper>
           {isSuccess ? IconSvgs.syncSuccess : IconSvgs.syncFail}

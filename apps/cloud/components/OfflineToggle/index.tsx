@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import supabase from "@/api/supabase/client";
 import ConfirmationModal from "@/components/modals/ConfirmationModal/ConfirmationModal";
-import { IconSvgs } from "@/lib/icons";
+import { useLanguage } from "@/lib/i18n";
 import { SyncButton, SyncButtonText } from "./styles";
 
 function OfflineToggle({
@@ -12,13 +13,21 @@ function OfflineToggle({
   isOffline,
   setIsOffline,
   hasFiles,
+  syncStatus,
+  onSyncStatusChange,
 }: {
   deviceId: string | null;
   lessonId: number;
   isOffline: boolean;
   setIsOffline: (isOffline: boolean) => void;
   hasFiles: boolean;
+  syncStatus?: "available" | "pending" | "pending_removal" | null;
+  onSyncStatusChange?: (
+    status: "available" | "pending" | "pending_removal" | null,
+  ) => void;
 }) {
+  const router = useRouter();
+  const { t } = useLanguage();
   const [isUpdating, setIsUpdating] = useState(false);
   const [isRemoveConfirmOpen, setIsRemoveConfirmOpen] = useState(false);
 
@@ -32,7 +41,7 @@ function OfflineToggle({
     try {
       const { error } = await supabase
         .from("DeviceLessons")
-        .delete()
+        .update({ status: "pending_removal" })
         .eq("device_id", deviceId)
         .eq("lesson_id", lessonId);
 
@@ -43,8 +52,10 @@ function OfflineToggle({
         return;
       }
 
-      setIsOffline(false);
+      setIsOffline(true);
+      onSyncStatusChange?.("pending_removal");
       setIsRemoveConfirmOpen(false);
+      router.refresh();
     } finally {
       setIsUpdating(false);
     }
@@ -52,6 +63,11 @@ function OfflineToggle({
 
   const handleToggle = async () => {
     if (isUpdating || !deviceId || Number.isNaN(lessonId) || !hasFiles) {
+      return;
+    }
+
+    if (syncStatus === "pending" || syncStatus === "pending_removal") {
+      router.push("/app/offline-library");
       return;
     }
 
@@ -77,16 +93,21 @@ function OfflineToggle({
       }
 
       setIsOffline(true);
+      onSyncStatusChange?.("pending");
+      router.refresh();
     } finally {
       setIsUpdating(false);
     }
   };
 
   const syncLabel = {
-    offline_updating: "Syncing...",
-    offline_idle: "Send to Sync",
-    online_updating: "Removing...",
-    online_idle: "Remove from Sync",
+    offline_updating: t("common.saving"),
+    offline_idle: t("sync.addToHub"),
+    online_updating: t("common.working"),
+    online_idle:
+      syncStatus === "pending" || syncStatus === "pending_removal"
+        ? t("sync.button")
+        : t("sync.removeFromHub"),
   } as const;
 
   const syncButtonKey =
@@ -100,15 +121,14 @@ function OfflineToggle({
           isUpdating || !deviceId || Number.isNaN(lessonId) || !hasFiles
         }
       >
-        {IconSvgs.sync}
         <SyncButtonText>{syncLabel[syncButtonKey]}</SyncButtonText>
       </SyncButton>
 
       <ConfirmationModal
         isOpen={isRemoveConfirmOpen}
-        title="Remove Lesson from Sync"
-        description="The lesson will stay saved, but it will be removed from the classroom device after the next sync."
-        confirmText="Remove Lesson"
+        title={t("lessons.removeSyncTitle")}
+        description={t("lessons.removeSyncDescription")}
+        confirmText={t("lessons.removeOnNextUpdate")}
         onCancel={() => setIsRemoveConfirmOpen(false)}
         onConfirm={handleRemoveConfirm}
         isLoading={isUpdating}

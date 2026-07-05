@@ -1,28 +1,31 @@
 "use client";
 
 import type { SetupStepData } from "./DashboardSetupWizard";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "@/lib/i18n";
 import DashboardSetupWizard from "./DashboardSetupWizard";
 import {
+  DashboardActionBadge,
+  DashboardActionContent,
   DashboardActionDescription,
   DashboardActionLink,
   DashboardActions,
   DashboardHeader,
-  DashboardHomeGrid,
   DashboardHomeShell,
+  DashboardHubStatusBadge,
+  DashboardHubStatusMain,
+  DashboardHubStatusPanel,
+  DashboardHubStatusText,
+  DashboardMetricItem,
+  DashboardMetricLabel,
+  DashboardMetricStrip,
+  DashboardMetricValue,
   DashboardPage,
   DashboardPanel,
   DashboardSectionTitle,
-  DashboardStatCard,
-  DashboardStatLabel,
-  DashboardStatusCard,
   DashboardStatusDetail,
-  DashboardStatusTitle,
-  DashboardStatValue,
   DashboardTitle,
-  SecondaryInlineButton,
   SetupProgressList,
 } from "./style";
 
@@ -31,11 +34,10 @@ type DashboardClientProps = {
   openSetupGuide: boolean;
   deviceId: string | null;
   deviceLastSyncedAt: string | null;
-  deviceLastSyncedLabel: string | null;
   userId: string;
   lessonCount: number;
   classroomCount: number;
-  savedToHubCount: number;
+  dashboardOnlyCount: number;
   syncedCount: number;
   pendingSyncCount: number;
 };
@@ -44,26 +46,54 @@ function pluralLabel(count: number, singular: string, plural: string) {
   return count === 1 ? singular : plural;
 }
 
+function formatLastSynced(lastSyncedAt: string | null, locale: string) {
+  if (!lastSyncedAt) return null;
+
+  const date = new Date(lastSyncedAt);
+  if (Number.isNaN(date.getTime())) return null;
+
+  return date.toLocaleString(locale, {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
 export default function DashboardClient({
   steps,
   openSetupGuide,
   deviceId,
   deviceLastSyncedAt,
-  deviceLastSyncedLabel,
   userId,
   lessonCount,
   classroomCount,
-  savedToHubCount,
   syncedCount,
   pendingSyncCount,
 }: DashboardClientProps) {
   const router = useRouter();
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
+  const [deviceLastSyncedLabel, setDeviceLastSyncedLabel] = useState<
+    string | null
+  >(null);
   const shouldStartInSetupGuide =
     !deviceId || classroomCount === 0 || lessonCount === 0;
   const [showSetupGuide, setShowSetupGuide] = useState(shouldStartInSetupGuide);
   const shouldShowSetupGuide = openSetupGuide || showSetupGuide;
   const incompleteSteps = steps.filter(step => !step.done);
+  const hubMetricValue =
+    pendingSyncCount > 0 ? pendingSyncCount : syncedCount > 0 ? syncedCount : 0;
+  const hubMetricLabel =
+    pendingSyncCount > 0 ? t("status.pendingSync") : t("status.synced");
+  const hubStatusDetail = deviceId
+    ? deviceLastSyncedLabel
+      ? `${t("home.lastUpdate")} ${deviceLastSyncedLabel}`
+      : t("home.noSuccessfulUpdate")
+    : t("home.linkHubDescription");
+
+  useEffect(() => {
+    setDeviceLastSyncedLabel(formatLastSynced(deviceLastSyncedAt, language));
+  }, [deviceLastSyncedAt, language]);
 
   function closeSetupGuide() {
     setShowSetupGuide(false);
@@ -80,6 +110,7 @@ export default function DashboardClient({
         deviceLastSyncedAt={deviceLastSyncedAt}
         deviceLastSyncedLabel={deviceLastSyncedLabel}
         userId={userId}
+        classroomCount={classroomCount}
         syncedCount={syncedCount}
         pendingSyncCount={pendingSyncCount}
         onFinish={closeSetupGuide}
@@ -92,94 +123,93 @@ export default function DashboardClient({
       <DashboardHomeShell>
         <DashboardHeader>
           <div>
-            <DashboardTitle>Dashboard</DashboardTitle>
-            <DashboardStatusDetail>
-              Manage lessons, classrooms, and Classroom Hub sync.
-            </DashboardStatusDetail>
+            <DashboardTitle>{t("nav.dashboard")}</DashboardTitle>
+            <DashboardStatusDetail>{t("home.subtitle")}</DashboardStatusDetail>
           </div>
         </DashboardHeader>
 
+        <DashboardMetricStrip>
+          <DashboardMetricItem>
+            <DashboardMetricValue>{classroomCount}</DashboardMetricValue>
+            <DashboardMetricLabel>
+              {pluralLabel(
+                classroomCount,
+                t("home.metricClassroomSingular"),
+                t("home.metricClassroomPlural"),
+              )}
+            </DashboardMetricLabel>
+          </DashboardMetricItem>
+          <DashboardMetricItem>
+            <DashboardMetricValue>{lessonCount}</DashboardMetricValue>
+            <DashboardMetricLabel>
+              {pluralLabel(
+                lessonCount,
+                t("home.metricLessonSingular"),
+                t("home.metricLessonPlural"),
+              )}
+            </DashboardMetricLabel>
+          </DashboardMetricItem>
+          <DashboardMetricItem $attention={pendingSyncCount > 0}>
+            <DashboardMetricValue>{hubMetricValue}</DashboardMetricValue>
+            <DashboardMetricLabel>{hubMetricLabel}</DashboardMetricLabel>
+          </DashboardMetricItem>
+        </DashboardMetricStrip>
+
         <DashboardPanel>
-          <DashboardSectionTitle>Quick actions</DashboardSectionTitle>
+          <DashboardSectionTitle>
+            {t("home.quickActions")}
+          </DashboardSectionTitle>
           <DashboardActions>
-            <DashboardActionLink href="/app/lessons">
-              <strong>Create lesson</strong>
-              <DashboardActionDescription>
-                Upload files and assign them to classrooms.
-              </DashboardActionDescription>
-            </DashboardActionLink>
             <DashboardActionLink href="/app/classrooms">
-              <strong>Create classroom</strong>
-              <DashboardActionDescription>
-                Make a classroom and student join code.
-              </DashboardActionDescription>
+              <DashboardActionBadge>1</DashboardActionBadge>
+              <DashboardActionContent>
+                <strong>{t("home.createClassroom")}</strong>
+                <DashboardActionDescription>
+                  {t("home.createClassroomDescription")}
+                </DashboardActionDescription>
+              </DashboardActionContent>
+            </DashboardActionLink>
+            <DashboardActionLink href="/app/lessons">
+              <DashboardActionBadge>2</DashboardActionBadge>
+              <DashboardActionContent>
+                <strong>{t("home.createLesson")}</strong>
+                <DashboardActionDescription>
+                  {t("home.createLessonDescription")}
+                </DashboardActionDescription>
+              </DashboardActionContent>
             </DashboardActionLink>
             <DashboardActionLink href="/app/offline-library">
-              <strong>Sync to Classroom Hub</strong>
-              <DashboardActionDescription>
-                Send selected lessons to the hub.
-              </DashboardActionDescription>
+              <DashboardActionBadge $tone="orange">3</DashboardActionBadge>
+              <DashboardActionContent>
+                <strong>{t("home.updateHub")}</strong>
+                <DashboardActionDescription>
+                  {t("home.updateHubDescription")}
+                </DashboardActionDescription>
+              </DashboardActionContent>
             </DashboardActionLink>
           </DashboardActions>
         </DashboardPanel>
 
-        <DashboardHomeGrid>
-          <DashboardStatCard $tone="green">
-            <DashboardStatValue $tone="green">{lessonCount}</DashboardStatValue>
-            <DashboardStatLabel>
-              {pluralLabel(lessonCount, "Lesson", "Lessons")}
-            </DashboardStatLabel>
-          </DashboardStatCard>
-          <DashboardStatCard $tone="sage">
-            <DashboardStatValue $tone="sage">
-              {classroomCount}
-            </DashboardStatValue>
-            <DashboardStatLabel>
-              {pluralLabel(classroomCount, "Classroom", "Classrooms")}
-            </DashboardStatLabel>
-          </DashboardStatCard>
-          <DashboardStatCard $tone="rose">
-            <DashboardStatValue $tone="rose">
-              {savedToHubCount}
-            </DashboardStatValue>
-            <DashboardStatLabel>Ready to sync</DashboardStatLabel>
-          </DashboardStatCard>
-          <DashboardStatCard $tone="green">
-            <DashboardStatValue $tone="green">{syncedCount}</DashboardStatValue>
-            <DashboardStatLabel>Synced</DashboardStatLabel>
-          </DashboardStatCard>
-          <DashboardStatCard $tone="sage">
-            <DashboardStatValue $tone="sage">
-              {pendingSyncCount}
-            </DashboardStatValue>
-            <DashboardStatLabel>Pending sync</DashboardStatLabel>
-          </DashboardStatCard>
-        </DashboardHomeGrid>
-
-        <DashboardStatusCard>
-          <div>
-            <DashboardStatusTitle>
-              {deviceId ? "Classroom Hub linked" : "Classroom Hub not linked"}
-            </DashboardStatusTitle>
-            <DashboardStatusDetail>
-              {deviceLastSyncedLabel
-                ? `Last successful sync: ${deviceLastSyncedLabel}.`
-                : "No successful sync has been recorded yet."}
-            </DashboardStatusDetail>
-          </div>
-          {incompleteSteps.length > 0 && (
-            <SecondaryInlineButton
-              type="button"
-              onClick={() => setShowSetupGuide(true)}
-            >
-              Continue setup
-            </SecondaryInlineButton>
-          )}
-        </DashboardStatusCard>
+        <DashboardHubStatusPanel>
+          <DashboardHubStatusMain>
+            <DashboardHubStatusBadge $linked={Boolean(deviceId)}>
+              {deviceId ? t("home.hubLinked") : t("home.hubNotLinked")}
+            </DashboardHubStatusBadge>
+            <DashboardHubStatusText>
+              <DashboardSectionTitle>
+                {t("home.hubStatusTitle")}
+              </DashboardSectionTitle>
+              <DashboardStatusDetail>{hubStatusDetail}</DashboardStatusDetail>
+            </DashboardHubStatusText>
+          </DashboardHubStatusMain>
+          <DashboardStatusDetail>{t("home.manageHub")}</DashboardStatusDetail>
+        </DashboardHubStatusPanel>
 
         {incompleteSteps.length > 0 && (
           <DashboardPanel>
-            <DashboardSectionTitle>Setup still needs</DashboardSectionTitle>
+            <DashboardSectionTitle>
+              {t("home.setupStillNeeds")}
+            </DashboardSectionTitle>
             <SetupProgressList>
               {incompleteSteps.map(step => (
                 <li key={step.titleKey}>{t(step.titleKey)}</li>

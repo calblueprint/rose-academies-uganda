@@ -1,5 +1,6 @@
 import { getSupabaseServerClientReadOnly } from "@/api/supabase/server-readonly";
-import { fetchVisibleClassrooms } from "@/lib/classrooms";
+import { fetchClassroomOverviews } from "@/lib/classrooms";
+import { getCurrentDeviceId } from "@/lib/getCurrentUserDevice";
 import ClassroomsClient from "./ClassroomsClient";
 
 export default async function ClassroomsPage() {
@@ -11,7 +12,14 @@ export default async function ClassroomsPage() {
 
   if (!user) throw new Error("User not authenticated");
 
-  const classrooms = await fetchVisibleClassrooms(supabase, user.id);
+  const deviceId = await getCurrentDeviceId({ userId: user.id });
+  const classrooms = await fetchClassroomOverviews(supabase, user.id, deviceId);
 
-  return <ClassroomsClient initialClassrooms={classrooms} userId={user.id} />;
+  return (
+    <ClassroomsClient
+      initialClassrooms={classrooms}
+      userId={user.id}
+      deviceId={deviceId}
+    />
+  );
 }

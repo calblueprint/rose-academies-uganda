@@ -174,7 +174,7 @@ export default function FilesTable({
   onSelectionChange,
   onRowClick,
 }: FilesTableProps) {
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
   const [sorting, setSorting] = useState<SortingState>([]);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [isMounted, setIsMounted] = useState(false);
@@ -257,9 +257,10 @@ export default function FilesTable({
       getFileTableColumns({
         isDeleting,
         isReordering,
+        language,
         t,
       }),
-    [isDeleting, isReordering, t],
+    [isDeleting, isReordering, language, t],
   );
 
   // TanStack Table owns sorting, row selection, and row rendering helpers.
@@ -334,15 +335,11 @@ export default function FilesTable({
       )}
 
       {sorting.length > 0 && (
-        <style.StatusText>
-          Sorting is active. Clear sorting to drag and manually reorder files.
-        </style.StatusText>
+        <style.StatusText>{t("files.sortingActiveDrag")}</style.StatusText>
       )}
 
       {isSearchActive && (
-        <style.StatusText>
-          Search is active. Clear search to drag and manually reorder files.
-        </style.StatusText>
+        <style.StatusText>{t("files.searchActiveDrag")}</style.StatusText>
       )}
 
       <style.TableCard>
@@ -393,7 +390,7 @@ export default function FilesTable({
             </style.FooterText>
 
             <style.FooterText $column="size">
-              Total size: {formatBytes(totalSizeBytes)}
+              {t("files.totalSize")}: {formatBytes(totalSizeBytes)}
             </style.FooterText>
           </style.FooterRow>
         )}

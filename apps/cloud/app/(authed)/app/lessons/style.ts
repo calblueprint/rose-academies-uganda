@@ -52,7 +52,11 @@ export const PageContainer = styled.div<LayoutVariantProps>`
     $variant === "archive" ? "flex-start" : "stretch"};
 
   gap: ${({ $variant = "dashboard" }) =>
-    $variant === "archive" ? "1.5rem" : "1rem"};
+    $variant === "archive"
+      ? "1.5rem"
+      : $variant === "offline"
+        ? "0.55rem"
+        : "1rem"};
 
   align-self: stretch;
 
@@ -70,19 +74,23 @@ export const PageContainer = styled.div<LayoutVariantProps>`
     $layout === "page" ? "100vh" : "auto"};
 
   padding: ${({ $layout = "page" }) =>
-    $layout === "page" ? "1.38rem clamp(16px, 4vw, 24px) 0" : "0"};
+    $layout === "page" ? "1.38rem clamp(16px, 4vw, 24px) 3rem" : "0"};
 
   background: transparent;
 
   @media (max-width: 760px) {
     padding: ${({ $layout = "page" }) =>
-      $layout === "page" ? "1rem 1rem 0" : "0"};
+      $layout === "page" ? "1rem 1rem 3rem" : "0"};
   }
 `;
 
 export const Title = styled.h1<LayoutVariantProps>`
-  margin: ${({ $layout = "page" }) =>
-    $layout === "embedded" ? "1.25rem 0 0 0" : "0"};
+  margin: ${({ $layout = "page", $variant = "dashboard" }) =>
+    $layout === "embedded"
+      ? $variant === "offline"
+        ? "0.35rem 0 0 0"
+        : "1.25rem 0 0 0"
+      : "0"};
 
   color: ${COLORS.gray100};
 
@@ -287,7 +295,8 @@ export const SearchBarRow = styled.div<VariantProps>`
   align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
-  padding: 0.5rem 0;
+  padding: ${({ $variant = "dashboard" }) =>
+    $variant === "offline" ? "0" : "0.5rem 0"};
   width: 100%;
 
   @media (max-width: 760px) {
@@ -335,12 +344,15 @@ export const ResultsHeader = styled.div`
   margin-top: -0.25rem;
 `;
 
-export const ViewToggleButton = styled.div`
+export const ViewToggleButton = styled.div<VariantProps>`
   display: flex;
-  height: 44px;
-  padding: 10px 12px;
+  height: ${({ $variant = "dashboard" }) =>
+    $variant === "offline" ? "36px" : "44px"};
+  padding: ${({ $variant = "dashboard" }) =>
+    $variant === "offline" ? "7px 10px" : "10px 12px"};
   align-items: center;
-  gap: 10px;
+  gap: ${({ $variant = "dashboard" }) =>
+    $variant === "offline" ? "8px" : "10px"};
   border-radius: 8px;
   border: 1px solid ${COLORS.surfaceBorder};
   background: ${COLORS.white};
@@ -454,8 +466,8 @@ export const Description = styled.p`
   color: ${COLORS.gray60};
   text-overflow: ellipsis;
   font-family: var(--font-primary);
-  font-size: 18px;
+  font-size: 0.95rem;
   font-style: normal;
   font-weight: 400;
-  line-height: normal;
+  line-height: 1.45;
 `;

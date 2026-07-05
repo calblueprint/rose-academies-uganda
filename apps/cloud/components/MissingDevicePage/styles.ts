@@ -223,6 +223,14 @@ export const ModalSection = styled.section`
     font-weight: 700;
     line-height: 1.25;
   }
+
+  p {
+    margin: 0;
+    color: ${COLORS.gray60};
+    font-family: var(--font-primary);
+    font-size: 0.95rem;
+    line-height: 1.45;
+  }
 `;
 
 export const ModalStepList = styled.ul`

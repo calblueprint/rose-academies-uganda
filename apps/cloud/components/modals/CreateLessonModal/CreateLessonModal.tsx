@@ -7,6 +7,7 @@ import { getLessonFileSizeError, uploadFile } from "@/api/supabase/files";
 import FileTypeBadge from "@/components/FileTypeBadge";
 import { DataContext } from "@/context/DataContext";
 import { getCurrentUserOrThrow } from "@/lib/getCurrentUser";
+import { useLanguage } from "@/lib/i18n";
 import { IconSvgs } from "@/lib/icons";
 import { randomPresetImage } from "@/lib/lessonPresets";
 import {
@@ -21,6 +22,7 @@ import {
   ClassroomDropdownAction,
   ClassroomDropdownEmpty,
   ClassroomManageButton,
+  ClassroomPrimaryButton,
   ClassroomSecondaryButton,
   CloseButton,
   CreateButton,
@@ -139,6 +141,7 @@ export default function CreateLessonModal({
   onClose,
   deviceId = null,
 }: Props) {
+  const { t } = useLanguage();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [files, setFiles] = useState<FileEntry[]>([]);
@@ -177,15 +180,15 @@ export default function CreateLessonModal({
       : 0;
   const submitStatusText =
     files.length === 0
-      ? "Creating lesson..."
+      ? t("lessonModal.creatingLesson")
       : completedUploadCount >= files.length
-        ? "Finishing lesson..."
-        : `Uploading file ${Math.min(completedUploadCount + 1, files.length)} of ${files.length}...`;
+        ? t("lessonModal.finishingLesson")
+        : `${t("lessonModal.uploadingFile")} ${Math.min(completedUploadCount + 1, files.length)} ${t("lessons.of")} ${files.length}...`;
   const createButtonText = isSubmitting
     ? files.length > 0
-      ? `Uploading ${Math.min(completedUploadCount + 1, files.length)} of ${files.length}...`
-      : "Creating..."
-    : "Create lesson";
+      ? `${t("lessonModal.uploading")} ${Math.min(completedUploadCount + 1, files.length)} ${t("lessons.of")} ${files.length}...`
+      : t("common.creating")
+    : t("lessons.createLower");
   // Lessons need both files and a classroom before they can be sent to sync;
   // otherwise the Pi would receive content that cannot be shown usefully.
   const canSendToSync = hasLinkedHub && hasFiles && hasClassroom;
@@ -285,12 +288,12 @@ export default function CreateLessonModal({
     const normalizedCode = normalizeJoinCode(newClassroomCode);
 
     if (!trimmedName) {
-      setClassroomError("Classroom name is required.");
+      setClassroomError(t("lessonModal.classroomNameRequired"));
       return;
     }
 
     if (!JOIN_CODE_PATTERN.test(normalizedCode)) {
-      setClassroomError("Use exactly 6 letters or numbers.");
+      setClassroomError(t("lessonModal.joinCodeLength"));
       return;
     }
 
@@ -299,7 +302,7 @@ export default function CreateLessonModal({
 
     try {
       if (await isCodeUsedElsewhere(normalizedCode)) {
-        setClassroomError("That join code is already used.");
+        setClassroomError(t("lessonModal.joinCodeUsed"));
         return;
       }
 
@@ -332,7 +335,7 @@ export default function CreateLessonModal({
       resetClassroomCreateForm();
     } catch (err) {
       console.error("Failed to create classroom:", err);
-      setClassroomError("Unable to create classroom. Please try again.");
+      setClassroomError(t("lessonModal.createClassroomFailed"));
     } finally {
       setIsClassroomSaving(false);
     }
@@ -425,7 +428,7 @@ export default function CreateLessonModal({
 
       if (existingLesson) {
         setTitleError(
-          `You already have a lesson called '${trimmedTitle}'. Try a different name.`,
+          `${t("lessonModal.duplicateLessonPrefix")} '${trimmedTitle}'. ${t("lessonModal.duplicateLessonSuffix")}`,
         );
         setIsSubmitting(false);
         return;
@@ -443,9 +446,7 @@ export default function CreateLessonModal({
         if (deviceError) throw deviceError;
 
         if (!device?.id) {
-          setError(
-            "Link a Classroom Hub before sending lessons to sync, or turn off sync for now.",
-          );
+          setError(t("lessonModal.linkHubBeforeAdd"));
           setIsSubmitting(false);
           return;
         }
@@ -504,9 +505,7 @@ export default function CreateLessonModal({
 
       if (sendToOffline) {
         if (snapshot.length === 0) {
-          throw new Error(
-            "Cannot send lesson to offline library without files.",
-          );
+          throw new Error(t("lessonModal.cannotAddWithoutFiles"));
         }
         // DeviceLessons is the assignment queue consumed by the Pi sync process.
         // A pending row means the lesson should be downloaded on the next sync.
@@ -542,7 +541,7 @@ export default function CreateLessonModal({
         ),
       );
 
-      setError("Failed to create lesson. Please try again.");
+      setError(t("lessonModal.createFailed"));
       setIsSubmitting(false);
     }
   }
@@ -551,12 +550,12 @@ export default function CreateLessonModal({
     <Overlay onClick={handleClose}>
       <ModalCard onClick={e => e.stopPropagation()}>
         <ModalHeader>
-          <ModalTitle>Create new lesson</ModalTitle>
+          <ModalTitle>{t("lessonModal.createTitle")}</ModalTitle>
           <CloseButton
             type="button"
             onClick={handleClose}
             disabled={isSubmitting}
-            aria-label="Close modal"
+            aria-label={t("common.closeModal")}
           >
             <svg
               width="16"
@@ -577,11 +576,11 @@ export default function CreateLessonModal({
 
         <FieldSection>
           <FieldLabel htmlFor="lesson-title">
-            Name <RequiredAsterisk>*</RequiredAsterisk>
+            {t("lessonModal.name")} <RequiredAsterisk>*</RequiredAsterisk>
           </FieldLabel>
           <TextInput
             id="lesson-title"
-            placeholder="Lesson title"
+            placeholder={t("lessonModal.lessonTitlePlaceholder")}
             value={title}
             onChange={e => {
               setTitle(e.target.value);
@@ -593,10 +592,12 @@ export default function CreateLessonModal({
         </FieldSection>
 
         <FieldSection>
-          <FieldLabel htmlFor="lesson-description">Description</FieldLabel>
+          <FieldLabel htmlFor="lesson-description">
+            {t("lessonModal.description")}
+          </FieldLabel>
           <TextArea
             id="lesson-description"
-            placeholder="Brief description of the lesson"
+            placeholder={t("lessonModal.descriptionPlaceholder")}
             value={description}
             onChange={e => setDescription(e.target.value)}
             disabled={isSubmitting}
@@ -606,7 +607,9 @@ export default function CreateLessonModal({
 
         <FieldSection>
           <AssignedVillageRow>
-            <FieldLabel style={{ marginBottom: 0 }}>Classroom</FieldLabel>
+            <FieldLabel style={{ marginBottom: 0 }}>
+              {t("common.classroom")}
+            </FieldLabel>
 
             <VillageDropdownWrapper ref={villageDropdownRef}>
               <VillageSelectTrigger
@@ -617,8 +620,8 @@ export default function CreateLessonModal({
               >
                 <VillageSelectTriggerText>
                   {selectedGroupIds.length > 0
-                    ? `${selectedGroupIds.length} selected`
-                    : "Select"}
+                    ? `${selectedGroupIds.length} ${t("common.selected")}`
+                    : t("lessonModal.select")}
                 </VillageSelectTriggerText>
 
                 <svg
@@ -679,7 +682,7 @@ export default function CreateLessonModal({
                     })
                   ) : (
                     <ClassroomDropdownEmpty>
-                      No classrooms yet.
+                      {t("lessonModal.noClassrooms")}
                     </ClassroomDropdownEmpty>
                   )}
 
@@ -692,7 +695,7 @@ export default function CreateLessonModal({
                     }}
                     disabled={isSubmitting || isClassroomSaving}
                   >
-                    New classroom
+                    {t("lessonModal.newClassroom")}
                   </ClassroomDropdownAction>
 
                   <ClassroomManageButton
@@ -702,7 +705,7 @@ export default function CreateLessonModal({
                       router.push("/app/classrooms");
                     }}
                   >
-                    Manage classrooms
+                    {t("lessons.manageClassrooms")}
                   </ClassroomManageButton>
                 </VillageDropdownMenu>
               )}
@@ -713,15 +716,15 @@ export default function CreateLessonModal({
             <ClassroomCreatePanel ref={classroomCreatePanelRef}>
               <ClassroomCreateRow>
                 <TextInput
-                  placeholder="Classroom name"
+                  placeholder={t("classrooms.name")}
                   value={newClassroomName}
                   onChange={e => setNewClassroomName(e.target.value)}
                   disabled={isSubmitting || isClassroomSaving}
                 />
                 <JoinCodeField>
                   <JoinCodeInput
-                    aria-label="Student join code"
-                    placeholder="Student join code"
+                    aria-label={t("setupGuide.studentJoinCode")}
+                    placeholder={t("setupGuide.studentJoinCode")}
                     maxLength={JOIN_CODE_LENGTH}
                     value={newClassroomCode}
                     onChange={e =>
@@ -732,7 +735,7 @@ export default function CreateLessonModal({
                   <JoinCodeActions>
                     <JoinCodeIconButton
                       type="button"
-                      aria-label="Generate new student join code"
+                      aria-label={t("setupGuide.regenerateJoinCode")}
                       onClick={() => setNewClassroomCode(generateJoinCode())}
                       disabled={isSubmitting || isClassroomSaving}
                     >
@@ -740,7 +743,7 @@ export default function CreateLessonModal({
                     </JoinCodeIconButton>
                     <JoinCodeInfoButton
                       type="button"
-                      aria-label="What is a student join code?"
+                      aria-label={t("lessonModal.studentJoinCodeInfo")}
                     >
                       <svg
                         aria-hidden="true"
@@ -770,8 +773,7 @@ export default function CreateLessonModal({
                         />
                       </svg>
                       <InfoTooltip role="tooltip">
-                        Students enter this code on the Classroom Hub join page
-                        to see this classroom&apos;s lessons.
+                        {t("lessonModal.studentJoinCodeTooltip")}
                       </InfoTooltip>
                     </JoinCodeInfoButton>
                   </JoinCodeActions>
@@ -784,15 +786,17 @@ export default function CreateLessonModal({
                   onClick={resetClassroomCreateForm}
                   disabled={isSubmitting || isClassroomSaving}
                 >
-                  Cancel
+                  {t("common.cancel")}
                 </ClassroomSecondaryButton>
-                <CreateButton
+                <ClassroomPrimaryButton
                   type="button"
                   onClick={handleCreateClassroom}
                   disabled={isSubmitting || isClassroomSaving}
                 >
-                  {isClassroomSaving ? "Creating..." : "Create classroom"}
-                </CreateButton>
+                  {isClassroomSaving
+                    ? t("common.creating")
+                    : t("setupGuide.createClassroom")}
+                </ClassroomPrimaryButton>
               </ClassroomCreateActions>
 
               {classroomError && <ErrorText>{classroomError}</ErrorText>}
@@ -801,7 +805,7 @@ export default function CreateLessonModal({
         </FieldSection>
 
         <FieldSection>
-          <FieldLabel>Upload Files</FieldLabel>
+          <FieldLabel>{t("lessonModal.uploadFiles")}</FieldLabel>
 
           <DropZone
             $isDragging={isDragging}
@@ -841,10 +845,8 @@ export default function CreateLessonModal({
               />
             </svg>
 
-            <DropZoneText>Choose files or drag files here</DropZoneText>
-            <DropZoneSubtext>
-              JPEG, PNG, PDF, MP4, PowerPoint, and APK formats accepted
-            </DropZoneSubtext>
+            <DropZoneText>{t("lessonModal.chooseFiles")}</DropZoneText>
+            <DropZoneSubtext>{t("lessonModal.fileFormats")}</DropZoneSubtext>
 
             <BrowseButton
               type="button"
@@ -854,7 +856,7 @@ export default function CreateLessonModal({
                 fileInputRef.current?.click();
               }}
             >
-              Browse files
+              {t("files.upload")}
             </BrowseButton>
 
             <input
@@ -881,13 +883,13 @@ export default function CreateLessonModal({
                       <FileSubtext>
                         <span>{formatBytes(entry.file.size)}</span>
                         {entry.status === "uploading" && (
-                          <span>&nbsp;• Uploading...</span>
+                          <span>&nbsp;• {t("lessonModal.uploading")}...</span>
                         )}
                         {entry.status === "done" && (
-                          <span>&nbsp;• Completed</span>
+                          <span>&nbsp;• {t("lessonModal.completed")}</span>
                         )}
                         {entry.status === "error" && (
-                          <span>&nbsp;• Failed</span>
+                          <span>&nbsp;• {t("lessonModal.failed")}</span>
                         )}
                       </FileSubtext>
                     </FileInfo>
@@ -896,7 +898,7 @@ export default function CreateLessonModal({
                       <DeleteFileButton
                         type="button"
                         onClick={() => removeFile(entry.id)}
-                        aria-label={`Remove ${entry.file.name}`}
+                        aria-label={`${t("lessonModal.removeFile")} ${entry.file.name}`}
                       >
                         <svg
                           width="14"
@@ -930,11 +932,11 @@ export default function CreateLessonModal({
 
         <OfflineRow>
           <OfflineTextColumn>
-            <OfflineLabel>Save to Classroom Hub</OfflineLabel>
+            <OfflineLabel>{t("sync.addToHub")}</OfflineLabel>
             <OfflineSupportingText $flashError={shouldFlashSyncRequirements}>
               {hasLinkedHub
-                ? "Make this lesson available offline after the next hub sync"
-                : "Link a Classroom Hub before saving lessons offline"}
+                ? t("lessonModal.addToHubAvailable")
+                : t("lessonModal.addToHubNeedsHub")}
             </OfflineSupportingText>
           </OfflineTextColumn>
 
@@ -984,7 +986,7 @@ export default function CreateLessonModal({
             onClick={handleClose}
             disabled={isSubmitting}
           >
-            Cancel
+            {t("common.cancel")}
           </CancelButton>
           <CreateButton
             type="button"

@@ -1,30 +1,62 @@
 import styled from "styled-components";
 import COLORS from "@/styles/colors";
 
-export const Pill = styled.span<{ $status: "available" | "pending" }>`
+export const Pill = styled.span<{
+  $status: "available" | "pending" | "pending_removal" | "dashboard";
+}>`
   display: inline-flex;
   align-items: center;
-  gap: 0.375rem;
+  flex-shrink: 0;
+  gap: 0.25rem;
+  white-space: nowrap;
 
-  padding: 0.25rem 0.6rem;
-  border-radius: 17.38px;
+  padding: 0.15rem 0.45rem;
+  border-radius: 999px;
+  border: 1px solid
+    ${({ $status }) =>
+      $status === "available"
+        ? COLORS.mintGreenBorder
+        : $status === "pending" || $status === "pending_removal"
+          ? COLORS.orange100
+          : COLORS.surfaceBorder};
 
-  font-size: var(--font-h6);
-  line-height: var(--lh-h6);
-  font-weight: 400;
+  font-size: 0.72rem;
+  line-height: 1.2;
+  font-weight: 700;
 
   background: ${({ $status }) =>
-    $status === "available" ? COLORS.green10 : COLORS.orange20};
+    $status === "available"
+      ? COLORS.green10
+      : $status === "pending" || $status === "pending_removal"
+        ? COLORS.orange20
+        : COLORS.gray10};
 
   color: ${({ $status }) =>
-    $status === "available" ? COLORS.evergreen : COLORS.orange100};
+    $status === "available"
+      ? COLORS.activeGreen
+      : $status === "pending" || $status === "pending_removal"
+        ? COLORS.orange100
+        : COLORS.gray80};
 `;
 
-export const Dot = styled.div<{ $status: "available" | "pending" }>`
-  width: 0.5rem;
-  height: 0.5rem;
+export const CheckMark = styled.span`
+  color: ${COLORS.activeGreen};
+  font-size: 0.82em;
+  font-weight: 900;
+  line-height: 1;
+`;
+
+export const Dot = styled.div<{
+  $status: "available" | "pending" | "pending_removal" | "dashboard";
+}>`
+  width: 0.36rem;
+  height: 0.36rem;
   border-radius: 50%;
 
   background: ${({ $status }) =>
-    $status === "available" ? COLORS.evergreen : COLORS.orange100};
+    $status === "available"
+      ? COLORS.evergreen
+      : $status === "pending" || $status === "pending_removal"
+        ? COLORS.orange100
+        : COLORS.gray60};
 `;

@@ -32,6 +32,7 @@ import {
   InputActionRow,
   InstructionList,
   InstructionText,
+  OrientationCard,
   PairingError,
   PairingForm,
   PairingHelp,
@@ -42,10 +43,12 @@ import {
   ProgressItem,
   ProgressList,
   ProgressStepButton,
+  SafetyCard,
   SecondaryInlineButton,
+  SetupSystemItem,
+  SetupSystemMap,
   StepActionRow,
   StepBackButton,
-  StepBadge,
   StepCount,
   StepNavRow,
   StepNextButton,
@@ -75,13 +78,14 @@ type DashboardSetupWizardProps = {
   deviceLastSyncedAt: string | null;
   deviceLastSyncedLabel?: string | null;
   userId: string;
+  classroomCount: number;
   syncedCount: number;
   pendingSyncCount: number;
   onFinish?: () => void;
 };
 
 const EMPHASIZED_TERMS =
-  /(\bRose-Setup-XXXX\b|\brosehub1\b|http:\/\/rosehub\.local\/setup)/g;
+  /(http:\/\/rosehub\.local\/setup|http:\/\/10\.42\.0\.1\/setup|http:\/\/10\.42\.0\.1\/join|\bRose-Hub-XXXX\b|rosehub!)/g;
 
 function renderInstruction(instruction: string) {
   return instruction.split(EMPHASIZED_TERMS).map(part => {
@@ -108,8 +112,14 @@ function interpolate(
   );
 }
 
-const SKIPPABLE_STEP_INDEXES = new Set([1, 2, 3]);
+const SKIPPABLE_STEP_INDEXES = new Set([0, 1, 2, 3]);
 const SETUP_FINISH_HREF = "/app/lessons";
+const STEP_SAFETY_KEYS = [
+  "setupGuide.stepSafetyHub",
+  "setupGuide.stepSafetyClassroom",
+  "setupGuide.stepSafetyLesson",
+  "setupGuide.stepSafetySync",
+];
 
 function generateJoinCode() {
   const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -136,6 +146,7 @@ export default function DashboardSetupWizard({
   deviceLastSyncedAt,
   deviceLastSyncedLabel,
   userId,
+  classroomCount,
   syncedCount,
   pendingSyncCount,
   onFinish,
@@ -147,11 +158,6 @@ export default function DashboardSetupWizard({
     key: string,
     replacements: Record<string, string | number> = {},
   ) => interpolate(t(key), replacements);
-  const firstIncompleteIndex = useMemo(() => {
-    const index = steps.findIndex(item => !item.done);
-    return index === -1 ? steps.length - 1 : index;
-  }, [steps]);
-
   const [hasStarted, setHasStarted] = useState(false);
   const [manualStepIndex, setManualStepIndex] = useState<number | null>(null);
   const [pairingCode, setPairingCode] = useState("");
@@ -171,11 +177,37 @@ export default function DashboardSetupWizard({
   const [skippedStepIndexes, setSkippedStepIndexes] = useState<Set<number>>(
     () => new Set(),
   );
+  const [localClassroomCount, setLocalClassroomCount] =
+    useState(classroomCount);
+  const effectiveSteps = useMemo(
+    () =>
+      steps.map((step, index) => {
+        if (index !== 1) return step;
+
+        return {
+          ...step,
+          done: localClassroomCount > 0,
+          detailKey:
+            localClassroomCount > 0
+              ? localClassroomCount === 1
+                ? "setupGuide.stepClassroom.detailDoneSingular"
+                : "setupGuide.stepClassroom.detailDonePlural"
+              : "setupGuide.stepClassroom.detail",
+          detailParams: { count: localClassroomCount },
+        };
+      }),
+    [localClassroomCount, steps],
+  );
+  const firstIncompleteIndex = useMemo(() => {
+    const index = effectiveSteps.findIndex(item => !item.done);
+    return index === -1 ? effectiveSteps.length - 1 : index;
+  }, [effectiveSteps]);
   const hubAlreadyLinked = steps[0]?.done === true;
-  const firstStepAfterWelcome = hubAlreadyLinked && steps.length > 1 ? 1 : 0;
+  const firstStepAfterWelcome =
+    hubAlreadyLinked && effectiveSteps.length > 1 ? 1 : 0;
   const currentStepIndex = manualStepIndex ?? firstIncompleteIndex;
-  const currentStep = steps[currentStepIndex];
-  const isFinalStep = currentStepIndex === steps.length - 1;
+  const currentStep = effectiveSteps[currentStepIndex];
+  const isFinalStep = currentStepIndex === effectiveSteps.length - 1;
   const lastSuccessfulSyncText =
     deviceLastSyncedLabel ?? (deviceLastSyncedAt ? t("common.recorded") : null);
   const currentStepTitle = tr(currentStep.titleKey, currentStep.titleParams);
@@ -196,7 +228,9 @@ export default function DashboardSetupWizard({
       return;
     }
 
-    setManualStepIndex(Math.min(steps.length - 1, currentStepIndex + 1));
+    setManualStepIndex(
+      Math.min(effectiveSteps.length - 1, currentStepIndex + 1),
+    );
   }
 
   function skipCurrentStep() {
@@ -211,7 +245,9 @@ export default function DashboardSetupWizard({
       return;
     }
 
-    setManualStepIndex(Math.min(steps.length - 1, currentStepIndex + 1));
+    setManualStepIndex(
+      Math.min(effectiveSteps.length - 1, currentStepIndex + 1),
+    );
   }
 
   async function handlePairingSubmit(event: FormEvent<HTMLFormElement>) {
@@ -254,11 +290,11 @@ export default function DashboardSetupWizard({
     }
 
     setCreatedClassroom(result.classroom);
+    setLocalClassroomCount(count => count + 1);
     setClassroomName("");
     setClassroomJoinCode(generateJoinCode());
     await data.refresh();
     setIsCreateClassroomOpen(false);
-    setManualStepIndex(2);
     router.refresh();
     setIsCreatingClassroom(false);
   }
@@ -280,6 +316,10 @@ export default function DashboardSetupWizard({
     SKIPPABLE_STEP_INDEXES.has(currentStepIndex) &&
     !currentStep.done &&
     !skippedStepIndexes.has(currentStepIndex);
+  const canAdvanceCurrentStep =
+    currentStepIndex !== 0 ||
+    currentStep.done ||
+    skippedStepIndexes.has(currentStepIndex);
 
   return (
     <DashboardPage>
@@ -290,7 +330,7 @@ export default function DashboardSetupWizard({
             <StepCount>
               {tr("setupGuide.stepCount", {
                 current: currentStepIndex + 1,
-                total: steps.length,
+                total: effectiveSteps.length,
               })}
             </StepCount>
           </BrandRow>
@@ -305,6 +345,20 @@ export default function DashboardSetupWizard({
                 ? t("setupGuide.welcomeLinked")
                 : t("setupGuide.welcomeIntro")}
             </CurrentStepText>
+            <SetupSystemMap>
+              <SetupSystemItem>
+                <strong>{t("setupGuide.mapDashboardTitle")}</strong>
+                <span>{t("setupGuide.mapDashboardText")}</span>
+              </SetupSystemItem>
+              <SetupSystemItem>
+                <strong>{t("setupGuide.mapHubTitle")}</strong>
+                <span>{t("setupGuide.mapHubText")}</span>
+              </SetupSystemItem>
+              <SetupSystemItem>
+                <strong>{t("setupGuide.mapStudentsTitle")}</strong>
+                <span>{t("setupGuide.mapStudentsText")}</span>
+              </SetupSystemItem>
+            </SetupSystemMap>
             <WelcomeChecklist>
               <span>{t("setupGuide.checkDashboardOpen")}</span>
               {!hubAlreadyLinked && (
@@ -327,11 +381,16 @@ export default function DashboardSetupWizard({
           </WelcomePanel>
         ) : (
           <>
+            <OrientationCard>
+              <strong>{t("setupGuide.orientationTitle")}</strong>
+              <span>{t("setupGuide.orientationText")}</span>
+            </OrientationCard>
+
             <ProgressList
-              $count={steps.length}
+              $count={effectiveSteps.length}
               aria-label={t("setupGuide.progressLabel")}
             >
-              {steps.map((item, index) => (
+              {effectiveSteps.map((item, index) => (
                 <ProgressItem
                   key={item.titleKey}
                   $active={index === currentStepIndex}
@@ -353,12 +412,6 @@ export default function DashboardSetupWizard({
             </ProgressList>
 
             <CurrentStepCard>
-              <StepBadge>
-                {tr("setupGuide.stepBadge", {
-                  step: currentStepIndex + 1,
-                  label: currentStepShortLabel,
-                })}
-              </StepBadge>
               <CurrentStepTitle>{currentStepTitle}</CurrentStepTitle>
               <CurrentStepText>{currentStepDetail}</CurrentStepText>
               {currentStep.instructionsKeys && (
@@ -375,6 +428,13 @@ export default function DashboardSetupWizard({
               )}
               {currentStep.helperKey && (
                 <HelperCard>{t(currentStep.helperKey)}</HelperCard>
+              )}
+              {currentStepIndex !== 0 && (
+                <SafetyCard>
+                  {t(
+                    STEP_SAFETY_KEYS[currentStepIndex] ?? "setupGuide.safeNote",
+                  )}
+                </SafetyCard>
               )}
 
               {currentStepIndex === 0 && !currentStep.done ? (
@@ -399,7 +459,9 @@ export default function DashboardSetupWizard({
                   />
                   <PairingHelp>
                     {t("setupGuide.pairingHelp")}{" "}
-                    <InlineCode>http://rosehub.local/setup</InlineCode>.
+                    <InlineCode>http://rosehub.local/setup</InlineCode>.{" "}
+                    {t("setupGuide.pairingFallbackHelp")}{" "}
+                    <InlineCode>http://10.42.0.1/setup</InlineCode>.
                   </PairingHelp>
                   {pairingError && <PairingError>{pairingError}</PairingError>}
                   <PrimaryButton type="submit" disabled={isPairing}>
@@ -429,6 +491,14 @@ export default function DashboardSetupWizard({
                         ? t("setupGuide.createAnotherClassroom")
                         : t("setupGuide.createClassroom")}
                     </PrimaryButton>
+                    {createdClassroom && (
+                      <SecondaryInlineButton
+                        type="button"
+                        onClick={goToNextStep}
+                      >
+                        {t("common.next")}
+                      </SecondaryInlineButton>
+                    )}
                   </StepActionRow>
                 </>
               ) : currentStepIndex === 2 ? (
@@ -467,7 +537,11 @@ export default function DashboardSetupWizard({
                     </span>
                   </SyncStepStatus>
                   <SyncInlineGrid>
-                    <CloudSyncButton userId={userId} deviceId={deviceId} />
+                    <CloudSyncButton
+                      userId={userId}
+                      deviceId={deviceId}
+                      variant="setup"
+                    />
                     <SyncSummaryCard
                       userId={userId}
                       deviceId={deviceId}
@@ -498,7 +572,11 @@ export default function DashboardSetupWizard({
                     {t("setupGuide.skipForNow")}
                   </SecondaryInlineButton>
                 )}
-                <StepNextButton type="button" onClick={goToNextStep}>
+                <StepNextButton
+                  type="button"
+                  onClick={goToNextStep}
+                  disabled={!canAdvanceCurrentStep}
+                >
                   {isFinalStep ? t("setupGuide.finishSetup") : t("common.next")}
                 </StepNextButton>
               </StepNavRow>

@@ -24,6 +24,15 @@ export default async function AuthedLayout({
   // A linked Classroom Hub is only required for sync/device-specific actions.
   // New educators can prepare lessons and classrooms before their hub is ready.
   const deviceId = await getCurrentDeviceId({ userId: user.id });
+  const { data: pendingHubLesson } = deviceId
+    ? await supabase
+        .from("DeviceLessons")
+        .select("lesson_id")
+        .eq("device_id", deviceId)
+        .in("status", ["pending", "pending_removal"])
+        .limit(1)
+        .maybeSingle()
+    : { data: null };
 
   const { data, error } = await supabase
     .from("Profiles")
@@ -43,6 +52,7 @@ export default async function AuthedLayout({
         displayName={displayName}
         email={user.email ?? null}
         deviceId={deviceId}
+        hasHubUpdates={Boolean(pendingHubLesson)}
       />
       {children}
     </DataContextProvider>

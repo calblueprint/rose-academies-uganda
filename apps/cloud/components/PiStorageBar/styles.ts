@@ -43,13 +43,34 @@ export const ProgressFill = styled.div<{ $percent: number }>`
 
 export const StorageInfo = styled.div`
   display: flex;
-  height: 18px;
+  min-height: 18px;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   align-self: stretch;
+  gap: 0.75rem;
+
+  > * {
+    min-width: 0;
+  }
+
+  > *:last-child {
+    text-align: right;
+  }
+
+  @media (max-width: 520px) {
+    flex-direction: column;
+    gap: 0.25rem;
+
+    > *:last-child {
+      text-align: left;
+    }
+  }
 `;
 
 export const StatusText = styled(Subtitle2).attrs({
   $color: COLORS.gray60,
   $fontWeight: 500,
-})``;
+})`
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+`;

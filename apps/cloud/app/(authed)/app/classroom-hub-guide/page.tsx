@@ -78,7 +78,7 @@ export default function ClassroomHubGuidePage() {
       </GuideHeader>
 
       <DiagramCard>
-        <DiagramGrid aria-label="Classroom Hub workflow overview">
+        <DiagramGrid aria-label={t("guide.workflowOverview")}>
           <DiagramStep>
             <DiagramLabel>{t("guide.flowDashboard")}</DiagramLabel>
             <SectionText>{t("guide.flowDashboardText")}</SectionText>

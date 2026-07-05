@@ -7,15 +7,16 @@ import { Button, Label } from "./styles";
 
 type Props = {
   onClick: () => void;
+  label?: string;
 };
 
-export default function CreateButton({ onClick }: Props) {
+export default function CreateButton({ onClick, label }: Props) {
   const { t } = useLanguage();
 
   return (
     <Button type="button" onClick={onClick}>
       {IconSvgs.plus}
-      <Label>{t("lessons.create")}</Label>
+      <Label>{label ?? t("lessons.create")}</Label>
     </Button>
   );
 }

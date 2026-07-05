@@ -13,14 +13,18 @@ export function formatBytes(bytes: number) {
   return `${value.toFixed(value >= 10 || exponent === 0 ? 0 : 1)} ${units[exponent]}`;
 }
 
-export function formatDate(dateString: string) {
+export function formatDate(dateString: string, locale?: string) {
   const date = new Date(dateString);
 
   if (Number.isNaN(date.getTime())) {
     return "—";
   }
 
-  return date.toLocaleDateString();
+  return date.toLocaleDateString(locale, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
 }
 
 export function haveSameIds(a: string[], b: string[]) {

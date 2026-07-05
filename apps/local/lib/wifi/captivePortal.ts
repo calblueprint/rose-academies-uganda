@@ -9,7 +9,12 @@ function getCaptivePortalUrl() {
 }
 
 export function redirectToCaptivePortal() {
-  return NextResponse.redirect(getCaptivePortalUrl(), 302);
+  return new NextResponse(null, {
+    status: 204,
+    headers: {
+      "Cache-Control": "no-store",
+    },
+  });
 }
 
 export function captivePortalApi() {
@@ -17,7 +22,7 @@ export function captivePortalApi() {
 
   return NextResponse.json(
     {
-      captive: true,
+      captive: false,
       "user-portal-url": portalUrl,
       "venue-info-url": "http://rosehub.local/join",
     },

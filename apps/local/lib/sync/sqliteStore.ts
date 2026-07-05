@@ -97,41 +97,33 @@ export function insertIntoSQLite(
   lessonFiles: LessonFileRow[],
   lessonGroups: LessonGroupRow[],
 ) {
-  // Each entity type is inserted in a transaction so partial writes do not leave
-  // a table halfway updated if one row fails.
-  const insertGroups = db.transaction((rows: Group[]) => {
+  // The cloud payload is authoritative for this hub. Apply the full graph in
+  // one transaction so old lesson/classroom links cannot violate foreign keys
+  // while rows are being replaced.
+  const replaceAssignedGraph = db.transaction(() => {
+    db.prepare("DELETE FROM lesson_files").run();
+    db.prepare("DELETE FROM lesson_groups").run();
+
     const stmt = db.prepare(
       "INSERT OR REPLACE INTO groups (id, name, join_code) VALUES (?, ?, ?)",
     );
-    for (const r of rows) stmt.run(r.id, r.name, r.join_code);
-  });
-  insertGroups(groups);
+    for (const r of groups) stmt.run(r.id, r.name, r.join_code);
 
-  if (groups.length > 0) {
-    const placeholders = groups.map(() => "?").join(",");
-    db.prepare(`DELETE FROM groups WHERE id NOT IN (${placeholders})`).run(
-      ...groups.map(group => group.id),
-    );
-  } else {
-    db.prepare("DELETE FROM groups").run();
-  }
-
-  const insertLessons = db.transaction((rows: Lesson[]) => {
-    const stmt = db.prepare(
+    const lessonStmt = db.prepare(
       "INSERT OR REPLACE INTO lessons (id, name, description, image_path, group_id) VALUES (?, ?, ?, ?, ?)",
     );
-    for (const r of rows) {
-      stmt.run(r.id, r.name, r.description, r.image_path, r.group_id);
+    for (const r of lessons) {
+      lessonStmt.run(r.id, r.name, r.description, r.image_path, r.group_id);
     }
-  });
-  insertLessons(lessons);
 
-  const insertFiles = db.transaction((rows: FileRow[]) => {
-    const stmt = db.prepare(
+    const lessonIds = new Set(lessons.map(lesson => lesson.id));
+    const fileStmt = db.prepare(
       "INSERT OR REPLACE INTO files (id, name, size_bytes, storage_path, hash, created_at, updated_at, lesson_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
     );
-    for (const r of rows) {
-      stmt.run(
+    for (const r of files) {
+      const lessonId =
+        r.lesson_id !== null && lessonIds.has(r.lesson_id) ? r.lesson_id : null;
+      fileStmt.run(
         r.id,
         r.name,
         r.size_bytes,
@@ -139,37 +131,53 @@ export function insertIntoSQLite(
         r.hash,
         r.created_at ?? null,
         r.updated_at ?? r.created_at ?? null,
-        r.lesson_id,
+        lessonId,
       );
     }
-  });
-  insertFiles(files);
 
-  const insertLessonFiles = db.transaction((rows: LessonFileRow[]) => {
-    const stmt = db.prepare(
+    if (files.length > 0) {
+      const filePlaceholders = files.map(() => "?").join(",");
+      db.prepare(`DELETE FROM files WHERE id NOT IN (${filePlaceholders})`).run(
+        ...files.map(file => file.id),
+      );
+    } else {
+      db.prepare("DELETE FROM files").run();
+    }
+
+    if (lessons.length > 0) {
+      const lessonPlaceholders = lessons.map(() => "?").join(",");
+      db.prepare(
+        `DELETE FROM lessons WHERE id NOT IN (${lessonPlaceholders})`,
+      ).run(...lessons.map(lesson => lesson.id));
+    } else {
+      db.prepare("DELETE FROM lessons").run();
+    }
+
+    if (groups.length > 0) {
+      const groupPlaceholders = groups.map(() => "?").join(",");
+      db.prepare(
+        `DELETE FROM groups WHERE id NOT IN (${groupPlaceholders})`,
+      ).run(...groups.map(group => group.id));
+    } else {
+      db.prepare("DELETE FROM groups").run();
+    }
+
+    const lessonFileStmt = db.prepare(
       "INSERT OR REPLACE INTO lesson_files (lesson_id, file_id) VALUES (?, ?)",
     );
-    for (const r of rows) {
-      stmt.run(r.lesson_id, r.file_id);
+    for (const r of lessonFiles) {
+      lessonFileStmt.run(r.lesson_id, r.file_id);
     }
-  });
 
-  // LessonFiles reflects the current cloud assignment graph, so we replace the
-  // local join table before inserting the latest links.
-  db.prepare("DELETE FROM lesson_files").run();
-  insertLessonFiles(lessonFiles);
-
-  const insertLessonGroups = db.transaction((rows: LessonGroupRow[]) => {
-    const stmt = db.prepare(
+    const lessonGroupStmt = db.prepare(
       "INSERT OR REPLACE INTO lesson_groups (lesson_id, group_id) VALUES (?, ?)",
     );
-    for (const r of rows) {
-      stmt.run(r.lesson_id, r.group_id);
+    for (const r of lessonGroups) {
+      lessonGroupStmt.run(r.lesson_id, r.group_id);
     }
   });
 
-  db.prepare("DELETE FROM lesson_groups").run();
-  insertLessonGroups(lessonGroups);
+  replaceAssignedGraph();
 }
 
 export function startLocalSyncRun(db: DB, startedAt: string) {

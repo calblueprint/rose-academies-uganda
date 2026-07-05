@@ -74,7 +74,7 @@ export async function verifyOfflineReadiness(): Promise<OfflineReadinessReport> 
 
     if (requiredTables.some(table => !tables.has(table))) {
       return emptyReport(
-        "The offline library has not completed its first sync.",
+        "The Student Classroom has not downloaded its first classroom files.",
       );
     }
 
@@ -197,7 +197,7 @@ export async function verifyOfflineReadiness(): Promise<OfflineReadinessReport> 
       issues.push({
         type: "database",
         message:
-          "At least one classroom and lesson must be synced for offline use.",
+          "At least one classroom and lesson must be ready for offline use.",
       });
     }
 
@@ -216,8 +216,8 @@ export async function verifyOfflineReadiness(): Promise<OfflineReadinessReport> 
   } catch (error) {
     return emptyReport(
       error instanceof Error
-        ? `Unable to verify the offline library: ${error.message}`
-        : "Unable to verify the offline library.",
+        ? `Unable to verify the Student Classroom: ${error.message}`
+        : "Unable to verify the Student Classroom.",
     );
   } finally {
     db?.close();

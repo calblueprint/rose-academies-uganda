@@ -31,16 +31,25 @@ function matchesFileType(fileName: string, filter: FileTypeFilter): boolean {
   return !["jpg", "jpeg", "png", "pdf"].includes(ext);
 }
 
+function canPreviewFile(fileName: string): boolean {
+  const ext = fileName.split(".").pop()?.toLowerCase() ?? "";
+
+  return ["gif", "jpeg", "jpg", "mp4", "pdf", "png", "svg", "webp"].includes(
+    ext,
+  );
+}
+
 function formatFileDate(
   value: string | null | undefined,
   notAvailableLabel: string,
+  locale?: string,
 ): string {
   if (!value) return notAvailableLabel;
 
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return notAvailableLabel;
 
-  return date.toLocaleDateString(undefined, {
+  return date.toLocaleDateString(locale, {
     month: "short",
     day: "numeric",
     year: "numeric",
@@ -50,7 +59,7 @@ function formatFileDate(
 export default function FilesPage() {
   const lessonId = Number(useParams().lessonId);
   const router = useRouter();
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
   const data = useContext(DataContext);
 
   const [selectedFile, setSelectedFile] = useState<LocalFile | null>(null);
@@ -63,6 +72,10 @@ export default function FilesPage() {
   }, [data, lessonId]);
 
   const authorizedGroupId = data?.groups[0]?.id;
+  const classroomName = data?.groups[0]?.name;
+  const lessonListLabel = classroomName
+    ? `${classroomName} ${t("lessons.titleSuffix")}`
+    : t("lessons.title");
 
   useEffect(() => {
     if (data && !lesson && authorizedGroupId) {
@@ -97,19 +110,29 @@ export default function FilesPage() {
       filteredFiles.map(file => ({
         id: file.id,
         name: file.name,
-        dateAdded: formatFileDate(file.created_at, t("files.notAvailable")),
+        dateAdded: formatFileDate(
+          file.created_at,
+          t("files.notAvailable"),
+          language,
+        ),
         dateModified: formatFileDate(
           file.updated_at ?? file.created_at,
           t("files.notAvailable"),
+          language,
         ),
         sizeBytes: file.size_bytes,
       })),
-    [filteredFiles, t],
+    [filteredFiles, language, t],
   );
 
   function handleRowClick(row: FileRow) {
     const file = filteredFiles.find(f => f.id === row.id);
     if (file) {
+      if (!canPreviewFile(file.name)) {
+        window.location.href = `/api/sqlite/files/${file.id}?download=1`;
+        return;
+      }
+
       setSelectedFile(file);
     }
   }
@@ -124,7 +147,7 @@ export default function FilesPage() {
 
   return (
     <PageContainer>
-      <LessonHeader label={t("lessons.title")} image={lesson?.image_path} />
+      <LessonHeader label={lessonListLabel} image={lesson?.image_path} />
       <Title>{lesson?.name ?? t("files.titleFallback")}</Title>
 
       {lesson?.description && (

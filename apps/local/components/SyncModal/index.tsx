@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useLanguage } from "@/lib/i18n";
 import { IconSvgs } from "@/lib/icons";
 import {
   ActionsRow,
@@ -28,6 +29,7 @@ const SyncModal: React.FC<SyncModalProps> = ({
   onClose,
   onSyncAgain,
 }) => {
+  const { t } = useLanguage();
   const isSuccess = variant === "success";
 
   return (
@@ -40,25 +42,31 @@ const SyncModal: React.FC<SyncModalProps> = ({
         </IconWrapper>
 
         <Title>
-          {isSuccess ? "Syncing Successful!" : "Error! Syncing Failed"}
+          {isSuccess
+            ? t("downloadModal.successTitle")
+            : t("downloadModal.errorTitle")}
         </Title>
 
         <Body>
           {isSuccess
-            ? "All changes have been successfully synced."
-            : "Explanation for syncing was not successful because lorem ipsum"}
+            ? t("downloadModal.successBody")
+            : t("downloadModal.errorBody")}
         </Body>
 
         {isSuccess ? (
           <ActionsRow>
             <ContinueButton onClick={onClose}>
-              <ContinueText>Continue</ContinueText>
+              <ContinueText>{t("downloadModal.continue")}</ContinueText>
             </ContinueButton>
           </ActionsRow>
         ) : (
           <ActionsRow>
-            <TryLaterButton onClick={onClose}>Try Later</TryLaterButton>
-            <SyncAgainButton onClick={onSyncAgain}>Sync Again</SyncAgainButton>
+            <TryLaterButton onClick={onClose}>
+              {t("downloadModal.tryLater")}
+            </TryLaterButton>
+            <SyncAgainButton onClick={onSyncAgain}>
+              {t("downloadModal.tryAgain")}
+            </SyncAgainButton>
           </ActionsRow>
         )}
       </Card>

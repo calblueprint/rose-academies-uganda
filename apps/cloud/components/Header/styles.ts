@@ -21,17 +21,18 @@ export const Header = styled.header`
 
 export const HeaderInner = styled.div`
   width: 100%;
-  max-width: 67.5rem;
+  max-width: 80rem;
   height: 100%;
   min-height: 4.75rem;
   padding: 0 1.5rem;
 
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
-  justify-content: space-between;
   gap: 1.5rem;
 
   @media (max-width: 920px) {
+    display: flex;
     min-height: auto;
     padding: 0.9rem 1rem;
     flex-wrap: wrap;
@@ -43,6 +44,7 @@ export const LogoAndTitle = styled.div`
   align-items: center;
   gap: 0.4375rem;
   min-width: 0;
+  justify-self: start;
 `;
 
 // `all: unset` strips default button appearance so the logo renders as plain
@@ -65,6 +67,8 @@ export const LogoContainer = styled(Link)`
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  min-width: 0;
+  max-width: 100%;
   cursor: pointer;
   text-align: left;
   text-decoration: none;
@@ -73,7 +77,10 @@ export const LogoContainer = styled(Link)`
 export const HeaderRight = styled.div`
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 1rem;
+  min-width: 0;
+  justify-self: end;
 
   @media (max-width: 920px) {
     margin-left: auto;
@@ -95,9 +102,20 @@ export const Title = styled.h1`
   font-size: 1.25rem;
   font-weight: var(--font-weight-action);
   line-height: 1.15;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  @media (max-width: 1120px) {
+    font-size: 1.08rem;
+    overflow: visible;
+    text-overflow: clip;
+    white-space: normal;
+  }
 
   @media (max-width: 520px) {
-    font-size: 1.05rem;
+    font-size: 0.95rem;
   }
 `;
 
@@ -114,10 +132,11 @@ export const Nav = styled.nav`
   display: flex;
   align-items: center;
   gap: 0.25rem;
+  justify-self: center;
   padding: 0.35rem;
   border: 1px solid ${COLORS.surfaceBorder};
   border-radius: 999px;
-  background: ${COLORS.green10};
+  background: ${COLORS.pageWash};
 
   @media (max-width: 920px) {
     order: 3;
@@ -132,13 +151,15 @@ export const NavTab = styled(Link)<{ $active?: boolean }>`
   min-height: 2.35rem;
   display: flex;
   align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
 
   padding: 0 1rem;
   background: ${({ $active }) => ($active ? COLORS.white : "transparent")};
   border: none;
   border-radius: 999px;
   box-shadow: ${({ $active }) =>
-    $active ? "0 6px 18px rgba(30, 66, 64, 0.1)" : "none"};
+    $active ? "0 6px 18px rgba(30, 66, 64, 0.14)" : "none"};
 
   color: ${({ $active }) => ($active ? COLORS.evergreen : COLORS.gray80)};
   font-family: var(--font-primary);
@@ -146,6 +167,8 @@ export const NavTab = styled(Link)<{ $active?: boolean }>`
   font-weight: var(--font-weight-section-title);
   cursor: pointer;
   text-decoration: none;
+  text-align: center;
+  white-space: nowrap;
 
   transition:
     background 0.15s,
@@ -162,13 +185,23 @@ export const NavTab = styled(Link)<{ $active?: boolean }>`
   }
 `;
 
+export const NavIndicator = styled.span`
+  width: 0.5rem;
+  height: 0.5rem;
+  flex-shrink: 0;
+  border-radius: 999px;
+  background: ${COLORS.orange100};
+  box-shadow: 0 0 0 3px ${COLORS.orange20};
+`;
+
 export const UserImg = styled.div`
   width: 2rem;
   height: 2rem;
   border-radius: 50%;
 
-  background-color: ${COLORS.green10};
-  border: 1px solid ${COLORS.green20};
+  background: #fff4f8;
+  border: 1px solid ${COLORS.rose11};
+  box-shadow: 0 0 0 3px rgba(243, 147, 165, 0.2);
 
   display: flex;
   align-items: center;
@@ -176,7 +209,7 @@ export const UserImg = styled.div`
 
   font-size: 0.8rem;
   font-weight: 600;
-  color: ${COLORS.evergreen};
+  color: #b84f73;
 `;
 
 export const UserName = styled.span`
@@ -435,6 +468,14 @@ export const SetupGuideSection = styled.section`
     font-size: 0.98rem;
     font-weight: 700;
     line-height: 1.25;
+  }
+
+  p {
+    margin: 0;
+    color: ${COLORS.gray60};
+    font-family: var(--font-primary);
+    font-size: 0.92rem;
+    line-height: 1.45;
   }
 `;
 

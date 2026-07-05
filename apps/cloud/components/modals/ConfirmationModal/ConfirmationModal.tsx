@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { useLanguage } from "@/lib/i18n";
 import {
   ActionRow,
   CancelButton,
@@ -28,12 +29,15 @@ export default function ConfirmationModal({
   title,
   description,
   confirmText,
-  cancelText = "Cancel",
+  cancelText,
   isLoading = false,
   variant = "default",
   onCancel,
   onConfirm,
 }: ConfirmationModalProps) {
+  const { t } = useLanguage();
+  const resolvedCancelText = cancelText ?? t("common.cancel");
+
   useEffect(() => {
     if (!isOpen) return;
     document.documentElement.style.overflowY = "hidden";
@@ -60,7 +64,7 @@ export default function ConfirmationModal({
 
         <ActionRow>
           <CancelButton onClick={onCancel} disabled={isLoading} type="button">
-            {cancelText}
+            {resolvedCancelText}
           </CancelButton>
 
           <ConfirmButton
@@ -69,7 +73,7 @@ export default function ConfirmationModal({
             type="button"
             $variant={variant}
           >
-            {isLoading ? "Loading..." : confirmText}
+            {isLoading ? t("common.loading") : confirmText}
           </ConfirmButton>
         </ActionRow>
       </ModalCard>

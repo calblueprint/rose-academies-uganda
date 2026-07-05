@@ -36,6 +36,7 @@ import {
   ModalOverlay,
   ModalTitle,
   Nav,
+  NavIndicator,
   NavTab,
   PairingError,
   PairingHelp,
@@ -45,7 +46,6 @@ import {
   ProfileButton,
   ReplaceHubModal,
   SecondaryButton,
-  SetupGuideList,
   SetupGuideSection,
   Subtitle,
   Title,
@@ -58,10 +58,12 @@ export default function Header({
   displayName,
   email,
   deviceId,
+  hasHubUpdates,
 }: {
   displayName: string;
   email: string | null;
   deviceId: string | null;
+  hasHubUpdates?: boolean;
 }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [replaceHubModalOpen, setReplaceHubModalOpen] = useState(false);
@@ -83,10 +85,13 @@ export default function Header({
     : t("profile.linkHub");
   const navTabs = [
     { label: t("nav.dashboard"), href: "/app" },
-    { label: t("nav.lessons"), href: "/app/lessons" },
     { label: t("nav.classrooms"), href: "/app/classrooms" },
-    { label: t("nav.sync"), href: "/app/offline-library" },
-    { label: t("nav.archive"), href: "/app/archived" },
+    { label: t("nav.lessons"), href: "/app/lessons" },
+    {
+      label: t("nav.sync"),
+      href: "/app/offline-library",
+      showIndicator: hasHubUpdates,
+    },
   ];
 
   // The ref covers both the trigger button and the menu panel so that clicks
@@ -212,6 +217,9 @@ export default function Header({
                 href={tab.href}
               >
                 {tab.label}
+                {tab.showIndicator && (
+                  <NavIndicator aria-label={t("status.pendingSync")} />
+                )}
               </NavTab>
             ))}
           </Nav>
@@ -394,56 +402,24 @@ export default function Header({
             aria-labelledby="setup-guide-title"
             onClick={event => event.stopPropagation()}
           >
-            <ModalTitle id="setup-guide-title">Setup guide</ModalTitle>
-            <ModalDescription>
-              Keep this Educator Dashboard open. Have the Classroom Hub nearby,
-              and use another tablet, phone, or computer to connect to the hub
-              setup Wi-Fi and open rosehub.local/setup.
-            </ModalDescription>
+            <ModalTitle id="setup-guide-title">
+              {t("setupGuideModal.title")}
+            </ModalTitle>
+            <ModalDescription>{t("setupGuideModal.body")}</ModalDescription>
 
             <SetupGuideSection>
-              <h3>1. At the Classroom Hub</h3>
-              <SetupGuideList>
-                <li>Power on the hub with a charger or battery pack.</li>
-                <li>
-                  On another tablet, phone, or computer, join the Rose-Setup
-                  Wi-Fi hotspot if it appears.
-                </li>
-                <li>
-                  On that same tablet, phone, or computer, open
-                  http://rosehub.local/setup.
-                </li>
-                <li>Connect the hub to internet Wi-Fi.</li>
-                <li>Copy the pairing code shown on the hub.</li>
-              </SetupGuideList>
+              <h3>{t("setupGuide.mapDashboardTitle")}</h3>
+              <p>{t("setupGuide.mapDashboardText")}</p>
             </SetupGuideSection>
 
             <SetupGuideSection>
-              <h3>2. In the Educator Dashboard</h3>
-              <SetupGuideList>
-                <li>Use this dashboard at https://rosepch.org.</li>
-                <li>Enter the hub pairing code.</li>
-                <li>Create classrooms and save each join code.</li>
-                <li>Create lessons and upload files.</li>
-                <li>Save lessons to the Classroom Hub and sync them.</li>
-              </SetupGuideList>
+              <h3>{t("setupGuide.mapHubTitle")}</h3>
+              <p>{t("setupGuide.mapHubText")}</p>
             </SetupGuideSection>
 
             <SetupGuideSection>
-              <h3>3. For students</h3>
-              <SetupGuideList>
-                <li>
-                  Students connect their tablet, phone, or computer to the
-                  Classroom Hub Wi-Fi.
-                </li>
-                <li>
-                  Students open the Student Library at
-                  http://rosehub.local/join.
-                </li>
-                <li>
-                  Students enter the classroom join code from the educator.
-                </li>
-              </SetupGuideList>
+              <h3>{t("setupGuide.mapStudentsTitle")}</h3>
+              <p>{t("setupGuide.mapStudentsText")}</p>
             </SetupGuideSection>
 
             <ModalActions>
@@ -451,10 +427,10 @@ export default function Header({
                 type="button"
                 onClick={() => setSetupGuideModalOpen(false)}
               >
-                Got it
+                {t("common.gotIt")}
               </SecondaryButton>
               <PrimaryButton type="button" onClick={openDashboardSetupGuide}>
-                Open setup guide
+                {t("common.openSetupGuide")}
               </PrimaryButton>
             </ModalActions>
           </ReplaceHubModal>

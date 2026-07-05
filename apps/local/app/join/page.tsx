@@ -3,7 +3,6 @@
 import React, { FormEvent, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import RoseLogo from "@/assets/images/rose-academies-logo.png";
 import LanguageSelector from "@/components/LanguageSelector";
 import { useLanguage } from "@/lib/i18n";
@@ -24,7 +23,6 @@ import {
 } from "./style";
 
 export default function JoinPage() {
-  const router = useRouter();
   const { t } = useLanguage();
   const [joinCode, setJoinCode] = useState("");
   const [error, setError] = useState("");
@@ -42,7 +40,9 @@ export default function JoinPage() {
     e.preventDefault();
     if (isJoining) return;
 
-    if (!joinCode.trim()) {
+    const normalizedCode = normalizeJoinCode(joinCode);
+
+    if (!normalizedCode) {
       setError(t("join.invalidCode"));
       return;
     }
@@ -54,7 +54,7 @@ export default function JoinPage() {
       const response = await fetch("/api/join", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ joinCode }),
+        body: JSON.stringify({ joinCode: normalizedCode }),
       });
       const result = (await response.json()) as {
         groupId?: number;
@@ -67,8 +67,7 @@ export default function JoinPage() {
       }
 
       setJoinCode("");
-      router.push(`/groups/${result.groupId}/lessons`);
-      router.refresh();
+      window.location.assign(`/groups/${result.groupId}/lessons`);
     } catch {
       setError(t("join.unableToJoin"));
     } finally {
@@ -89,7 +88,12 @@ export default function JoinPage() {
           <Title>{t("join.title")}</Title>
           <Helper>{t("join.helper")}</Helper>
         </HeaderSection>
-        <CodeSection as="form" onSubmit={handleJoin}>
+        <CodeSection
+          as="form"
+          action="/api/join"
+          method="post"
+          onSubmit={handleJoin}
+        >
           <CodeInputSection>
             <CodeInput
               id="joinCode"
@@ -101,6 +105,9 @@ export default function JoinPage() {
                 if (error) setError("");
               }}
               maxLength={6}
+              inputMode="text"
+              autoCapitalize="characters"
+              spellCheck={false}
               $error={error !== ""}
               autoComplete="off"
               disabled={isJoining}

@@ -5,12 +5,13 @@ import { Subtitle2 } from "@/styles/text";
 export const EditButton = styled.button`
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  min-height: 2.5rem;
-  padding: 8px 16px;
-  background-color: ${COLORS.evergreen};
-  color: ${COLORS.white};
-  border: none;
+  justify-content: center;
+  gap: 0.4rem;
+  min-height: 2rem;
+  padding: 0 0.7rem;
+  background-color: transparent;
+  color: ${COLORS.gray60};
+  border: 1px solid transparent;
   border-radius: 8px;
   cursor: pointer;
   white-space: nowrap;
@@ -19,7 +20,9 @@ export const EditButton = styled.button`
     opacity 0.15s ease;
 
   &:hover {
-    background-color: #14312d;
+    background-color: ${COLORS.white};
+    border-color: ${COLORS.surfaceBorder};
+    color: ${COLORS.evergreen};
   }
 
   &:disabled {
@@ -29,11 +32,15 @@ export const EditButton = styled.button`
 
   svg {
     flex-shrink: 0;
-    stroke: ${COLORS.white};
+    width: 0.9rem;
+    height: 0.9rem;
+    stroke: currentColor;
   }
 `;
 
 export const EditButtonText = styled(Subtitle2).attrs({
   $fontWeight: 500,
-  $color: COLORS.white,
-})``;
+})`
+  color: inherit;
+  font-size: 0.84rem;
+`;

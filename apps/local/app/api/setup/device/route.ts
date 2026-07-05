@@ -25,7 +25,7 @@ export async function GET() {
           message.includes("schema cache")
             ? "Device pairing has not been enabled in Supabase yet."
             : message.includes("Missing Classroom Hub pairing code")
-              ? "This Classroom Hub setup status could not be loaded. Refresh this page, or open http://rosehub.local/setup while connected to the Classroom Hub."
+              ? "This Classroom Hub setup status could not be loaded. Refresh this page, or open http://rosehub.local/setup while connected to the Classroom Hub. If that does not open, use http://10.42.0.1/setup."
               : message,
       },
       {

@@ -25,13 +25,28 @@ export default async function LessonsPage() {
   }
   const lessonIds = (lessons ?? []).map(lesson => lesson.id);
 
-  const { data: lessonGroupRows, error: lessonGroupsError } = await supabase
-    .from("LessonGroups")
-    .select("lesson_id, group_id")
-    .in("lesson_id", lessonIds);
+  const { data: lessonGroupRows, error: lessonGroupsError } =
+    lessonIds.length > 0
+      ? await supabase
+          .from("LessonGroups")
+          .select("lesson_id, group_id")
+          .in("lesson_id", lessonIds)
+      : { data: [], error: null };
 
   if (lessonGroupsError) {
     throw new Error(lessonGroupsError.message);
+  }
+
+  const { data: lessonFileRows, error: lessonFilesError } =
+    lessonIds.length > 0
+      ? await supabase
+          .from("LessonFiles")
+          .select("lesson_id, Files(name)")
+          .in("lesson_id", lessonIds)
+      : { data: [], error: null };
+
+  if (lessonFilesError) {
+    throw new Error(lessonFilesError.message);
   }
 
   const groupIds = [
@@ -56,6 +71,7 @@ export default async function LessonsPage() {
 
   const villagesByLessonId: Record<number, string[]> = {};
   const classroomIdsByLessonId: Record<number, number[]> = {};
+  const fileNamesByLessonId: Record<number, string[]> = {};
 
   for (const row of lessonGroupRows ?? []) {
     const villageName = groupNamesById[row.group_id];
@@ -75,6 +91,20 @@ export default async function LessonsPage() {
     classroomIdsByLessonId[row.lesson_id].push(row.group_id);
   }
 
+  for (const row of (lessonFileRows ?? []) as {
+    lesson_id: number;
+    Files: { name: string | null } | null;
+  }[]) {
+    const fileName = row.Files?.name;
+    if (!fileName) continue;
+
+    if (!fileNamesByLessonId[row.lesson_id]) {
+      fileNamesByLessonId[row.lesson_id] = [];
+    }
+
+    fileNamesByLessonId[row.lesson_id].push(fileName);
+  }
+
   const lessonsWithVillages = (lessons ?? []).map(lesson => ({
     ...lesson,
     classroomIds:
@@ -83,6 +113,7 @@ export default async function LessonsPage() {
     villages:
       villagesByLessonId[lesson.id] ??
       (groupsById[lesson.group_id] ? [groupsById[lesson.group_id].name] : []),
+    fileNames: fileNamesByLessonId[lesson.id] ?? [],
   }));
 
   // DeviceLessons stores the offline-library state for the user's Pi. The main
@@ -100,15 +131,20 @@ export default async function LessonsPage() {
 
   const lessonStatuses = Object.fromEntries(
     (deviceLessons ?? [])
-      .filter(row => row.status === "available" || row.status === "pending")
+      .filter(
+        row =>
+          row.status === "available" ||
+          row.status === "pending" ||
+          row.status === "pending_removal",
+      )
       .map(row => [row.lesson_id, row.status]),
-  ) as Partial<Record<number, "available" | "pending">>;
+  ) as Partial<Record<number, "available" | "pending" | "pending_removal">>;
 
   return (
     <LessonsClient
       initialLessons={lessonsWithVillages}
       lessonStatuses={lessonStatuses}
-      description="Create lessons, assign classrooms, and choose what to sync for offline use."
+      description="Create lessons, assign classrooms, and choose what to save on the Classroom Hub."
       variant="dashboard"
       deviceId={deviceId}
       showSortButton

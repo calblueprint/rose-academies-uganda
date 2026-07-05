@@ -57,6 +57,16 @@ function buildStorageObjectPath(userId: string, fileName: string): string {
   return `${userId}/${safeFileName}`;
 }
 
+function getStoragePublicUrl(objectPath: string): string {
+  const supabase = getSupabaseBrowserClient();
+  const { data: pub } = supabase.storage.from("files").getPublicUrl(objectPath);
+  const publicUrl = pub?.publicUrl;
+
+  if (!publicUrl) throw new Error("Failed to compute public URL");
+
+  return publicUrl;
+}
+
 function inferMimeType(file: File): string | null {
   if (file.type) return file.type;
 
@@ -64,11 +74,19 @@ function inferMimeType(file: File): string | null {
 
   const mimeByExtension: Record<string, string> = {
     apk: "application/vnd.android.package-archive",
+    gif: "image/gif",
+    jpeg: "image/jpeg",
+    jpg: "image/jpeg",
+    mp4: "video/mp4",
+    pdf: "application/pdf",
+    png: "image/png",
     pps: "application/vnd.ms-powerpoint",
     ppsx: "application/vnd.openxmlformats-officedocument.presentationml.slideshow",
     ppt: "application/vnd.ms-powerpoint",
     pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     ppx: "application/vnd.ms-powerpoint",
+    svg: "image/svg+xml",
+    webp: "image/webp",
   };
 
   return extension ? (mimeByExtension[extension] ?? null) : null;
@@ -149,12 +167,34 @@ export async function uploadFile(
   if (existingFile) {
     await linkFileToLesson(lessonId, existingFile.id, displayOrder);
 
-    if (!existingFile.size_bytes || !existingFile.mime_type) {
+    const objectPath = buildStorageObjectPath(user.id, file.name);
+    let storagePath = existingFile.storage_path;
+
+    if (!storagePath) {
+      const { error: storageError } = await supabase.storage
+        .from("files")
+        .upload(objectPath, file, { upsert: true });
+
+      if (storageError) {
+        throw new Error(
+          `Storage upload failed for key "${objectPath}": ${storageError.message}`,
+        );
+      }
+
+      storagePath = getStoragePublicUrl(objectPath);
+    }
+
+    if (
+      !existingFile.size_bytes ||
+      !existingFile.mime_type ||
+      !existingFile.storage_path
+    ) {
       const { data: updatedFile, error: updateError } = await supabase
         .from("Files")
         .update({
           size_bytes: existingFile.size_bytes || file.size,
           mime_type: existingFile.mime_type || mimeType,
+          storage_path: storagePath,
         })
         .eq("id", existingFile.id)
         .select()
@@ -186,10 +226,7 @@ export async function uploadFile(
     );
   }
 
-  const { data: pub } = supabase.storage.from("files").getPublicUrl(objectPath);
-
-  const publicUrl = pub?.publicUrl;
-  if (!publicUrl) throw new Error("Failed to compute public URL");
+  const publicUrl = getStoragePublicUrl(objectPath);
 
   const { data: fileRow, error: fileError } = await supabase
     .from("Files")

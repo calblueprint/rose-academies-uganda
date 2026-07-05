@@ -13,8 +13,13 @@ import {
   ButtonWrapper,
   CardHeader,
   CardTitle,
+  HubStatusDetail,
+  HubStatusDot,
+  HubStatusRow,
+  HubStatusText,
   IconWrapper,
   SyncCard,
+  SyncCardFooter,
 } from "./styles";
 import SyncStageIndicator from "./SyncStageIndicator";
 
@@ -54,9 +59,11 @@ function formatLastSynced(lastSyncedAt: string | null, locale: string) {
 export default function CloudSyncButton({
   userId,
   deviceId,
+  variant = "default",
 }: {
   userId?: string | null;
   deviceId?: string | null;
+  variant?: "default" | "setup";
 }) {
   const router = useRouter();
   const { language, t } = useLanguage();
@@ -87,10 +94,16 @@ export default function CloudSyncButton({
         ? query.eq("id", deviceId as string)
         : query.eq("user_id", userId as string);
 
-      const { data, error } = await query.single();
+      const { data, error } = await query.maybeSingle();
 
-      if (error || !data) {
+      if (error) {
         console.error("[CLOUD] Failed to fetch device:", error);
+        return;
+      }
+
+      if (!data) {
+        setDevice(null);
+        setLastSyncedAt(null);
         return;
       }
 
@@ -102,6 +115,8 @@ export default function CloudSyncButton({
 
     loadDevice();
   }, [deviceId, userId]);
+
+  const hasLinkedDevice = Boolean(device);
 
   const waitForSyncRunCompletion = async (syncRunId: string) => {
     const startedAt = Date.now();
@@ -212,30 +227,51 @@ export default function CloudSyncButton({
 
   return (
     <>
-      <SyncCard>
-        <CardHeader>
+      <SyncCard $variant={variant}>
+        <CardHeader $variant={variant}>
           <CardTitle>{t("sync.progress")}</CardTitle>
 
           <ButtonWrapper
+            $variant={variant}
             onClick={handleSync}
-            disabled={isSyncing || !device}
-            title={t("sync.buttonTitle")}
+            disabled={isSyncing || !hasLinkedDevice}
+            title={
+              hasLinkedDevice
+                ? t("sync.buttonTitle")
+                : t("sync.linkHubFirstTitle")
+            }
           >
             <IconWrapper $isSpinning={isSyncing}>
               {IconSvgs.refresh}
             </IconWrapper>
             <ButtonText>
-              {isSyncing ? t("sync.syncing") : t("sync.button")}
+              {!hasLinkedDevice
+                ? t("sync.linkHubFirst")
+                : isSyncing
+                  ? t("sync.syncing")
+                  : t("sync.button")}
             </ButtonText>
           </ButtonWrapper>
         </CardHeader>
 
-        <SyncStageIndicator
-          stage={syncStage}
-          lastSyncedText={
-            formatLastSynced(lastSyncedAt, language) ?? t("sync.notSynced")
-          }
-        />
+        <SyncCardFooter>
+          <SyncStageIndicator
+            stage={syncStage}
+            lastSyncedText={
+              formatLastSynced(lastSyncedAt, language) ?? t("sync.notSynced")
+            }
+          />
+
+          <HubStatusRow>
+            <HubStatusDot aria-hidden="true" $linked={hasLinkedDevice} />
+            <HubStatusText>
+              {hasLinkedDevice ? t("sync.hubLinked") : t("sync.noHubTitle")}
+            </HubStatusText>
+            {hasLinkedDevice && (
+              <HubStatusDetail>{t("sync.hubManagedInProfile")}</HubStatusDetail>
+            )}
+          </HubStatusRow>
+        </SyncCardFooter>
       </SyncCard>
 
       {modalVariant && (

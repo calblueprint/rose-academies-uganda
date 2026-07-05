@@ -25,13 +25,13 @@ export async function POST(request: Request) {
     const wifiStatus = await getWifiStatus();
 
     // Network changes are intentionally limited to clients connected through
-    // the physical Pi's setup hotspot. This prevents another device on a
+    // the physical Pi's Classroom Hub Wi-Fi. This prevents another device on a
     // school or home LAN from remotely changing the Pi's Wi-Fi connection.
     if (!wifiStatus.hotspotActive) {
       return NextResponse.json(
         {
           error:
-            "Wi-Fi changes are only available while connected to this Classroom Hub setup network.",
+            "Wi-Fi changes are only available while connected to this Classroom Hub Wi-Fi.",
         },
         { status: 409 },
       );
@@ -73,7 +73,7 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         message:
-          "Connection scheduled. This setup network may disappear while the Classroom Hub connects.",
+          "Connection scheduled. The Classroom Hub Wi-Fi may pause while the hub connects.",
       },
       { status: 202 },
     );

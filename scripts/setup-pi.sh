@@ -12,7 +12,8 @@ BRANCH="${ROSE_BRANCH:-main}"
 SKIP_GIT="${ROSE_SKIP_GIT:-false}"
 
 AP_CONNECTION_NAME="pi-ap"
-AP_PASSWORD="${ROSE_AP_PASSWORD:-rosehub1}"
+AP_INTERFACE="${ROSE_AP_INTERFACE:-roseap0}"
+AP_PASSWORD="${ROSE_AP_PASSWORD:-rosehub!}"
 
 SUPABASE_URL="https://tyckvrwfblheqxuliscl.supabase.co"
 SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR5Y2t2cndmYmxoZXF4dWxpc2NsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkxNzIwNTksImV4cCI6MjA3NDc0ODA1OX0.dggjzvmAdwHif9v3hUZWrYdwOFPfZAPMO9BHGlPaqPg"
@@ -93,7 +94,7 @@ if [[ ! "$CLASSROOM_SESSION_SECRET" =~ ^[A-Fa-f0-9]{64}$ ]]; then
 fi
 
 DEVICE_SUFFIX=$(printf '%s' "$DEVICE_ID" | sha256sum | cut -c1-4 | tr '[:lower:]' '[:upper:]')
-AP_SSID="Rose-Setup-$DEVICE_SUFFIX"
+AP_SSID="Rose-Hub-$DEVICE_SUFFIX"
 
 echo "Device ID: $DEVICE_ID"
 echo "This Pi's setup and offline WiFi will be: $AP_SSID"
@@ -108,6 +109,7 @@ sudo apt install -y \
   network-manager \
   dnsmasq-base \
   avahi-daemon \
+  iw \
   libnss-mdns
 
 echo "Configuring Classroom Hub hostname..."
@@ -130,6 +132,7 @@ else
 fi
 
 sudo nmcli connection modify "$AP_CONNECTION_NAME" \
+  connection.interface-name "$AP_INTERFACE" \
   802-11-wireless.ssid "$AP_SSID" \
   802-11-wireless.mode ap \
   802-11-wireless.band bg \
@@ -240,6 +243,10 @@ sudo install -m 0755 \
   /usr/local/sbin/rose-wifi-manager
 
 sudo install -m 0755 \
+  "$REPO_DIR/scripts/rose-ap-interface.sh" \
+  /usr/local/sbin/rose-ap-interface
+
+sudo install -m 0755 \
   "$REPO_DIR/scripts/rose-first-boot.sh" \
   /usr/local/sbin/rose-first-boot
 
@@ -259,6 +266,22 @@ EOF
 sudo sysctl --system >/dev/null
 
 echo "Installing WiFi fallback service..."
+
+sudo tee /etc/systemd/system/rose-ap-interface.service > /dev/null <<EOF
+[Unit]
+Description=Create Rose setup hotspot WiFi interface
+After=sys-subsystem-net-devices-wlan0.device
+Wants=sys-subsystem-net-devices-wlan0.device
+Before=NetworkManager.service rose-wifi-fallback.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/rose-ap-interface
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
+EOF
 
 sudo tee /etc/systemd/system/rose-first-boot.service > /dev/null <<EOF
 [Unit]
@@ -280,8 +303,8 @@ EOF
 sudo tee /etc/systemd/system/rose-wifi-fallback.service > /dev/null <<EOF
 [Unit]
 Description=Start Rose setup hotspot when no saved WiFi is available
-After=NetworkManager.service rose-first-boot.service
-Wants=NetworkManager.service rose-first-boot.service
+After=NetworkManager.service rose-ap-interface.service rose-first-boot.service
+Wants=NetworkManager.service rose-ap-interface.service rose-first-boot.service
 
 [Service]
 Type=oneshot
@@ -320,6 +343,7 @@ EOF
 echo "Starting service..."
 
 sudo systemctl daemon-reload
+sudo systemctl enable --now rose-ap-interface.service
 sudo systemctl enable rose-first-boot.service
 sudo systemctl enable "$SERVICE_NAME"
 sudo systemctl enable --now rose-wifi-fallback.service

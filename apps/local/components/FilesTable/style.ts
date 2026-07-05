@@ -78,6 +78,9 @@ export const BodyCell = styled.td`
 
   &:last-child {
     padding-right: 1.5rem;
+    overflow: visible;
+    text-overflow: clip;
+    white-space: nowrap;
     text-align: right;
   }
 `;
@@ -129,5 +132,33 @@ export const DownloadIcon = styled.a`
   &:hover {
     background-color: ${COLORS.green20};
     color: ${COLORS.evergreen};
+  }
+`;
+
+export const PreviewIconButton = styled.button`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border: 0;
+  border-radius: 999px;
+  color: ${COLORS.gray80};
+  background: transparent;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
+
+  svg {
+    width: 1.0125rem;
+    height: 1.125rem;
+  }
+
+  &:hover,
+  &:focus-visible {
+    background-color: ${COLORS.green20};
+    color: ${COLORS.evergreen};
+    outline: none;
   }
 `;

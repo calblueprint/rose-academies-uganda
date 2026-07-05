@@ -1,6 +1,7 @@
 "use client";
 
 import type { FileRow } from "@/components/FilesTable";
+import { useLanguage } from "@/lib/i18n";
 import {
   GenericActions,
   GenericBox,
@@ -10,6 +11,10 @@ import {
   PdfFrame,
   PreviewContainer,
   PreviewImage,
+  PreviewVideo,
+  VideoActionLink,
+  VideoActions,
+  VideoStage,
 } from "./style";
 
 function inferMimeTypeFromFileName(fileName: string): string {
@@ -20,6 +25,7 @@ function inferMimeTypeFromFileName(fileName: string): string {
   const mimeByExtension: Record<string, string> = {
     jpg: "image/jpeg",
     jpeg: "image/jpeg",
+    mp4: "video/mp4",
     png: "image/png",
     gif: "image/gif",
     webp: "image/webp",
@@ -37,7 +43,9 @@ function inferMimeTypeFromFileName(fileName: string): string {
 }
 
 export default function FilePreview({ file }: { file: FileRow }) {
-  if (!file) return <p>No file selected.</p>;
+  const { t } = useLanguage();
+
+  if (!file) return <p>{t("files.noFileSelected")}</p>;
 
   const src = file.storagePath ?? "";
   const mimeType = file.mimeType || inferMimeTypeFromFileName(file.name || "");
@@ -48,7 +56,7 @@ export default function FilePreview({ file }: { file: FileRow }) {
         <GenericBox>
           <GenericTitle>{file.name}</GenericTitle>
           {mimeType && <GenericMime>{mimeType}</GenericMime>}
-          <GenericMime>Preview URL not available yet.</GenericMime>
+          <GenericMime>{t("files.previewUnavailable")}</GenericMime>
         </GenericBox>
       </PreviewContainer>
     );
@@ -58,17 +66,73 @@ export default function FilePreview({ file }: { file: FileRow }) {
     return <ImagePreview src={src} alt={file.name} />;
   }
 
+  if (mimeType.startsWith("video/")) {
+    return (
+      <VideoPreview
+        src={src}
+        fileName={file.name}
+        mimeType={mimeType}
+        downloadLabel={t("files.download")}
+        openLabel={t("files.openFullScreen")}
+      />
+    );
+  }
+
   if (mimeType === "application/pdf") {
     return <PdfPreview src={src} fileName={file.name} />;
   }
 
-  return <GenericPreview src={src} fileName={file.name} mimeType={mimeType} />;
+  return (
+    <GenericPreview
+      src={src}
+      fileName={file.name}
+      mimeType={mimeType}
+      downloadLabel={t("files.download")}
+    />
+  );
 }
 
 function ImagePreview({ src, alt }: { src: string; alt: string }) {
   return (
     <PreviewContainer>
       <PreviewImage src={src} alt={alt} />
+    </PreviewContainer>
+  );
+}
+
+function VideoPreview({
+  src,
+  fileName,
+  mimeType,
+  downloadLabel,
+  openLabel,
+}: {
+  src: string;
+  fileName: string;
+  mimeType: string;
+  downloadLabel: string;
+  openLabel: string;
+}) {
+  return (
+    <PreviewContainer $stacked>
+      <VideoStage>
+        <PreviewVideo
+          controls
+          playsInline
+          preload="metadata"
+          aria-label={fileName}
+        >
+          <source src={src} type={mimeType} />
+        </PreviewVideo>
+      </VideoStage>
+      <VideoActions>
+        <VideoActionLink href={src} target="_blank" rel="noreferrer">
+          {openLabel}
+        </VideoActionLink>
+        <VideoActionLink href={src} download={fileName}>
+          {downloadLabel}
+        </VideoActionLink>
+      </VideoActions>
     </PreviewContainer>
   );
 }
@@ -85,10 +149,12 @@ function GenericPreview({
   src,
   fileName,
   mimeType,
+  downloadLabel,
 }: {
   src: string;
   fileName: string;
   mimeType: string;
+  downloadLabel: string;
 }) {
   return (
     <PreviewContainer>
@@ -97,7 +163,7 @@ function GenericPreview({
         {mimeType && <GenericMime>{mimeType}</GenericMime>}
         <GenericActions>
           <GenericLink href={src} target="_blank" rel="noreferrer">
-            Download
+            {downloadLabel}
           </GenericLink>
         </GenericActions>
       </GenericBox>

@@ -27,10 +27,9 @@ type SortByDropdownProps = {
 export type SortOption = { label: string; value: SortOptionValue };
 
 const SORT_OPTIONS: SortOption[] = [
-  { label: "Updated (Newest)", value: "updated_desc" },
-  { label: "Updated (Oldest)", value: "updated_asc" },
-  { label: "Created (Newest)", value: "created_desc" },
-  { label: "Created (Oldest)", value: "created_asc" },
+  { label: "Recently updated", value: "updated_desc" },
+  { label: "Newest lessons", value: "created_desc" },
+  { label: "Lesson name A-Z", value: "name_asc" },
 ];
 
 const SORT_LABEL_KEYS: Partial<Record<SortOptionValue, string>> = {

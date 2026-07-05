@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import supabase from "@/api/supabase/client";
+import { getDevicePairingCode } from "@/lib/devicePairing";
 import { getDeviceId } from "@/lib/getDeviceId";
 import { verifyOfflineReadiness } from "@/lib/offline/readiness";
 
@@ -7,17 +8,20 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 async function getPendingLessonCount() {
-  const { data, error } = await supabase
-    .from("DeviceLessons")
-    .select("lesson_id, status")
-    .eq("device_id", getDeviceId());
+  const { data, error } = await supabase.rpc(
+    "get_device_pending_update_count",
+    {
+      p_device_id: getDeviceId(),
+      p_pairing_code: getDevicePairingCode(),
+    },
+  );
 
   if (error) {
     console.error("[SETUP] Unable to check pending lesson assignments:", error);
     return null;
   }
 
-  return (data ?? []).filter(row => row.status === "pending").length;
+  return typeof data === "number" ? data : 0;
 }
 
 export async function GET() {
@@ -37,8 +41,8 @@ export async function GET() {
             type: "pending_sync",
             message:
               pendingLessons === 1
-                ? "1 lesson is waiting to download from the Educator Dashboard."
-                : `${pendingLessons} lessons are waiting to download from the Educator Dashboard.`,
+                ? "1 hub update is waiting from the Educator Dashboard."
+                : `${pendingLessons} hub updates are waiting from the Educator Dashboard.`,
           },
         ]
       : []),

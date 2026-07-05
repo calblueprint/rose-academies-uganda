@@ -5,6 +5,7 @@ import { promisify } from "util";
 
 const execFileAsync = promisify(execFile);
 const WIFI_INTERFACE = process.env.ROSE_WIFI_INTERFACE ?? "wlan0";
+const AP_CONNECTION_NAME = process.env.ROSE_AP_CONNECTION_NAME ?? "pi-ap";
 const WIFI_HELPER =
   process.env.ROSE_WIFI_HELPER ?? "/usr/local/sbin/rose-wifi-manager";
 const WIFI_RESULT_FILE =
@@ -24,6 +25,7 @@ export type WifiStatus = {
   hostname: string;
   hotspotName: string | null;
   connectionName: string | null;
+  internetConnectionName: string | null;
   connectivity: string;
   hotspotActive: boolean;
   networks: WifiNetwork[];
@@ -119,8 +121,9 @@ export async function getWifiStatus(): Promise<WifiStatus> {
     return {
       supported: true,
       hostname: "rose-test-pi",
-      hotspotName: "Rose-Setup-TEST",
-      connectionName: mockConnected ? "Educator WiFi" : "Setup hotspot",
+      hotspotName: "Rose-Hub-TEST",
+      connectionName: mockConnected ? "Educator WiFi" : "Classroom Hub Wi-Fi",
+      internetConnectionName: mockConnected ? "Educator WiFi" : null,
       connectivity: mockConnected ? "full" : "setup mode",
       hotspotActive: !mockConnected,
       networks: [
@@ -153,6 +156,7 @@ export async function getWifiStatus(): Promise<WifiStatus> {
       hostname: hostname(),
       hotspotName: null,
       connectionName: null,
+      internetConnectionName: null,
       connectivity: "unsupported",
       hotspotActive: false,
       networks: [],
@@ -160,28 +164,43 @@ export async function getWifiStatus(): Promise<WifiStatus> {
     };
   }
 
-  const [connectionOutput, connectivityOutput, hotspotName, lastResult] =
-    await Promise.all([
-      runNmcli([
-        "--terse",
-        "--escape",
-        "yes",
-        "--fields",
-        "GENERAL.CONNECTION",
-        "device",
-        "show",
-        WIFI_INTERFACE,
-      ]),
-      runNmcli(["--terse", "--fields", "CONNECTIVITY", "general"]),
-      runNmcli([
-        "--get-values",
-        "802-11-wireless.ssid",
-        "connection",
-        "show",
-        "pi-ap",
-      ]).catch(() => ""),
-      readLastResult(),
-    ]);
+  const [
+    connectionOutput,
+    activeConnectionsOutput,
+    connectivityOutput,
+    hotspotName,
+    lastResult,
+  ] = await Promise.all([
+    runNmcli([
+      "--terse",
+      "--escape",
+      "yes",
+      "--fields",
+      "GENERAL.CONNECTION",
+      "device",
+      "show",
+      WIFI_INTERFACE,
+    ]),
+    runNmcli([
+      "--terse",
+      "--escape",
+      "yes",
+      "--fields",
+      "NAME,DEVICE",
+      "connection",
+      "show",
+      "--active",
+    ]),
+    runNmcli(["--terse", "--fields", "CONNECTIVITY", "general"]),
+    runNmcli([
+      "--get-values",
+      "802-11-wireless.ssid",
+      "connection",
+      "show",
+      AP_CONNECTION_NAME,
+    ]).catch(() => ""),
+    readLastResult(),
+  ]);
   let networksOutput = "";
 
   try {
@@ -193,11 +212,14 @@ export async function getWifiStatus(): Promise<WifiStatus> {
   }
 
   const rawConnectionName = splitNmcliLine(connectionOutput)[1] || null;
-  const hotspotActive = rawConnectionName === "pi-ap";
+  const hotspotActive = activeConnectionsOutput
+    .split("\n")
+    .filter(Boolean)
+    .some(line => splitNmcliLine(line)[0] === AP_CONNECTION_NAME);
   const parsedNetworks = parseNetworks(networksOutput);
   const activeNetwork = parsedNetworks.find(network => network.active);
   const savedSsid =
-    !hotspotActive && rawConnectionName
+    rawConnectionName && rawConnectionName !== AP_CONNECTION_NAME
       ? await runNmcli([
           "--get-values",
           "802-11-wireless.ssid",
@@ -206,19 +228,22 @@ export async function getWifiStatus(): Promise<WifiStatus> {
           rawConnectionName,
         ]).catch(() => "")
       : "";
+  const internetConnectionName =
+    activeNetwork?.ssid ||
+    savedSsid ||
+    (rawConnectionName && rawConnectionName !== AP_CONNECTION_NAME
+      ? rawConnectionName
+      : null);
 
   return {
     supported: true,
     hostname: hostname(),
     hotspotName: hotspotName || null,
-    connectionName: hotspotActive
-      ? "Setup hotspot"
-      : activeNetwork?.ssid || savedSsid || rawConnectionName,
+    connectionName: internetConnectionName ?? "Classroom Hub Wi-Fi",
+    internetConnectionName,
     connectivity: connectivityOutput || "unknown",
     hotspotActive,
-    networks: hotspotActive
-      ? parsedNetworks.filter(network => !network.active)
-      : parsedNetworks,
+    networks: parsedNetworks.filter(network => !network.active),
     lastResult,
   };
 }

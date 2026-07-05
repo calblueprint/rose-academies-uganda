@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { getSupabaseBrowserClient } from "@/api/supabase/browser";
 import { uploadLessonImage } from "@/api/supabase/images";
 import { getCurrentUserOrThrow } from "@/lib/getCurrentUser";
+import { useLanguage } from "@/lib/i18n";
 import { PRESET_IMAGES } from "@/lib/lessonPresets";
 import {
   ActionRow,
@@ -98,6 +99,7 @@ export default function UploadLessonImageModal({
   lessonId,
   onImageUpdated,
 }: Props) {
+  const { t } = useLanguage();
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<ActiveTab>("select");
   const [selectedPreset, setSelectedPreset] = useState<string | null>(null);
@@ -133,7 +135,7 @@ export default function UploadLessonImageModal({
 
   function validateAndSetFile(f: File) {
     if (!ACCEPTED_TYPES.includes(f.type)) {
-      setError("Only .png and .jpg files are accepted.");
+      setError(t("lessonModal.onlyImagesAccepted"));
       return;
     }
     if (previewUrl) URL.revokeObjectURL(previewUrl);
@@ -200,7 +202,7 @@ export default function UploadLessonImageModal({
       onClose();
     } catch (err) {
       console.error("Failed to save image:", err);
-      setError("Failed to save image. Please try again.");
+      setError(t("lessonModal.saveImageFailed"));
     } finally {
       setIsSubmitting(false);
     }
@@ -220,7 +222,7 @@ export default function UploadLessonImageModal({
               lineHeight: "normal",
             }}
           >
-            Select Lesson Graphic
+            {t("lessonModal.imageTitle")}
           </h2>
 
           <CloseButton
@@ -252,7 +254,7 @@ export default function UploadLessonImageModal({
             onClick={() => setActiveTab("select")}
           >
             <SelectIcon color={activeTab === "select" ? "#fff" : "#000"} />
-            Select Image
+            {t("lessonModal.selectImage")}
           </Tab>
           <Tab
             type="button"
@@ -260,7 +262,7 @@ export default function UploadLessonImageModal({
             onClick={() => setActiveTab("upload")}
           >
             <UploadIcon color={activeTab === "upload" ? "#fff" : "#000"} />
-            Upload Image
+            {t("lessonModal.uploadImage")}
           </Tab>
         </TabRow>
 
@@ -293,7 +295,7 @@ export default function UploadLessonImageModal({
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={previewUrl}
-                alt="Preview"
+                alt={t("lessonModal.previewAlt")}
                 style={{ display: "block", width: "100%", height: "auto" }}
               />
             ) : (
@@ -328,12 +330,10 @@ export default function UploadLessonImageModal({
                   />
                 </svg>
 
-                <DropZoneText>
-                  Choose a file or drag &amp; drop it here
-                </DropZoneText>
+                <DropZoneText>{t("lessonModal.chooseFile")}</DropZoneText>
 
                 <DropZoneSubtext>
-                  {ACCEPTED_EXT} formats accepted
+                  {ACCEPTED_EXT} {t("lessonModal.formatsAccepted")}
                 </DropZoneSubtext>
 
                 <BrowseButton
@@ -344,7 +344,7 @@ export default function UploadLessonImageModal({
                     fileInputRef.current?.click();
                   }}
                 >
-                  Browse file
+                  {t("lessonModal.browseFile")}
                 </BrowseButton>
               </>
             )}
@@ -367,7 +367,7 @@ export default function UploadLessonImageModal({
 
         <ActionRow>
           <CancelButton type="button" onClick={handleClose}>
-            Cancel
+            {t("common.cancel")}
           </CancelButton>
           <SaveButton
             type="button"
@@ -375,10 +375,10 @@ export default function UploadLessonImageModal({
             disabled={!canSave || isSubmitting}
           >
             {isSubmitting
-              ? "Saving..."
+              ? t("common.saving")
               : activeTab === "select"
-                ? "Select Image"
-                : "Save Image"}
+                ? t("lessonModal.selectImage")
+                : t("lessonModal.saveImage")}
           </SaveButton>
         </ActionRow>
       </ModalCard>

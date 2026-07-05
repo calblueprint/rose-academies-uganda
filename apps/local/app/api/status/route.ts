@@ -67,8 +67,8 @@ export async function GET(): Promise<NextResponse> {
       {
         operational: true,
         message: readiness.ready
-          ? `Connected to the Classroom Hub. ${readiness.groups} classroom${readiness.groups === 1 ? "" : "s"} and ${readiness.lessons} lesson${readiness.lessons === 1 ? "" : "s"} are synced.`
-          : "Connected to the Classroom Hub. No synced classroom lessons are ready yet.",
+          ? `Connected to the Classroom Hub. ${readiness.groups} classroom${readiness.groups === 1 ? "" : "s"} and ${readiness.lessons} lesson${readiness.lessons === 1 ? "" : "s"} are ready.`
+          : "Connected to the Classroom Hub. No classroom lessons are ready yet.",
         readiness,
         wifi: wifiStatus,
       },

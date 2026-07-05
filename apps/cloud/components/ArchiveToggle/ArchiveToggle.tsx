@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { getSupabaseBrowserClient } from "@/api/supabase/browser";
 import ConfirmationModal from "@/components/modals/ConfirmationModal/ConfirmationModal";
+import { useLanguage } from "@/lib/i18n";
 import { ArchiveButton, ArchiveButtonText } from "./styles";
 
 type ArchiveToggleProps = {
@@ -17,6 +18,7 @@ export default function ArchiveToggle({
   isArchived,
   deviceId = null,
 }: ArchiveToggleProps) {
+  const { t } = useLanguage();
   const supabase = getSupabaseBrowserClient();
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
@@ -37,7 +39,7 @@ export default function ArchiveToggle({
     if (!isArchived && deviceId) {
       const { error: syncError } = await supabase
         .from("DeviceLessons")
-        .delete()
+        .update({ status: "pending_removal" })
         .eq("lesson_id", lesson_Id)
         .eq("device_id", deviceId);
 
@@ -80,21 +82,23 @@ export default function ArchiveToggle({
         </svg>
 
         <ArchiveButtonText>
-          {isArchived ? "Restore" : "Archive"}
+          {isArchived ? t("lessons.restore") : t("archive.action")}
         </ArchiveButtonText>
       </ArchiveButton>
 
       <ConfirmationModal
         isOpen={isOpen}
-        title={isArchived ? "Restore Lesson" : "Archive Lesson"}
+        title={isArchived ? t("lessons.restoreTitle") : t("archive.modalTitle")}
         description={
           isArchived
-            ? "This lesson will return to the Lesson Dashboard. You can send it to sync again when it is ready."
+            ? t("archive.restoreModalDescription")
             : deviceId
-              ? "This lesson will be removed from the Lesson Dashboard and Sync Lessons page. Sync afterwards to remove it from the classroom device."
-              : "This lesson will be removed from the Lesson Dashboard. You can restore it later from Archived Lessons."
+              ? t("archive.modalDescriptionWithHub")
+              : t("archive.modalDescription")
         }
-        confirmText={isArchived ? "Restore Lesson" : "Archive Lesson"}
+        confirmText={
+          isArchived ? t("lessons.restoreConfirm") : t("archive.modalConfirm")
+        }
         onCancel={() => setIsOpen(false)}
         onConfirm={handleConfirm}
       />

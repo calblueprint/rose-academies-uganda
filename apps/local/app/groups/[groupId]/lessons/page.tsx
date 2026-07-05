@@ -50,6 +50,10 @@ export default function LessonsPage() {
   const filteredLessons = lessons.filter(lesson =>
     lesson.name.toLowerCase().includes(searchTerm.toLowerCase()),
   );
+  const classroomName = data?.groups[0]?.name;
+  const pageTitle = classroomName
+    ? `${classroomName} ${t("lessons.titleSuffix")}`
+    : t("lessons.title");
 
   if (!data) {
     return (
@@ -61,7 +65,7 @@ export default function LessonsPage() {
 
   return (
     <PageContainer>
-      <Title>{t("lessons.title")}</Title>
+      <Title>{pageTitle}</Title>
       <SearchBarRow>
         {/* Search bar */}
         <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />

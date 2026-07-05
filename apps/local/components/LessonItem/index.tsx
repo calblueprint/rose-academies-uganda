@@ -3,6 +3,7 @@
 import { useContext, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { DataContext } from "@/context/DataContext";
+import { useLanguage } from "@/lib/i18n";
 import { IconSvgs } from "@/lib/icons";
 import {
   DownloadLink,
@@ -26,6 +27,7 @@ export default function LessonItem({
   lessonId: number;
   lessonName: string;
 }) {
+  const { t } = useLanguage();
   const [opened, setOpened] = useState(false);
   const data = useContext(DataContext);
   const router = useRouter();
@@ -69,8 +71,8 @@ export default function LessonItem({
                 <DownloadLink
                   href={`/api/sqlite/files/${file.id}?download=1`}
                   download={file.name}
-                  title={`Download ${file.name}`}
-                  aria-label={`Download ${file.name}`}
+                  title={`${t("files.download")} ${file.name}`}
+                  aria-label={`${t("files.download")} ${file.name}`}
                   onClick={event => event.stopPropagation()}
                 >
                   {IconSvgs.download}
@@ -78,7 +80,7 @@ export default function LessonItem({
               </FileRow>
             ))
           ) : (
-            <EmptyFilesMessage>No files in this lesson yet.</EmptyFilesMessage>
+            <EmptyFilesMessage>{t("files.empty")}</EmptyFilesMessage>
           )}
         </FilesContainer>
       )}

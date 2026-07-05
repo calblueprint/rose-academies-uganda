@@ -38,10 +38,24 @@ export async function deleteLessonFilesAction({
     throw new Error(error.message);
   }
 
-  await supabase
+  const { error: lessonUpdateError } = await supabase
     .from("Lessons")
     .update({ updated_at: new Date().toISOString() })
     .eq("id", lessonId);
+
+  if (lessonUpdateError) {
+    throw new Error(lessonUpdateError.message);
+  }
+
+  const { error: deviceLessonError } = await supabase
+    .from("DeviceLessons")
+    .update({ status: "pending" })
+    .eq("lesson_id", lessonId)
+    .neq("status", "pending_removal");
+
+  if (deviceLessonError) {
+    throw new Error(deviceLessonError.message);
+  }
 
   return { success: true };
 }
@@ -74,6 +88,25 @@ export async function reorderLessonFilesAction({
     if (error) {
       throw new Error(error.message);
     }
+  }
+
+  const { error: lessonUpdateError } = await supabase
+    .from("Lessons")
+    .update({ updated_at: new Date().toISOString() })
+    .eq("id", lessonId);
+
+  if (lessonUpdateError) {
+    throw new Error(lessonUpdateError.message);
+  }
+
+  const { error: deviceLessonError } = await supabase
+    .from("DeviceLessons")
+    .update({ status: "pending" })
+    .eq("lesson_id", lessonId)
+    .neq("status", "pending_removal");
+
+  if (deviceLessonError) {
+    throw new Error(deviceLessonError.message);
   }
 
   return { success: true };

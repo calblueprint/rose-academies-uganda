@@ -71,9 +71,9 @@ Then, navigate to http://localhost:3000 to launch the web application.
 ## Raspberry Pi WiFi setup
 
 The production Pi exposes an educator-friendly setup page at `/setup`. When no
-saved WiFi is available, the Pi starts its unique `Rose-Setup-XXXX` hotspot.
-Join that hotspot. The setup page should open automatically. If it does not,
-open:
+saved WiFi is available, the Pi starts its unique `Rose-Hub-XXXX` hotspot.
+Join that hotspot with password `rosehub!`. The setup page should open
+automatically. If it does not, open:
 
 ```text
 http://rosehub.local/setup

@@ -20,7 +20,7 @@ device identity on first boot.
 - A unique `DEVICE_ID`
 - A unique one-time `DEVICE_PAIRING_CODE`
 - A unique `CLASSROOM_SESSION_SECRET`
-- A unique `Rose-Setup-XXXX` hotspot name
+- A unique `Rose-Hub-XXXX` hotspot name
 - An empty local offline SQLite database
 
 The service writes `/var/lib/rose/first-boot-complete` after it succeeds. Later
@@ -123,7 +123,7 @@ For each release image:
 1. Flash the image to a fresh SD card.
 2. Insert it into a different Raspberry Pi.
 3. Boot without internet.
-4. Confirm a `Rose-Setup-XXXX` network appears.
+4. Confirm a `Rose-Hub-XXXX` network appears.
 5. Join that network from a tablet.
 6. Open `http://rosehub.local/setup`.
 7. Connect the Pi to an internet Wi-Fi network from the setup page.
@@ -140,5 +140,5 @@ For each release image:
 - SSH is disabled by the cleanup script for shipped images.
 - SSH host keys are removed so copied devices do not share host identity.
 - Supabase service-role keys must never be placed on the image.
-- The MVP hotspot password is still shared as `rosehub1`; use unique
+- The MVP hotspot password is still shared as `rosehub!`; use unique
   per-device hotspot passwords or QR labels before larger deployment.

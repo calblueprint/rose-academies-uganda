@@ -2,13 +2,16 @@ import styled, { css, keyframes } from "styled-components";
 import COLORS from "@/styles/colors";
 import { Subtitle1, Subtitle2 } from "@/styles/text";
 
-export const SyncCard = styled.div`
+type SyncButtonVariant = "default" | "setup";
+
+export const SyncCard = styled.div<{ $variant?: SyncButtonVariant }>`
   display: flex;
   width: 100%;
-  min-height: 11.375rem;
+  min-height: ${({ $variant }) =>
+    $variant === "setup" ? "12rem" : "11.375rem"};
   flex-direction: column;
   justify-content: space-between;
-  gap: 1.5rem;
+  gap: ${({ $variant }) => ($variant === "setup" ? "1.25rem" : "1.5rem")};
   padding: 1.5rem;
   border-radius: 1rem;
   background: ${COLORS.white};
@@ -17,12 +20,16 @@ export const SyncCard = styled.div`
   box-sizing: border-box;
 `;
 
-export const CardHeader = styled.div`
+export const CardHeader = styled.div<{ $variant?: SyncButtonVariant }>`
   display: flex;
   width: 100%;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
+  align-items: ${({ $variant }) =>
+    $variant === "setup" ? "stretch" : "center"};
+  justify-content: ${({ $variant }) =>
+    $variant === "setup" ? "flex-start" : "space-between"};
+  flex-direction: ${({ $variant }) =>
+    $variant === "setup" ? "column" : "row"};
+  gap: ${({ $variant }) => ($variant === "setup" ? "0.85rem" : "1rem")};
 
   @media (max-width: 560px) {
     align-items: flex-start;
@@ -37,11 +44,69 @@ export const CardTitle = styled(Subtitle2).attrs({
   font-size: 1rem;
 `;
 
+export const SyncCardFooter = styled.div`
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 1rem;
+  width: 100%;
+
+  @media (max-width: 560px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+export const HubStatusRow = styled.div`
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  column-gap: 0.45rem;
+  row-gap: 0.08rem;
+  justify-self: end;
+  min-width: 0;
+  max-width: 14rem;
+
+  @media (max-width: 560px) {
+    justify-self: start;
+    min-width: 0;
+  }
+`;
+
+export const HubStatusDot = styled.span<{ $linked: boolean }>`
+  width: 0.5rem;
+  height: 0.5rem;
+  flex: 0 0 auto;
+  margin-top: 0.35rem;
+  border-radius: 999px;
+  background: ${({ $linked }) =>
+    $linked ? COLORS.activeGreen : COLORS.orange100};
+  box-shadow: 0 0 0 3px
+    ${({ $linked }) => ($linked ? COLORS.green10 : COLORS.orange20)};
+`;
+
+export const HubStatusText = styled.span`
+  color: ${COLORS.gray100};
+  font-family: var(--font-primary);
+  font-size: 0.86rem;
+  line-height: 1.35;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+`;
+
+export const HubStatusDetail = styled.span`
+  grid-column: 2;
+  color: ${COLORS.gray60};
+  font-family: var(--font-primary);
+  font-size: 0.8rem;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+`;
+
 export const LastSyncedInfo = styled.div`
   display: flex;
   min-height: 4.25rem;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-end;
   align-items: flex-start;
   gap: 0.35rem;
   align-self: stretch;
@@ -52,7 +117,7 @@ export const SyncProgressArea = styled.div`
   width: 100%;
   min-height: 4.25rem;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-end;
   gap: 1rem;
 `;
 
@@ -94,12 +159,15 @@ const spin = keyframes`
   }
 `;
 
-export const ButtonWrapper = styled.button`
+export const ButtonWrapper = styled.button<{ $variant?: SyncButtonVariant }>`
   display: flex;
-  width: auto;
-  min-width: 7rem;
-  height: 2.75rem;
-  padding: 0 1.25rem;
+  width: ${({ $variant }) => ($variant === "setup" ? "100%" : "auto")};
+  min-width: ${({ $variant }) => ($variant === "setup" ? "0" : "7rem")};
+  min-height: ${({ $variant }) =>
+    $variant === "setup" ? "3.25rem" : "2.75rem"};
+  height: auto;
+  padding: ${({ $variant }) =>
+    $variant === "setup" ? "0.75rem 1.25rem" : "0 1.25rem"};
   justify-content: center;
   align-items: center;
   gap: 0.5rem;

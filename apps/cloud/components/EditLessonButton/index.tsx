@@ -23,7 +23,7 @@ function EditLessonButton({
     <>
       <EditButton onClick={() => setIsOpen(true)}>
         {IconSvgs.pencil}
-        <EditButtonText>{t("lessons.edit")}</EditButtonText>
+        <EditButtonText>{t("lessons.editDetails")}</EditButtonText>
       </EditButton>
 
       <EditLessonModal

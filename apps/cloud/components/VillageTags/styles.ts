@@ -20,17 +20,18 @@ export const VillageTag = styled.span<{
   flex-shrink: 0;
 
   border-radius: 999px;
+  border: 0;
   background-color: ${({ $variant }) =>
-    $variant === "card" ? COLORS.stem : COLORS.green20};
+    $variant === "card" ? COLORS.pageWash : COLORS.green20};
 
   color: ${({ $variant }) =>
-    $variant === "card" ? COLORS.gray100 : COLORS.black};
+    $variant === "card" ? COLORS.gray80 : COLORS.black};
 
   font-size: ${({ $variant }) =>
     $variant === "card" ? "var(--font-subtitle-3)" : "var(--font-body)"};
   line-height: ${({ $variant }) =>
     $variant === "card" ? "var(--lh-subtitle-3)" : "var(--lh-body)"};
-  font-weight: 400;
+  font-weight: ${({ $variant }) => ($variant === "card" ? "600" : "400")};
 
   white-space: nowrap;
 `;

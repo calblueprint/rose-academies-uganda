@@ -3,37 +3,6 @@ import { getSupabaseServerClientReadOnly } from "@/api/supabase/server-readonly"
 import { fetchVisibleClassrooms } from "@/lib/classrooms";
 import DashboardClient from "./DashboardClient";
 
-function formatSyncTimestamp(timestamp: string | null) {
-  if (!timestamp) return null;
-
-  const date = new Date(timestamp);
-
-  if (Number.isNaN(date.getTime())) return null;
-
-  const months = [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec",
-  ];
-  const month = months[date.getUTCMonth()];
-  const day = date.getUTCDate();
-  const hours = date.getUTCHours();
-  const minutes = String(date.getUTCMinutes()).padStart(2, "0");
-  const hour12 = hours % 12 || 12;
-  const period = hours >= 12 ? "PM" : "AM";
-
-  return `${month} ${day}, ${hour12}:${minutes} ${period}`;
-}
-
 type DashboardPageRouteProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
@@ -75,7 +44,6 @@ export default async function DashboardPageRoute({
 
   const deviceId = device?.id ?? null;
   const deviceLastSyncedAt = device?.last_synced_at ?? null;
-  const deviceLastSyncedLabel = formatSyncTimestamp(deviceLastSyncedAt);
 
   const { data: deviceLessons, error: deviceLessonsError } = deviceId
     ? await supabase
@@ -89,10 +57,13 @@ export default async function DashboardPageRoute({
   const lessonCount = lessons?.length ?? 0;
   const classroomCount = classrooms.length;
   const savedToHubCount = deviceLessons?.length ?? 0;
+  const dashboardOnlyCount = Math.max(lessonCount - savedToHubCount, 0);
   const syncedCount =
     deviceLessons?.filter(row => row.status === "available").length ?? 0;
   const pendingSyncCount =
-    deviceLessons?.filter(row => row.status === "pending").length ?? 0;
+    deviceLessons?.filter(
+      row => row.status === "pending" || row.status === "pending_removal",
+    ).length ?? 0;
   const steps: SetupStepData[] = [
     {
       done: Boolean(deviceId),
@@ -133,18 +104,16 @@ export default async function DashboardPageRoute({
       href: "/app/classrooms",
     },
     {
-      done: lessonCount > 0 && savedToHubCount > 0,
+      done: lessonCount > 0,
       titleKey: "setupGuide.stepLesson.title",
       shortLabelKey: "setupGuide.stepLesson.short",
       detailKey:
-        savedToHubCount > 0
-          ? savedToHubCount === 1
-            ? "setupGuide.stepLesson.detailReadySingular"
-            : "setupGuide.stepLesson.detailReadyPlural"
-          : lessonCount > 0
-            ? "setupGuide.stepLesson.detailNeedsSync"
-            : "setupGuide.stepLesson.detail",
-      detailParams: { count: savedToHubCount },
+        lessonCount > 0
+          ? lessonCount === 1
+            ? "setupGuide.stepLesson.detailDoneSingular"
+            : "setupGuide.stepLesson.detailDonePlural"
+          : "setupGuide.stepLesson.detail",
+      detailParams: { count: lessonCount },
       actionKey: "lessons.title",
       href: "/app/lessons",
     },
@@ -169,11 +138,10 @@ export default async function DashboardPageRoute({
       openSetupGuide={shouldOpenSetupGuide}
       deviceId={deviceId}
       deviceLastSyncedAt={deviceLastSyncedAt}
-      deviceLastSyncedLabel={deviceLastSyncedLabel}
       userId={user.id}
       lessonCount={lessonCount}
       classroomCount={classroomCount}
-      savedToHubCount={savedToHubCount}
+      dashboardOnlyCount={dashboardOnlyCount}
       syncedCount={syncedCount}
       pendingSyncCount={pendingSyncCount}
     />

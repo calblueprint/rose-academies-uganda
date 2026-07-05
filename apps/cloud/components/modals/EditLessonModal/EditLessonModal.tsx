@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { getSupabaseBrowserClient } from "@/api/supabase/browser";
 import { DataContext } from "@/context/DataContext";
 import { fetchVisibleClassrooms } from "@/lib/classrooms";
+import { useLanguage } from "@/lib/i18n";
 import {
   ActionRow,
   AssignedVillageRow,
@@ -93,6 +94,7 @@ function createClassroomId(existingIds: Set<number>) {
 }
 
 export default function EditLessonModal({ isOpen, onClose, lesson }: Props) {
+  const { t } = useLanguage();
   const supabase = getSupabaseBrowserClient();
   const data = useContext(DataContext);
   const router = useRouter();
@@ -338,7 +340,8 @@ export default function EditLessonModal({ isOpen, onClose, lesson }: Props) {
             .from("DeviceLessons")
             .update({ status: "pending" })
             .eq("lesson_id", lesson.id)
-            .in("device_id", deviceIds);
+            .in("device_id", deviceIds)
+            .neq("status", "pending_removal");
 
           if (deviceLessonsError) {
             throw deviceLessonsError;
@@ -390,12 +393,12 @@ export default function EditLessonModal({ isOpen, onClose, lesson }: Props) {
     const normalizedCode = normalizeJoinCode(newClassroomCode);
 
     if (!trimmedName) {
-      setClassroomError("Classroom name is required.");
+      setClassroomError(t("lessonModal.classroomNameRequired"));
       return;
     }
 
     if (!JOIN_CODE_PATTERN.test(normalizedCode)) {
-      setClassroomError("Use exactly 6 letters or numbers.");
+      setClassroomError(t("lessonModal.joinCodeLength"));
       return;
     }
 
@@ -404,7 +407,7 @@ export default function EditLessonModal({ isOpen, onClose, lesson }: Props) {
 
     try {
       if (await isCodeUsedElsewhere(normalizedCode)) {
-        setClassroomError("That join code is already used.");
+        setClassroomError(t("lessonModal.joinCodeUsed"));
         return;
       }
 
@@ -438,7 +441,7 @@ export default function EditLessonModal({ isOpen, onClose, lesson }: Props) {
       resetClassroomCreateForm();
     } catch (err) {
       console.error("Failed to create classroom:", err);
-      setClassroomError("Unable to create classroom. Please try again.");
+      setClassroomError(t("lessonModal.createClassroomFailed"));
     } finally {
       setIsClassroomSaving(false);
     }
@@ -448,12 +451,12 @@ export default function EditLessonModal({ isOpen, onClose, lesson }: Props) {
     <Overlay onClick={handleClose}>
       <ModalCard onClick={e => e.stopPropagation()}>
         <ModalHeader>
-          <ModalTitle>Edit lesson</ModalTitle>
+          <ModalTitle>{t("lessonModal.editTitle")}</ModalTitle>
           <CloseButton
             type="button"
             onClick={handleClose}
             disabled={isSubmitting}
-            aria-label="Close modal"
+            aria-label={t("common.closeModal")}
           >
             <svg
               width="16"
@@ -473,10 +476,12 @@ export default function EditLessonModal({ isOpen, onClose, lesson }: Props) {
         </ModalHeader>
 
         <FieldSection>
-          <FieldLabel htmlFor="lesson-title">Name</FieldLabel>
+          <FieldLabel htmlFor="lesson-title">
+            {t("lessonModal.name")}
+          </FieldLabel>
           <TextInput
             id="lesson-title"
-            placeholder="Lesson title"
+            placeholder={t("lessonModal.lessonTitlePlaceholder")}
             value={title}
             onChange={e => setTitle(e.target.value)}
             disabled={isSubmitting}
@@ -484,10 +489,12 @@ export default function EditLessonModal({ isOpen, onClose, lesson }: Props) {
         </FieldSection>
 
         <FieldSection>
-          <FieldLabel htmlFor="lesson-description">Description</FieldLabel>
+          <FieldLabel htmlFor="lesson-description">
+            {t("lessonModal.description")}
+          </FieldLabel>
           <TextArea
             id="lesson-description"
-            placeholder="Brief description of the lesson"
+            placeholder={t("lessonModal.descriptionPlaceholder")}
             value={description}
             onChange={e => setDescription(e.target.value)}
             disabled={isSubmitting}
@@ -497,7 +504,9 @@ export default function EditLessonModal({ isOpen, onClose, lesson }: Props) {
 
         <FieldSection>
           <AssignedVillageRow>
-            <FieldLabel style={{ marginBottom: 0 }}>Classroom</FieldLabel>
+            <FieldLabel style={{ marginBottom: 0 }}>
+              {t("common.classroom")}
+            </FieldLabel>
 
             <VillageDropdownWrapper ref={villageDropdownRef}>
               <VillageSelectTrigger
@@ -507,8 +516,8 @@ export default function EditLessonModal({ isOpen, onClose, lesson }: Props) {
               >
                 <VillageSelectTriggerText>
                   {selectedGroupIds.length === 0
-                    ? "Select"
-                    : `${selectedGroupIds.length} selected`}
+                    ? t("lessonModal.select")
+                    : `${selectedGroupIds.length} ${t("common.selected")}`}
                 </VillageSelectTriggerText>
 
                 <svg
@@ -569,7 +578,7 @@ export default function EditLessonModal({ isOpen, onClose, lesson }: Props) {
                     })
                   ) : (
                     <ClassroomDropdownEmpty>
-                      No classrooms yet.
+                      {t("lessonModal.noClassrooms")}
                     </ClassroomDropdownEmpty>
                   )}
 
@@ -582,7 +591,7 @@ export default function EditLessonModal({ isOpen, onClose, lesson }: Props) {
                     }}
                     disabled={isSubmitting || isClassroomSaving}
                   >
-                    New classroom
+                    {t("lessonModal.newClassroom")}
                   </ClassroomDropdownAction>
 
                   <ClassroomManageButton
@@ -592,7 +601,7 @@ export default function EditLessonModal({ isOpen, onClose, lesson }: Props) {
                       router.push("/app/classrooms");
                     }}
                   >
-                    Manage classrooms
+                    {t("lessons.manageClassrooms")}
                   </ClassroomManageButton>
                 </VillageDropdownMenu>
               )}
@@ -603,13 +612,13 @@ export default function EditLessonModal({ isOpen, onClose, lesson }: Props) {
             <ClassroomCreatePanel ref={classroomCreatePanelRef}>
               <ClassroomCreateRow>
                 <TextInput
-                  placeholder="Classroom name"
+                  placeholder={t("classrooms.name")}
                   value={newClassroomName}
                   onChange={e => setNewClassroomName(e.target.value)}
                   disabled={isSubmitting || isClassroomSaving}
                 />
                 <TextInput
-                  placeholder="Student join code"
+                  placeholder={t("setupGuide.studentJoinCode")}
                   maxLength={JOIN_CODE_LENGTH}
                   value={newClassroomCode}
                   onChange={e =>
@@ -625,21 +634,23 @@ export default function EditLessonModal({ isOpen, onClose, lesson }: Props) {
                   onClick={() => setNewClassroomCode(generateJoinCode())}
                   disabled={isSubmitting || isClassroomSaving}
                 >
-                  New code
+                  {t("classrooms.newCode")}
                 </ClassroomSecondaryButton>
                 <ClassroomSecondaryButton
                   type="button"
                   onClick={resetClassroomCreateForm}
                   disabled={isSubmitting || isClassroomSaving}
                 >
-                  Cancel
+                  {t("common.cancel")}
                 </ClassroomSecondaryButton>
                 <CreateButton
                   type="button"
                   onClick={handleCreateClassroom}
                   disabled={isSubmitting || isClassroomSaving}
                 >
-                  {isClassroomSaving ? "Creating..." : "Create classroom"}
+                  {isClassroomSaving
+                    ? t("common.creating")
+                    : t("setupGuide.createClassroom")}
                 </CreateButton>
               </ClassroomCreateActions>
 
@@ -649,7 +660,7 @@ export default function EditLessonModal({ isOpen, onClose, lesson }: Props) {
         </FieldSection>
 
         {showVillageError && selectedGroupIds.length === 0 && (
-          <ErrorText>At least one classroom is required.</ErrorText>
+          <ErrorText>{t("lessonModal.classroomRequired")}</ErrorText>
         )}
 
         <ActionRow>
@@ -658,7 +669,7 @@ export default function EditLessonModal({ isOpen, onClose, lesson }: Props) {
             onClick={handleClose}
             disabled={isSubmitting}
           >
-            Cancel
+            {t("common.cancel")}
           </CancelButton>
 
           <CreateButton
@@ -668,7 +679,7 @@ export default function EditLessonModal({ isOpen, onClose, lesson }: Props) {
               !title.trim() || selectedGroupIds.length === 0 || isSubmitting
             }
           >
-            {isSubmitting ? "Saving..." : "Save Changes"}
+            {isSubmitting ? t("common.saving") : t("lessonModal.saveChanges")}
           </CreateButton>
         </ActionRow>
       </ModalCard>

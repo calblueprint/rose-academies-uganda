@@ -191,5 +191,5 @@ Next:
 3. Capture and compress the image from another machine.
 
 On the first boot of each copied card, rose-first-boot.service will generate a
-unique device ID, pairing code, classroom session secret, and Rose-Setup hotspot.
+unique device ID, pairing code, classroom session secret, and Rose-Hub hotspot.
 EOF

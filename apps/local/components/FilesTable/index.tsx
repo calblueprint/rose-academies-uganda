@@ -12,6 +12,7 @@ import {
   FileNameContainer,
   HeadCell,
   HeadRow,
+  PreviewIconButton,
   StyledTable,
   TableContainer,
 } from "./style";
@@ -31,6 +32,14 @@ type SortKey = "name" | "dateAdded" | "dateModified" | "sizeBytes";
 
 // Sorting direction.
 type SortDir = "asc" | "desc";
+
+function canPreviewFile(fileName: string): boolean {
+  const ext = fileName.split(".").pop()?.toLowerCase() ?? "";
+
+  return ["gif", "jpeg", "jpg", "mp4", "pdf", "png", "svg", "webp"].includes(
+    ext,
+  );
+}
 
 // Props for the FilesTable component: files and a callback function
 type FilesTableProps = {
@@ -126,8 +135,8 @@ export function FilesTable({ files, onRowClick }: FilesTableProps) {
           <col style={{ width: "38%" }} />
           <col style={{ width: "19%" }} />
           <col style={{ width: "19%" }} />
-          <col style={{ width: "18%" }} />
-          <col style={{ width: "6%" }} />
+          <col style={{ width: "16%" }} />
+          <col style={{ width: "8%" }} />
         </colgroup>
 
         <thead>
@@ -172,15 +181,29 @@ export function FilesTable({ files, onRowClick }: FilesTableProps) {
               <BodyCell>{formatSize(file.sizeBytes)}</BodyCell>
 
               <BodyCell>
-                <DownloadIcon
-                  href={`/api/sqlite/files/${file.id}?download=1`}
-                  download={file.name}
-                  title={`${t("files.download")} ${file.name}`}
-                  aria-label={`${t("files.download")} ${file.name}`}
-                  onClick={event => event.stopPropagation()}
-                >
-                  {IconSvgs.download}
-                </DownloadIcon>
+                {canPreviewFile(file.name) ? (
+                  <PreviewIconButton
+                    type="button"
+                    title={`${t("files.openFullScreen")} ${file.name}`}
+                    aria-label={`${t("files.openFullScreen")} ${file.name}`}
+                    onClick={event => {
+                      event.stopPropagation();
+                      handleRowClick(file);
+                    }}
+                  >
+                    {IconSvgs.download}
+                  </PreviewIconButton>
+                ) : (
+                  <DownloadIcon
+                    href={`/api/sqlite/files/${file.id}?download=1`}
+                    download={file.name}
+                    title={`${t("files.download")} ${file.name}`}
+                    aria-label={`${t("files.download")} ${file.name}`}
+                    onClick={event => event.stopPropagation()}
+                  >
+                    {IconSvgs.download}
+                  </DownloadIcon>
+                )}
               </BodyCell>
             </BodyRow>
           ))}

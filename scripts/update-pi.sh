@@ -10,6 +10,8 @@ cd "$REPO_DIR"
 git switch main
 git pull --ff-only origin main
 CI=true $PNPM_CMD install
+sudo apt update
+sudo apt install -y iw
 
 cd "$APP_DIR"
 $PNPM_CMD build
@@ -17,6 +19,10 @@ $PNPM_CMD build
 sudo install -m 0755 \
   "$REPO_DIR/scripts/rose-wifi-manager.sh" \
   /usr/local/sbin/rose-wifi-manager
+
+sudo install -m 0755 \
+  "$REPO_DIR/scripts/rose-ap-interface.sh" \
+  /usr/local/sbin/rose-ap-interface
 
 sudo install -m 0755 \
   "$REPO_DIR/scripts/rose-first-boot.sh" \
@@ -32,11 +38,11 @@ sudo tee /etc/systemd/system/rose-web.service.d/allow-wifi-sudo.conf > /dev/null
 [Service]
 # The setup page calls the narrowly-allowlisted Wi-Fi helper through sudo.
 # NoNewPrivileges blocks sudo from elevating, so keep it disabled for this
-# service. Clear capability sandboxing from older installs because it blocks
-# sudo from changing to root uid/gid.
+# service. Restore the full default capability bounding set for older installs
+# that limited the service to CAP_NET_BIND_SERVICE.
 NoNewPrivileges=false
 AmbientCapabilities=
-CapabilityBoundingSet=
+CapabilityBoundingSet=~
 EOF
 
 sudo tee /etc/systemd/system/rose-first-boot.service > /dev/null <<'EOF'
@@ -56,7 +62,24 @@ RemainAfterExit=yes
 WantedBy=multi-user.target
 EOF
 
+sudo tee /etc/systemd/system/rose-ap-interface.service > /dev/null <<'EOF'
+[Unit]
+Description=Create Rose setup hotspot WiFi interface
+After=sys-subsystem-net-devices-wlan0.device
+Wants=sys-subsystem-net-devices-wlan0.device
+Before=NetworkManager.service rose-wifi-fallback.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/rose-ap-interface
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
 sudo systemctl daemon-reload
+sudo systemctl enable --now rose-ap-interface.service
 sudo systemctl enable rose-first-boot.service
 
 sudo systemctl restart rose-web

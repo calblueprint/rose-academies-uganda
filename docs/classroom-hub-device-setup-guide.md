@@ -48,21 +48,21 @@ When the hub is not yet connected to internet Wi-Fi, it creates a temporary setu
 The network name looks like:
 
 ```text
-Rose-Setup-XXXX
+Rose-Hub-XXXX
 ```
 
 The setup hotspot password is:
 
 ```text
-rosehub1
+rosehub!
 ```
 
 1. Open Wi-Fi settings on your tablet, phone, or laptop.
-2. Choose the `Rose-Setup-XXXX` network.
-3. Enter the password `rosehub1`.
+2. Choose the `Rose-Hub-XXXX` network.
+3. Enter the password `rosehub!`.
 4. Wait for your device to connect.
 
-> Picture to add: screenshot of Wi-Fi settings showing a `Rose-Setup-XXXX` network.
+> Picture to add: screenshot of Wi-Fi settings showing a `Rose-Hub-XXXX` network.
 
 ## Step 3: Open Classroom Hub Device Setup
 
@@ -96,7 +96,7 @@ The hub needs internet during setup and when downloading new lessons.
 http://rosehub.local/setup
 ```
 
-If the hub cannot connect to internet Wi-Fi, it will return to the `Rose-Setup-XXXX` hotspot so you can try again.
+If the hub cannot connect to internet Wi-Fi, it will return to the `Rose-Hub-XXXX` hotspot so you can try again.
 
 > Picture to add: screenshot of the Wi-Fi selection screen on the setup page.
 
@@ -144,7 +144,7 @@ Students will need the classroom join code from the educator.
 
 ## Troubleshooting
 
-### I Cannot See `Rose-Setup-XXXX`
+### I Cannot See `Rose-Hub-XXXX`
 
 - Wait 1 minute after plugging in the hub.
 - Move closer to the hub.
@@ -153,7 +153,7 @@ Students will need the classroom join code from the educator.
 
 ### The Setup Page Does Not Open
 
-- Make sure you are connected to the `Rose-Setup-XXXX` Wi-Fi network first.
+- Make sure you are connected to the `Rose-Hub-XXXX` Wi-Fi network first.
 - Open a browser and type `http://rosehub.local/setup`.
 - If that does not work, try again after restarting the hub.
 

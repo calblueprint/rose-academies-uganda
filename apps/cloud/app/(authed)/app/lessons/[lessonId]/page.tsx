@@ -32,6 +32,7 @@ type LessonFileRow = {
   display_order: number;
   Files: {
     id: number;
+    user_id: string | null;
     name: string;
     size_bytes: number | null;
     created_at: string | null;
@@ -40,7 +41,32 @@ type LessonFileRow = {
   } | null;
 };
 
-type LessonSyncStatus = "available" | "pending" | null;
+type LessonSyncStatus = "available" | "pending" | "pending_removal" | null;
+
+function buildStorageObjectPath(userId: string, fileName: string): string {
+  const normalizedFileName = fileName || "unnamed-file";
+  const safeFileName = normalizedFileName.replace(/\s+/g, "_");
+
+  return `${userId}/${safeFileName}`;
+}
+
+function encodeStoragePath(objectPath: string): string {
+  return objectPath.split("/").map(encodeURIComponent).join("/");
+}
+
+function buildFallbackPublicStorageUrl(
+  fileUserId: string | null,
+  fileName: string,
+): string | null {
+  if (!fileUserId) return null;
+
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (!supabaseUrl) return null;
+
+  const objectPath = buildStorageObjectPath(fileUserId, fileName);
+
+  return `${supabaseUrl}/storage/v1/object/public/files/${encodeStoragePath(objectPath)}`;
+}
 
 export default async function LessonDetailPage({
   params,
@@ -119,7 +145,7 @@ export default async function LessonDetailPage({
   const { data: lessonFileRows, error: filesError } = await supabase
     .from("LessonFiles")
     .select(
-      "file_id, display_order, Files(id, name, size_bytes, created_at, storage_path, mime_type)",
+      "file_id, display_order, Files(id, user_id, name, size_bytes, created_at, storage_path, mime_type)",
     )
     .eq("lesson_id", numericLessonId)
     .order("display_order", { ascending: true })
@@ -140,20 +166,27 @@ export default async function LessonDetailPage({
       )
       // LessonFiles is the ordered join table, while Files contains the actual
       // metadata needed by the detail page.
-      .map(row => ({
-        id: String(row.Files.id),
-        name: row.Files.name,
-        sizeBytes: row.Files.size_bytes ?? 0,
-        createdAt: row.Files.created_at,
-        updatedAt: row.Files.created_at,
-        order: row.display_order,
-        storagePath: row.Files.storage_path,
-        mimeType: row.Files.mime_type,
-      })) ?? [];
+      .map(row => {
+        const storagePath =
+          row.Files.storage_path ||
+          buildFallbackPublicStorageUrl(row.Files.user_id, row.Files.name);
+
+        return {
+          id: String(row.Files.id),
+          name: row.Files.name,
+          sizeBytes: row.Files.size_bytes ?? 0,
+          createdAt: row.Files.created_at,
+          updatedAt: row.Files.created_at,
+          order: row.display_order,
+          storagePath,
+          mimeType: row.Files.mime_type,
+        };
+      }) ?? [];
 
   const initialSyncStatus: LessonSyncStatus =
     offlineRows?.[0]?.status === "available" ||
-    offlineRows?.[0]?.status === "pending"
+    offlineRows?.[0]?.status === "pending" ||
+    offlineRows?.[0]?.status === "pending_removal"
       ? offlineRows[0].status
       : null;
 

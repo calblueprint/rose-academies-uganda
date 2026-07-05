@@ -5,7 +5,8 @@ set -euo pipefail
 STATE_DIR="${ROSE_STATE_DIR:-/var/lib/rose}"
 FIRST_BOOT_MARKER="$STATE_DIR/first-boot-complete"
 AP_CONNECTION_NAME="${ROSE_AP_CONNECTION_NAME:-pi-ap}"
-AP_PASSWORD="${ROSE_AP_PASSWORD:-rosehub1}"
+AP_INTERFACE="${ROSE_AP_INTERFACE:-roseap0}"
+AP_PASSWORD="${ROSE_AP_PASSWORD:-rosehub!}"
 DEFAULT_SUPABASE_URL="https://tyckvrwfblheqxuliscl.supabase.co"
 DEFAULT_SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR5Y2t2cndmYmxoZXF4dWxpc2NsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkxNzIwNTksImV4cCI6MjA3NDc0ODA1OX0.dggjzvmAdwHif9v3hUZWrYdwOFPfZAPMO9BHGlPaqPg"
 
@@ -147,7 +148,7 @@ if [[ ! "$CLASSROOM_SESSION_SECRET" =~ ^[A-Fa-f0-9]{64}$ ]]; then
 fi
 
 DEVICE_SUFFIX="$(printf '%s' "$DEVICE_ID" | sha256sum | cut -c1-4 | tr '[:lower:]' '[:upper:]')"
-AP_SSID="Rose-Setup-$DEVICE_SUFFIX"
+AP_SSID="Rose-Hub-$DEVICE_SUFFIX"
 
 echo "Preparing Rose first boot identity..."
 echo "Device ID: $DEVICE_ID"
@@ -181,6 +182,7 @@ if command -v nmcli >/dev/null 2>&1; then
   fi
 
   nmcli connection modify "$AP_CONNECTION_NAME" \
+    connection.interface-name "$AP_INTERFACE" \
     802-11-wireless.ssid "$AP_SSID" \
     802-11-wireless.mode ap \
     802-11-wireless.band bg \

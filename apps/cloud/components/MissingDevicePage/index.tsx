@@ -3,6 +3,7 @@
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { claimDeviceWithCode } from "@/actions/claimDevice";
+import { useLanguage } from "@/lib/i18n";
 import {
   Button,
   Card,
@@ -21,7 +22,6 @@ import {
   ModalEyebrow,
   ModalOverlay,
   ModalSection,
-  ModalStepList,
   ModalTitle,
   Steps,
   SuccessMessage,
@@ -30,6 +30,7 @@ import {
 
 export default function MissingDevicePage() {
   const router = useRouter();
+  const { t } = useLanguage();
   const [pairingCode, setPairingCode] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -58,36 +59,23 @@ export default function MissingDevicePage() {
   return (
     <Container>
       <Card>
-        <Title>Link Your Classroom Hub</Title>
-        <Description>
-          You are in the Educator Dashboard at rosepch.org. Link the physical
-          Classroom Hub device so lessons from this account can sync to the
-          Student Library.
-        </Description>
+        <Title>{t("missingDevice.title")}</Title>
+        <Description>{t("missingDevice.description")}</Description>
 
         <GuideButton type="button" onClick={() => setSetupModalOpen(true)}>
-          View setup steps
+          {t("missingDevice.viewSetupSteps")}
         </GuideButton>
 
         <Steps>
-          <li>
-            On the hub device, open Classroom Hub Device Setup at
-            rosehub.local/setup.
-          </li>
-          <li>Copy the one-time pairing code shown on the hub device.</li>
-          <li>
-            Return to this Educator Dashboard and enter the pairing code here.
-          </li>
+          <li>{t("missingDevice.step1")}</li>
+          <li>{t("missingDevice.step2")}</li>
+          <li>{t("missingDevice.step3")}</li>
         </Steps>
 
-        <HelpText>
-          Already set up this Classroom Hub with another educator account? Sign
-          in with that account, or reset this Classroom Hub before linking it to
-          a new educator.
-        </HelpText>
+        <HelpText>{t("missingDevice.help")}</HelpText>
 
         <Form onSubmit={handleSubmit}>
-          <Label htmlFor="pairing-code">Classroom Hub pairing code</Label>
+          <Label htmlFor="pairing-code">{t("pairing.codeLabel")}</Label>
           <Input
             id="pairing-code"
             name="pairing-code"
@@ -107,17 +95,15 @@ export default function MissingDevicePage() {
 
           {error && <ErrorMessage>{error}</ErrorMessage>}
           {success && (
-            <SuccessMessage>
-              Classroom Hub linked. Opening your dashboard…
-            </SuccessMessage>
+            <SuccessMessage>{t("missingDevice.linkSuccess")}</SuccessMessage>
           )}
 
           <Button type="submit" disabled={isSubmitting || success}>
             {isSubmitting
-              ? "Linking…"
+              ? t("pairing.linking")
               : success
-                ? "Linked"
-                : "Link Classroom Hub"}
+                ? t("missingDevice.linked")
+                : t("profile.linkHub")}
           </Button>
         </Form>
       </Card>
@@ -130,57 +116,25 @@ export default function MissingDevicePage() {
             aria-labelledby="setup-modal-title"
             onClick={event => event.stopPropagation()}
           >
-            <ModalEyebrow>Setup guide</ModalEyebrow>
-            <ModalTitle id="setup-modal-title">Setup guide</ModalTitle>
-            <ModalBody>
-              Keep this Educator Dashboard open. Have the Classroom Hub nearby,
-              and use another tablet, phone, or computer to connect to the hub
-              setup Wi-Fi and open rosehub.local/setup.
-            </ModalBody>
+            <ModalEyebrow>{t("setupGuideModal.title")}</ModalEyebrow>
+            <ModalTitle id="setup-modal-title">
+              {t("setupGuideModal.title")}
+            </ModalTitle>
+            <ModalBody>{t("setupGuideModal.body")}</ModalBody>
 
             <ModalSection>
-              <h3>1. At the Classroom Hub</h3>
-              <ModalStepList>
-                <li>Power on the hub with a charger or battery pack.</li>
-                <li>
-                  On another tablet, phone, or computer, join the Rose-Setup
-                  Wi-Fi hotspot if it appears.
-                </li>
-                <li>
-                  On that same tablet, phone, or computer, open
-                  http://rosehub.local/setup.
-                </li>
-                <li>Connect the hub to internet Wi-Fi.</li>
-                <li>Copy the pairing code shown on the hub.</li>
-              </ModalStepList>
+              <h3>{t("setupGuide.mapDashboardTitle")}</h3>
+              <p>{t("setupGuide.mapDashboardText")}</p>
             </ModalSection>
 
             <ModalSection>
-              <h3>2. In the Educator Dashboard</h3>
-              <ModalStepList>
-                <li>Use this dashboard at https://rosepch.org.</li>
-                <li>Enter the hub pairing code below.</li>
-                <li>Create classrooms and save each join code.</li>
-                <li>Create lessons and upload files.</li>
-                <li>Save lessons to the Classroom Hub and sync them.</li>
-              </ModalStepList>
+              <h3>{t("setupGuide.mapHubTitle")}</h3>
+              <p>{t("setupGuide.mapHubText")}</p>
             </ModalSection>
 
             <ModalSection>
-              <h3>3. For students</h3>
-              <ModalStepList>
-                <li>
-                  Students connect their tablet, phone, or computer to the
-                  Classroom Hub Wi-Fi.
-                </li>
-                <li>
-                  Students open the Student Library at
-                  http://rosehub.local/join.
-                </li>
-                <li>
-                  Students enter the classroom join code from the educator.
-                </li>
-              </ModalStepList>
+              <h3>{t("setupGuide.mapStudentsTitle")}</h3>
+              <p>{t("setupGuide.mapStudentsText")}</p>
             </ModalSection>
 
             <ModalActions>
@@ -188,7 +142,7 @@ export default function MissingDevicePage() {
                 type="button"
                 onClick={() => setSetupModalOpen(false)}
               >
-                Got it
+                {t("common.gotIt")}
               </ModalCloseButton>
             </ModalActions>
           </ModalCard>

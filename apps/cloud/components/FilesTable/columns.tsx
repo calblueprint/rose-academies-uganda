@@ -6,12 +6,14 @@ import * as style from "./styles";
 type GetFileTableColumnsArgs = {
   isDeleting: boolean;
   isReordering: boolean;
+  language: string;
   t: (key: string) => string;
 };
 
 export function getFileTableColumns({
   isDeleting,
   isReordering,
+  language,
   t,
 }: GetFileTableColumnsArgs): ColumnDef<FileRow>[] {
   return [
@@ -59,13 +61,13 @@ export function getFileTableColumns({
       accessorKey: "createdAt",
       id: "createdAt",
       header: t("files.dateAdded"),
-      cell: ({ row }) => formatDate(row.original.createdAt),
+      cell: ({ row }) => formatDate(row.original.createdAt, language),
     },
     {
       accessorKey: "updatedAt",
       id: "updatedAt",
       header: t("files.dateModified"),
-      cell: ({ row }) => formatDate(row.original.updatedAt),
+      cell: ({ row }) => formatDate(row.original.updatedAt, language),
     },
     {
       accessorKey: "sizeBytes",

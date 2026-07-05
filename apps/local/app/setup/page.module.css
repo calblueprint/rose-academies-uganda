@@ -86,6 +86,27 @@
   text-transform: uppercase;
 }
 
+.orientationCard {
+  padding: 14px 16px;
+  border: 1px solid rgba(30, 66, 64, 0.12);
+  border-radius: 10px;
+  background: #f7faf7;
+  color: #4d5451;
+  line-height: 1.45;
+}
+
+.orientationCard strong {
+  display: block;
+  margin-bottom: 4px;
+  color: #1e4240;
+  font-size: 15px;
+}
+
+.orientationCard span {
+  display: block;
+  font-size: 15px;
+}
+
 .progress {
   position: relative;
   display: grid;
@@ -275,6 +296,18 @@
   line-height: 1.4;
 }
 
+.safetyNote {
+  width: min(100%, 620px);
+  margin: 0;
+  padding: 13px 15px;
+  border: 1px solid rgba(104, 115, 91, 0.18);
+  border-radius: 9px;
+  background: #fbfcf7;
+  color: #4d5451;
+  font-size: 15px;
+  line-height: 1.45;
+}
+
 .form,
 .field {
   display: flex;
@@ -290,6 +323,13 @@
   color: #25282b;
   font-size: 16px;
   font-weight: var(--font-weight-section-title);
+}
+
+.fieldHint {
+  margin: -4px 0 0;
+  color: #606764;
+  font-size: 15px;
+  line-height: 1.45;
 }
 
 .row {
@@ -388,6 +428,13 @@
   color: #ffffff;
 }
 
+.buttonContent,
+.redirectHint {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .secondaryLinkButton {
   min-height: 52px;
   display: grid;
@@ -479,6 +526,23 @@
   justify-self: start;
 }
 
+.connectedNavigationRow {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.connectedActionGroup {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.connectedActionGroup .secondaryButton,
+.connectedActionGroup .primaryButton {
+  min-height: 44px;
+  padding: 0 18px;
+}
+
 .notice,
 .error,
 .success {
@@ -500,6 +564,35 @@
 .success {
   background: #edf6ee;
   color: #1f5a2a;
+}
+
+.success p {
+  margin: 0;
+}
+
+.redirectHint {
+  margin-top: 8px !important;
+  color: #3f6f43;
+  font-size: 14px;
+}
+
+.inlineAction {
+  width: fit-content;
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 12px;
+  padding: 0 16px;
+  border-radius: 8px;
+  background: #1e4240;
+  color: #ffffff;
+  font-weight: var(--font-weight-action);
+  text-decoration: none;
+}
+
+.inlineAction:hover {
+  background: #173432;
 }
 
 .accountStatusRow {
@@ -608,6 +701,20 @@
 .readinessCard strong {
   color: #25282b;
   text-align: right;
+}
+
+.statusGrid .addressStack,
+.readinessCard .addressStack {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  align-items: flex-end;
+}
+
+.addressStack small {
+  color: #606764;
+  font-size: 12px;
+  font-weight: var(--font-weight-section-title);
 }
 
 .instructionCard {
@@ -803,6 +910,7 @@
 
   .row,
   .navigationRow,
+  .connectedNavigationRow,
   .verificationActions {
     grid-template-columns: 1fr;
   }
@@ -811,6 +919,17 @@
   .navigationRow .backButton {
     width: 100%;
     justify-self: stretch;
+  }
+
+  .connectedActionGroup {
+    width: 100%;
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .connectedActionGroup .secondaryButton,
+  .connectedActionGroup .primaryButton {
+    width: 100%;
   }
 
   .accountStatusRow {
@@ -830,6 +949,14 @@
   }
 
   .navigationRow .backButton {
+    order: 2;
+  }
+
+  .connectedNavigationRow .backButton {
+    order: 1;
+  }
+
+  .connectedNavigationRow .connectedActionGroup {
     order: 2;
   }
 

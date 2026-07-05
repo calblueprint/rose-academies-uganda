@@ -1,4 +1,5 @@
 import supabase from "@/api/supabase/client";
+import { getDevicePairingCode } from "@/lib/devicePairing";
 import { getDeviceId } from "@/lib/getDeviceId";
 
 const DEVICE_ID = getDeviceId();
@@ -27,14 +28,10 @@ async function pollForRequestedSync() {
   try {
     console.log("[PI] Polling for sync...", new Date().toLocaleTimeString());
 
-    const { data, error } = await supabase
-      .from("sync_runs")
-      .select("id, status, requested_at")
-      .eq("device_id", DEVICE_ID)
-      .eq("status", "requested")
-      .order("requested_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
+    const { data, error } = await supabase.rpc("claim_requested_sync_run", {
+      p_device_id: DEVICE_ID,
+      p_pairing_code: getDevicePairingCode(),
+    });
 
     if (error) {
       console.error("[PI] Poll error:", error);
@@ -48,26 +45,6 @@ async function pollForRequestedSync() {
 
     const pendingRun = data as PendingSyncRun;
     console.log("[PI] Found requested sync:", pendingRun.id);
-
-    // Claim the run with a status guard so two overlapping pollers cannot start
-    // the same cloud-requested sync at the same time.
-    const { data: claimedRun, error: claimError } = await supabase
-      .from("sync_runs")
-      .update({ status: "in_progress" })
-      .eq("id", pendingRun.id)
-      .eq("status", "requested")
-      .select("id")
-      .maybeSingle();
-
-    if (claimError) {
-      console.error("[PI] Failed to claim sync run:", claimError);
-      return;
-    }
-
-    if (!claimedRun) {
-      console.log("[PI] Sync run was already claimed:", pendingRun.id);
-      return;
-    }
 
     const syncUrl = new URL("/api/sync", LOCAL_APP_ORIGIN);
     syncUrl.searchParams.set("syncRunId", String(pendingRun.id));

@@ -9,7 +9,7 @@ import {
   useState,
   useTransition,
 } from "react";
-import ArchiveToggle from "@/components/ArchiveToggle/ArchiveToggle";
+import { useRouter } from "next/navigation";
 import DeleteSelectedFilesButton from "@/components/DeleteSelectedFilesButton";
 import EditLessonButton from "@/components/EditLessonButton";
 import FilePreview from "@/components/FilePreview";
@@ -38,6 +38,9 @@ import {
   LessonInformation,
   LessonMetadata,
   LessonTitle,
+  MetadataBlock,
+  MetadataEditSlot,
+  MetadataLabel,
   PageContainer,
   SearchBarRow,
   TitleRow,
@@ -63,7 +66,7 @@ type Lesson = {
   is_archived: boolean;
 };
 
-type LessonSyncStatus = "available" | "pending" | null;
+type LessonSyncStatus = "available" | "pending" | "pending_removal" | null;
 
 type LessonDetailClientProps = {
   lesson: Lesson;
@@ -74,6 +77,35 @@ type LessonDetailClientProps = {
   initialPreviewFileId?: string;
 };
 
+function inferMimeTypeFromFileName(fileName: string): string {
+  const extension = fileName.split(".").pop()?.toLowerCase();
+
+  if (!extension) return "";
+
+  const mimeByExtension: Record<string, string> = {
+    gif: "image/gif",
+    jpeg: "image/jpeg",
+    jpg: "image/jpeg",
+    mp4: "video/mp4",
+    pdf: "application/pdf",
+    png: "image/png",
+    svg: "image/svg+xml",
+    webp: "image/webp",
+  };
+
+  return mimeByExtension[extension] ?? "";
+}
+
+function canPreviewFile(file: FileRow): boolean {
+  const mimeType = file.mimeType || inferMimeTypeFromFileName(file.name);
+
+  return (
+    mimeType.startsWith("image/") ||
+    mimeType.startsWith("video/") ||
+    mimeType === "application/pdf"
+  );
+}
+
 export default function LessonDetailClient({
   lesson,
   deviceId,
@@ -82,6 +114,7 @@ export default function LessonDetailClient({
   villages,
   initialPreviewFileId,
 }: LessonDetailClientProps) {
+  const router = useRouter();
   const [syncStatus, setSyncStatus] =
     useState<LessonSyncStatus>(initialSyncStatus);
   const [isOffline, setIsOffline] = useState(initialSyncStatus !== null);
@@ -127,31 +160,50 @@ export default function LessonDetailClient({
     [files],
   );
 
-  const [selectedPreviewFile, setSelectedPreviewFile] =
-    useState<FileRow | null>(
-      () =>
-        initialTableFiles.find(file => file.id === initialPreviewFileId) ??
-        null,
-    );
+  const [selectedPreviewFileId, setSelectedPreviewFileId] = useState<
+    string | null
+  >(initialPreviewFileId ?? null);
 
   const [tableFiles, setTableFiles] = useState<FileRow[]>(
     [...initialTableFiles].sort((a, b) => a.order - b.order),
   );
 
-  const handleFilesUploaded = useCallback((uploaded: LocalFile[]) => {
-    setTableFiles(prev => {
-      const nextOrder = prev.length;
-      const newRows: FileRow[] = uploaded.map((f, i) => ({
-        id: String(f.id),
-        name: f.name,
-        sizeBytes: f.size_bytes,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        order: nextOrder + i,
-      }));
-      return [...prev, ...newRows];
+  const selectedPreviewFile = useMemo(
+    () => tableFiles.find(file => file.id === selectedPreviewFileId) ?? null,
+    [selectedPreviewFileId, tableFiles],
+  );
+
+  const markHubUpdateNeeded = useCallback(() => {
+    setSyncStatus(currentStatus => {
+      if (currentStatus === null || currentStatus === "pending_removal") {
+        return currentStatus;
+      }
+
+      return "pending";
     });
-  }, []);
+    router.refresh();
+  }, [router]);
+
+  const handleFilesUploaded = useCallback(
+    (uploaded: LocalFile[]) => {
+      setTableFiles(prev => {
+        const nextOrder = prev.length;
+        const newRows: FileRow[] = uploaded.map((f, i) => ({
+          id: String(f.id),
+          name: f.name,
+          sizeBytes: f.size_bytes,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          order: nextOrder + i,
+          storagePath: f.storage_path,
+          mimeType: f.mime_type,
+        }));
+        return [...prev, ...newRows];
+      });
+      markHubUpdateNeeded();
+    },
+    [markHubUpdateNeeded],
+  );
 
   async function handleDeleteFiles(fileIds: string[]) {
     if (fileIds.length === 0) return;
@@ -179,9 +231,11 @@ export default function LessonDetailClient({
 
         setSelectedFileIds([]);
 
-        if (selectedPreviewFile && fileIds.includes(selectedPreviewFile.id)) {
-          setSelectedPreviewFile(null);
+        if (selectedPreviewFileId && fileIds.includes(selectedPreviewFileId)) {
+          setSelectedPreviewFileId(null);
         }
+
+        markHubUpdateNeeded();
       } catch (error) {
         setDeleteError(
           error instanceof Error ? error.message : "Failed to delete files",
@@ -204,6 +258,7 @@ export default function LessonDetailClient({
             .sort((a, b) => a.order - b.order)
             .map(file => file.id),
         });
+        markHubUpdateNeeded();
       } catch (error) {
         setTableFiles(previousFiles);
         setReorderError(
@@ -216,6 +271,26 @@ export default function LessonDetailClient({
   const handleSelectionChange = useCallback((fileIds: string[]) => {
     setSelectedFileIds(fileIds);
   }, []);
+
+  function handlePreviewOrDownloadFile(file: FileRow) {
+    if (canPreviewFile(file)) {
+      setSelectedPreviewFileId(file.id);
+      return;
+    }
+
+    if (!file.storagePath) {
+      setSelectedPreviewFileId(file.id);
+      return;
+    }
+
+    const link = document.createElement("a");
+    link.href = file.storagePath;
+    link.download = file.name;
+    link.rel = "noreferrer";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  }
 
   const fileCountText =
     tableFiles.length === 1
@@ -234,38 +309,43 @@ export default function LessonDetailClient({
         <HeaderBox>
           <TitleRow>
             <LessonTitle>{lesson.name}</LessonTitle>
-            {syncStatus && <StatusPill status={syncStatus} />}
+            <StatusPill status={syncStatus ?? "dashboard"} />
           </TitleRow>
 
           <HeaderButtons>
-            <EditLessonButton lesson={lesson} />
             <OfflineToggle
               deviceId={deviceId}
               lessonId={lesson.id}
               isOffline={isOffline}
               setIsOffline={updateOfflineState}
               hasFiles={tableFiles.length > 0}
-            />
-            <ArchiveToggle
-              lesson_Id={lesson.id}
-              isArchived={lesson.is_archived}
-              deviceId={deviceId}
+              syncStatus={syncStatus}
+              onSyncStatusChange={setSyncStatus}
             />
           </HeaderButtons>
         </HeaderBox>
 
         <LessonMetadata>
-          <LessonDescription>
-            {lesson.description || t("files.noDescription")}
-          </LessonDescription>
+          <MetadataEditSlot>
+            <EditLessonButton lesson={lesson} />
+          </MetadataEditSlot>
+          <MetadataBlock>
+            <MetadataLabel>{t("lessons.details")}</MetadataLabel>
+            <LessonDescription>
+              {lesson.description || t("files.noDescription")}
+            </LessonDescription>
+          </MetadataBlock>
 
-          <ClassroomSection>
-            {villages.length > 0 ? (
-              <VillageTags villages={villages} variant="lessonPage" />
-            ) : (
-              <EmptyMetadataText>{t("files.noClassrooms")}</EmptyMetadataText>
-            )}
-          </ClassroomSection>
+          <MetadataBlock>
+            <MetadataLabel>{t("nav.classrooms")}</MetadataLabel>
+            <ClassroomSection>
+              {villages.length > 0 ? (
+                <VillageTags villages={villages} variant="lessonPage" />
+              ) : (
+                <EmptyMetadataText>{t("files.noClassrooms")}</EmptyMetadataText>
+              )}
+            </ClassroomSection>
+          </MetadataBlock>
         </LessonMetadata>
 
         <SearchBarRow>
@@ -313,12 +393,12 @@ export default function LessonDetailClient({
           isReordering={isReordering}
           selectedFileIds={selectedFileIds}
           onSelectionChange={handleSelectionChange}
-          onRowClick={setSelectedPreviewFile}
+          onRowClick={handlePreviewOrDownloadFile}
         />
       </LessonInformation>
 
       {selectedPreviewFile && (
-        <FilePreviewModal onClose={() => setSelectedPreviewFile(null)}>
+        <FilePreviewModal onClose={() => setSelectedPreviewFileId(null)}>
           <FilePreview file={selectedPreviewFile} />
         </FilePreviewModal>
       )}

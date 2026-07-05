@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
+import { Readable } from "stream";
 import Database from "better-sqlite3";
+import mime from "mime-types";
 import { getClassroomSession } from "@/lib/classroom/session";
 
 type FileRow = {
@@ -16,6 +18,46 @@ const DB_PATH =
 
 function safeHeaderFilename(name: string) {
   return name.replace(/[\r\n"]/g, "_");
+}
+
+function isGenericMimeType(mimeType?: string | null) {
+  return !mimeType || mimeType === "application/octet-stream";
+}
+
+function resolveContentType(row: FileRow): string {
+  const inferredMimeType = mime.lookup(row.name)?.toString() ?? null;
+
+  return isGenericMimeType(row.mime_type)
+    ? (inferredMimeType ?? "application/octet-stream")
+    : (row.mime_type ?? "application/octet-stream");
+}
+
+function parseRangeHeader(rangeHeader: string, fileSize: number) {
+  const match = rangeHeader.match(/^bytes=(\d*)-(\d*)$/);
+  if (!match) return null;
+
+  const [, startText, endText] = match;
+  const requestedStart = startText ? Number(startText) : 0;
+  const requestedEnd = endText ? Number(endText) : fileSize - 1;
+
+  if (
+    !Number.isInteger(requestedStart) ||
+    !Number.isInteger(requestedEnd) ||
+    requestedStart < 0 ||
+    requestedEnd < requestedStart ||
+    requestedStart >= fileSize
+  ) {
+    return null;
+  }
+
+  return {
+    start: requestedStart,
+    end: Math.min(requestedEnd, fileSize - 1),
+  };
+}
+
+function nodeStreamToWeb(stream: fs.ReadStream) {
+  return Readable.toWeb(stream) as ReadableStream<Uint8Array>;
 }
 
 export async function GET(
@@ -65,21 +107,56 @@ export async function GET(
     return new NextResponse("File not downloaded", { status: 404 });
   }
 
-  // Read the file bytes from disc using the local path.
-  const buf = fs.readFileSync(row.local_path);
-
   // Send the raw file to the browser.
   const dispositionType =
     req.nextUrl.searchParams.get("download") === "1" ? "attachment" : "inline";
+  const contentType = resolveContentType(row);
+  const fileSize = fs.statSync(row.local_path).size;
+  const rangeHeader = req.headers.get("range");
+  const sharedHeaders = {
+    "Content-Type": contentType,
+    "Content-Disposition": `${dispositionType}; filename="${safeHeaderFilename(row.name)}"; filename*=UTF-8''${encodeURIComponent(row.name)}`,
+    "Cache-Control": "no-store",
+    "Accept-Ranges": "bytes",
+  };
 
-  return new NextResponse(buf, {
-    status: 200,
-    headers: {
-      // Tell browser the type of file (with generic bytes as fallback).
-      "Content-Type": row.mime_type ?? "application/octet-stream",
-      "Content-Disposition": `${dispositionType}; filename="${safeHeaderFilename(row.name)}"; filename*=UTF-8''${encodeURIComponent(row.name)}`,
-      "Content-Length": String(buf.byteLength),
-      "Cache-Control": "no-store",
+  if (rangeHeader) {
+    const range = parseRangeHeader(rangeHeader, fileSize);
+
+    if (!range) {
+      return new NextResponse(null, {
+        status: 416,
+        headers: {
+          ...sharedHeaders,
+          "Content-Range": `bytes */${fileSize}`,
+        },
+      });
+    }
+
+    const stream = fs.createReadStream(row.local_path, {
+      start: range.start,
+      end: range.end,
+    });
+    const chunkSize = range.end - range.start + 1;
+
+    return new NextResponse(nodeStreamToWeb(stream), {
+      status: 206,
+      headers: {
+        ...sharedHeaders,
+        "Content-Length": String(chunkSize),
+        "Content-Range": `bytes ${range.start}-${range.end}/${fileSize}`,
+      },
+    });
+  }
+
+  return new NextResponse(
+    nodeStreamToWeb(fs.createReadStream(row.local_path)),
+    {
+      status: 200,
+      headers: {
+        ...sharedHeaders,
+        "Content-Length": String(fileSize),
+      },
     },
-  });
+  );
 }

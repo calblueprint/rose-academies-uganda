@@ -20,6 +20,7 @@ type WifiStatus = {
   hostname?: string;
   hotspotName?: string | null;
   connectionName?: string | null;
+  internetConnectionName?: string | null;
   connectivity?: string;
   hotspotActive?: boolean;
   networks?: WifiNetwork[];
@@ -54,13 +55,10 @@ type OfflineReadinessReport = {
 
 type SetupStep = "welcome" | "wifi" | "account" | "content" | "ready";
 
-const SETUP_STEP_IDS: SetupStep[] = [
-  "welcome",
-  "wifi",
-  "account",
-  "content",
-  "ready",
-];
+const PAIRING_REDIRECT_RETRY_MS = 2500;
+const PAIRING_REDIRECT_MAX_ATTEMPTS = 36;
+
+const SETUP_STEP_IDS: SetupStep[] = ["welcome", "wifi", "account", "ready"];
 
 function formatTimestamp(timestamp: string | null | undefined, locale: string) {
   if (!timestamp) return null;
@@ -89,6 +87,10 @@ function getPairingSetupMessage(message: string, fallback: string) {
   return message;
 }
 
+function isSetupStep(value: string | null): value is SetupStep {
+  return SETUP_STEP_IDS.includes(value as SetupStep);
+}
+
 export default function SetupPage() {
   const { language, t } = useLanguage();
   const [step, setStep] = useState<SetupStep>("welcome");
@@ -101,9 +103,13 @@ export default function SetupPage() {
   const [isConnecting, setIsConnecting] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [setupRedirectUrl, setSetupRedirectUrl] = useState<string | null>(null);
+  const [isWaitingForSetupRedirect, setIsWaitingForSetupRedirect] =
+    useState(false);
+  const [setupRedirectAttempts, setSetupRedirectAttempts] = useState(0);
   const [pairing, setPairing] = useState<DevicePairingInfo | null>(null);
   const [pairingError, setPairingError] = useState<string | null>(null);
-  const [isPairingLoading, setIsPairingLoading] = useState(true);
+  const [isPairingLoading, setIsPairingLoading] = useState(false);
   const [syncError, setSyncError] = useState<string | null>(null);
   const [readiness, setReadiness] = useState<OfflineReadinessReport | null>(
     null,
@@ -112,6 +118,7 @@ export default function SetupPage() {
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncMessage, setSyncMessage] = useState<string | null>(null);
   const [showDeviceSetup, setShowDeviceSetup] = useState(false);
+  const [isChangingWifi, setIsChangingWifi] = useState(false);
   const previousPairingClaimedRef = useRef<boolean | null>(null);
   const hasUserNavigatedRef = useRef(false);
   const setupSteps = SETUP_STEP_IDS.map(id => ({
@@ -128,9 +135,9 @@ export default function SetupPage() {
   }
 
   function signalLabel(signal: number) {
-    if (signal >= 75) return "Strong";
-    if (signal >= 45) return "Good";
-    return "Weak";
+    if (signal >= 75) return t("setup.signalStrong");
+    if (signal >= 45) return t("setup.signalGood");
+    return t("setup.signalWeak");
   }
 
   function internetStatusLabel(connectivity: string | null | undefined) {
@@ -160,12 +167,25 @@ export default function SetupPage() {
 
   const changeStep = useCallback((nextStep: SetupStep) => {
     hasUserNavigatedRef.current = true;
+    if (nextStep !== "wifi") {
+      setIsChangingWifi(false);
+    }
     setStep(nextStep);
     window.localStorage.setItem("rose-setup-step", nextStep);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
   useEffect(() => {
+    const requestedStep = new URLSearchParams(window.location.search).get(
+      "step",
+    );
+
+    if (isSetupStep(requestedStep)) {
+      setStep(requestedStep);
+      window.localStorage.setItem("rose-setup-step", requestedStep);
+      return;
+    }
+
     const savedStep = window.localStorage.getItem(
       "rose-setup-step",
     ) as SetupStep | null;
@@ -175,26 +195,35 @@ export default function SetupPage() {
     }
   }, []);
 
-  const loadNetworks = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const response = await fetch("/api/setup/wifi", { cache: "no-store" });
-      const result = (await response.json()) as WifiStatus;
-
-      setStatus(result);
-      if (!response.ok) {
-        throw new Error(result.error ?? t("setup.unableScan"));
+  const loadNetworks = useCallback(
+    async (silent = false) => {
+      if (!silent) {
+        setIsLoading(true);
+        setError(null);
       }
-    } catch (loadError) {
-      setError(
-        loadError instanceof Error ? loadError.message : t("setup.unableScan"),
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  }, [t]);
+
+      try {
+        const response = await fetch("/api/setup/wifi", { cache: "no-store" });
+        const result = (await response.json()) as WifiStatus;
+
+        setStatus(result);
+        if (!response.ok) {
+          throw new Error(result.error ?? t("setup.unableScan"));
+        }
+      } catch (loadError) {
+        if (!silent) {
+          setError(
+            loadError instanceof Error
+              ? loadError.message
+              : t("setup.unableScan"),
+          );
+        }
+      } finally {
+        if (!silent) setIsLoading(false);
+      }
+    },
+    [t],
+  );
 
   const loadPairing = useCallback(
     async (silent = false) => {
@@ -214,6 +243,7 @@ export default function SetupPage() {
         }
 
         setPairing(result);
+        return result;
       } catch (pairingLoadError) {
         if (!silent) {
           setPairingError(
@@ -225,6 +255,7 @@ export default function SetupPage() {
               : t("setup.statusUnavailable"),
           );
         }
+        return null;
       } finally {
         if (!silent) setIsPairingLoading(false);
       }
@@ -278,8 +309,8 @@ export default function SetupPage() {
   );
 
   useEffect(() => {
-    void Promise.all([loadNetworks(), loadPairing(), loadReadiness()]);
-  }, [loadNetworks, loadPairing, loadReadiness]);
+    void Promise.all([loadNetworks(), loadReadiness()]);
+  }, [loadNetworks, loadReadiness]);
 
   useEffect(() => {
     if (step === "account") void loadPairing();
@@ -314,7 +345,7 @@ export default function SetupPage() {
     previousPairingClaimedRef.current = isClaimed;
 
     if (step === "account" && wasClaimed === false && isClaimed) {
-      changeStep("content");
+      changeStep("ready");
     }
   }, [changeStep, pairing?.claimed, step]);
 
@@ -337,6 +368,66 @@ export default function SetupPage() {
     };
   }, [loadReadiness, step]);
 
+  useEffect(() => {
+    if (step !== "wifi") return;
+    if (!message && status?.lastResult?.status !== "pending") return;
+
+    const intervalId = window.setInterval(() => {
+      if (document.visibilityState === "hidden") return;
+      void loadNetworks(true);
+    }, 2500);
+
+    return () => window.clearInterval(intervalId);
+  }, [loadNetworks, message, status?.lastResult?.status, step]);
+
+  useEffect(() => {
+    if (!setupRedirectUrl) return;
+
+    let isCancelled = false;
+    let timeoutId: number | undefined;
+    let attempts = 0;
+
+    const checkSetupPage = async () => {
+      attempts += 1;
+      setSetupRedirectAttempts(attempts);
+
+      try {
+        const controller = new AbortController();
+        const abortId = window.setTimeout(() => controller.abort(), 1800);
+
+        await fetch(setupRedirectUrl, {
+          cache: "no-store",
+          mode: "no-cors",
+          signal: controller.signal,
+        });
+        window.clearTimeout(abortId);
+
+        if (!isCancelled) {
+          window.location.assign(setupRedirectUrl);
+        }
+      } catch {
+        if (isCancelled || attempts >= PAIRING_REDIRECT_MAX_ATTEMPTS) {
+          if (!isCancelled) setIsWaitingForSetupRedirect(false);
+          return;
+        }
+
+        timeoutId = window.setTimeout(
+          checkSetupPage,
+          PAIRING_REDIRECT_RETRY_MS,
+        );
+      }
+    };
+
+    setIsWaitingForSetupRedirect(true);
+    setSetupRedirectAttempts(0);
+    timeoutId = window.setTimeout(checkSetupPage, PAIRING_REDIRECT_RETRY_MS);
+
+    return () => {
+      isCancelled = true;
+      if (timeoutId) window.clearTimeout(timeoutId);
+    };
+  }, [setupRedirectUrl]);
+
   const networks = status?.networks ?? [];
   const ssid = selectedSsid === "__manual" ? manualSsid.trim() : selectedSsid;
   const selectedNetwork = networks.find(
@@ -350,11 +441,22 @@ export default function SetupPage() {
         ? status.hostname
         : `${status.hostname}.local`
       : "rosehub.local";
+  const primarySetupUrl = `http://${localHostname}/setup`;
+  const primarySetupAccountUrl = `${primarySetupUrl}?step=account`;
+  const fallbackSetupUrl = "http://10.42.0.1/setup";
+  const fallbackSetupAccountUrl = `${fallbackSetupUrl}?step=account`;
+  const primaryJoinUrl = `http://${localHostname}/join`;
+  const fallbackJoinUrl = "http://10.42.0.1/join";
   const needsPassword =
     selectedSsid === "__manual" ||
     (selectedNetwork?.security !== "Open" && selectedNetwork !== undefined);
   const wifiComplete =
-    status?.hotspotActive === false && Boolean(status.connectionName);
+    Boolean(status?.internetConnectionName) ||
+    (status?.hotspotActive === false && Boolean(status?.connectionName));
+  const isWifiJoinPending =
+    step === "wifi" && Boolean(message) && !wifiComplete;
+  const isPairingPreparationPending =
+    step === "wifi" && Boolean(message) && wifiComplete && !pairing;
   const hasPendingDownloads = readiness?.hasPendingDownloads === true;
   const offlineReady = readiness?.ready === true && !hasPendingDownloads;
   const currentStepIndex = setupSteps.findIndex(item => item.id === step);
@@ -366,9 +468,8 @@ export default function SetupPage() {
   const getRecommendedSetupStep = useCallback((): SetupStep => {
     if (!wifiComplete) return "wifi";
     if (!isHubLinked) return "account";
-    if (!offlineReady) return "content";
     return "ready";
-  }, [isHubLinked, offlineReady, wifiComplete]);
+  }, [isHubLinked, wifiComplete]);
 
   useEffect(() => {
     if (hasUserNavigatedRef.current) return;
@@ -390,10 +491,34 @@ export default function SetupPage() {
     changeStep(getRecommendedSetupStep());
   }
 
+  useEffect(() => {
+    if (step !== "wifi" || !message || !wifiComplete) return;
+
+    let isCancelled = false;
+
+    const preparePairing = async () => {
+      const result = await loadPairing(true);
+      if (!isCancelled && result) {
+        changeStep("account");
+      }
+    };
+
+    void preparePairing();
+    const intervalId = window.setInterval(preparePairing, 3000);
+
+    return () => {
+      isCancelled = true;
+      window.clearInterval(intervalId);
+    };
+  }, [changeStep, loadPairing, message, step, wifiComplete]);
+
   async function handleWifiSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setMessage(null);
     setError(null);
+    setSetupRedirectUrl(null);
+    setIsWaitingForSetupRedirect(false);
+    setSetupRedirectAttempts(0);
 
     if (!ssid) {
       setError(t("setup.chooseWifi"));
@@ -424,7 +549,8 @@ export default function SetupPage() {
       setMessage(
         tr("setup.wifiSwitching", {
           ssid,
-          url: `http://${localHostname}/setup`,
+          url: primarySetupAccountUrl,
+          fallbackUrl: fallbackSetupAccountUrl,
         }),
       );
     } catch (connectError) {
@@ -432,9 +558,11 @@ export default function SetupPage() {
         setMessage(
           tr("setup.networkDisconnected", {
             ssid,
-            url: `http://${localHostname}/setup`,
+            url: primarySetupAccountUrl,
+            fallbackUrl: fallbackSetupAccountUrl,
           }),
         );
+        setSetupRedirectUrl(primarySetupAccountUrl);
       } else {
         setError(
           connectError instanceof Error
@@ -501,6 +629,13 @@ export default function SetupPage() {
           </div>
         </div>
 
+        {!showHubStatus && (
+          <div className={styles.orientationCard}>
+            <strong>{t("setup.orientationTitle")}</strong>
+            <span>{t("setup.orientationText")}</span>
+          </div>
+        )}
+
         {showHubStatus ? (
           <div className={styles.hubStatusPanel}>
             <div className={styles.hubStatusHeader}>
@@ -563,7 +698,12 @@ export default function SetupPage() {
               </div>
               <div>
                 <span>{t("setup.studentAddress")}</span>
-                <strong>http://rosehub.local/join</strong>
+                <strong className={styles.addressStack}>
+                  <span>{primaryJoinUrl}</span>
+                  <small>
+                    {tr("setup.alternativeAddress", { url: fallbackJoinUrl })}
+                  </small>
+                </strong>
               </div>
               {status?.hotspotName && (
                 <div>
@@ -656,6 +796,9 @@ export default function SetupPage() {
           <>
             <ol
               className={styles.progress}
+              style={{
+                gridTemplateColumns: `repeat(${setupSteps.length}, 1fr)`,
+              }}
               aria-label={t("setup.progressLabel")}
             >
               {setupSteps.map((item, index) => (
@@ -685,15 +828,13 @@ export default function SetupPage() {
                   <span>{t("setup.checkRecognized")}</span>
                   <span>{t("setup.checkSaved")}</span>
                 </div>
+                <p className={styles.safetyNote}>{t("setup.safeNote")}</p>
                 <button
                   className={styles.primaryButton}
                   type="button"
                   onClick={beginSetup}
-                  disabled={isLoading || isPairingLoading}
                 >
-                  {isLoading || isPairingLoading
-                    ? t("setup.checkingHub")
-                    : t("setup.begin")}
+                  {t("setup.begin")}
                 </button>
               </div>
             )}
@@ -701,9 +842,6 @@ export default function SetupPage() {
             {step === "wifi" && (
               <div className={styles.stepPanel}>
                 <div>
-                  <div className={styles.eyebrow}>
-                    {t("setup.stepInternet")}
-                  </div>
                   <h1>{t("setup.internetTitle")}</h1>
                   <p className={styles.intro}>{t("setup.internetIntro")}</p>
                 </div>
@@ -712,16 +850,26 @@ export default function SetupPage() {
                   <>
                     <div className={styles.notice}>
                       {tr("setup.previewNotice", {
-                        url: "http://rosehub.local/setup",
+                        url: primarySetupUrl,
+                        fallbackUrl: fallbackSetupUrl,
                       })}
                     </div>
                     <div className={styles.statusGrid}>
                       <span>{t("setup.connection")}</span>
                       <strong>{t("setup.previewOnly")}</strong>
                       <span>{t("setup.hubAddress")}</span>
-                      <strong>http://rosehub.local</strong>
+                      <strong className={styles.addressStack}>
+                        <span>{primarySetupUrl}</span>
+                        <small>
+                          {tr("setup.alternativeAddress", {
+                            url: fallbackSetupUrl,
+                          })}
+                        </small>
+                      </strong>
                     </div>
-                    <div className={styles.navigationRow}>
+                    <div
+                      className={`${styles.navigationRow} ${styles.connectedNavigationRow}`}
+                    >
                       <button
                         type="button"
                         className={styles.backButton}
@@ -738,7 +886,7 @@ export default function SetupPage() {
                       </button>
                     </div>
                   </>
-                ) : wifiComplete ? (
+                ) : wifiComplete && !isChangingWifi ? (
                   <>
                     <div className={styles.success}>
                       {t("setup.connectedTo")}{" "}
@@ -753,9 +901,18 @@ export default function SetupPage() {
                         {internetStatusLabel(status?.connectivity)}
                       </strong>
                       <span>{t("setup.localAddress")}</span>
-                      <strong>http://{localHostname}</strong>
+                      <strong className={styles.addressStack}>
+                        <span>{primarySetupUrl}</span>
+                        <small>
+                          {tr("setup.alternativeAddress", {
+                            url: fallbackSetupUrl,
+                          })}
+                        </small>
+                      </strong>
                     </div>
-                    <div className={styles.navigationRow}>
+                    <div
+                      className={`${styles.navigationRow} ${styles.connectedNavigationRow}`}
+                    >
                       <button
                         type="button"
                         className={styles.backButton}
@@ -763,13 +920,30 @@ export default function SetupPage() {
                       >
                         {t("setup.back")}
                       </button>
-                      <button
-                        type="button"
-                        className={styles.primaryButton}
-                        onClick={() => changeStep("account")}
-                      >
-                        {t("setup.continue")}
-                      </button>
+                      <div className={styles.connectedActionGroup}>
+                        <button
+                          type="button"
+                          className={styles.secondaryButton}
+                          onClick={() => {
+                            setIsChangingWifi(true);
+                            setMessage(null);
+                            setError(null);
+                            setSetupRedirectUrl(null);
+                            setIsWaitingForSetupRedirect(false);
+                            setSetupRedirectAttempts(0);
+                            void loadNetworks();
+                          }}
+                        >
+                          {t("setup.changeWifiNetwork")}
+                        </button>
+                        <button
+                          type="button"
+                          className={styles.primaryButton}
+                          onClick={() => changeStep("account")}
+                        >
+                          {t("setup.continue")}
+                        </button>
+                      </div>
                     </div>
                   </>
                 ) : (
@@ -796,6 +970,9 @@ export default function SetupPage() {
                         <label htmlFor="network">
                           {t("setup.wifiNetwork")}
                         </label>
+                        <p className={styles.fieldHint}>
+                          {t("setup.sameWifiHint")}
+                        </p>
                         <div className={styles.row}>
                           <select
                             id="network"
@@ -873,8 +1050,8 @@ export default function SetupPage() {
                                 className={styles.passwordToggle}
                                 aria-label={
                                   showPassword
-                                    ? "Hide password"
-                                    : "Show password"
+                                    ? t("setup.hidePassword")
+                                    : t("setup.showPassword")
                                 }
                                 aria-pressed={showPassword}
                                 onClick={() => setShowPassword(value => !value)}
@@ -944,7 +1121,31 @@ export default function SetupPage() {
 
                         {error && <div className={styles.error}>{error}</div>}
                         {message && (
-                          <div className={styles.success}>{message}</div>
+                          <div className={styles.success}>
+                            <p>{message}</p>
+                            {isPairingPreparationPending && (
+                              <p className={styles.redirectHint}>
+                                {t("setup.preparingPairing")}
+                              </p>
+                            )}
+                            {isWaitingForSetupRedirect && (
+                              <p className={styles.redirectHint}>
+                                {setupRedirectAttempts > 0
+                                  ? tr("setup.openingPairingPageAttempt", {
+                                      count: setupRedirectAttempts,
+                                    })
+                                  : t("setup.openingPairingPage")}
+                              </p>
+                            )}
+                            {setupRedirectUrl && (
+                              <a
+                                className={styles.inlineAction}
+                                href={setupRedirectUrl}
+                              >
+                                {t("setup.openPairingPage")}
+                              </a>
+                            )}
+                          </div>
                         )}
 
                         <button
@@ -953,12 +1154,18 @@ export default function SetupPage() {
                           disabled={
                             !ssid ||
                             isConnecting ||
+                            isWifiJoinPending ||
+                            isPairingPreparationPending ||
                             status?.hotspotActive !== true
                           }
                         >
-                          {isConnecting
-                            ? t("setup.connecting")
-                            : t("setup.connectHub")}
+                          <span className={styles.buttonContent}>
+                            {isConnecting ||
+                            isWifiJoinPending ||
+                            isPairingPreparationPending
+                              ? t("setup.connecting")
+                              : t("setup.connectHub")}
+                          </span>
                         </button>
                       </form>
                     )}
@@ -970,7 +1177,6 @@ export default function SetupPage() {
             {step === "account" && (
               <div className={styles.stepPanel}>
                 <div>
-                  <div className={styles.eyebrow}>{t("setup.stepAccount")}</div>
                   <h1>{t("setup.accountTitle")}</h1>
                   <p className={styles.intro}>{t("setup.accountIntro")}</p>
                 </div>
@@ -1042,7 +1248,7 @@ export default function SetupPage() {
                   <button
                     type="button"
                     className={styles.primaryButton}
-                    onClick={() => changeStep("content")}
+                    onClick={() => changeStep("ready")}
                     disabled={!pairing?.claimed}
                   >
                     {t("setup.continue")}
@@ -1054,7 +1260,6 @@ export default function SetupPage() {
             {step === "content" && (
               <div className={styles.stepPanel}>
                 <div>
-                  <div className={styles.eyebrow}>{t("setup.stepContent")}</div>
                   <h1>{t("setup.contentTitle")}</h1>
                   <p className={styles.intro}>{t("setup.contentIntro")}</p>
                 </div>
@@ -1189,47 +1394,15 @@ export default function SetupPage() {
                     </strong>
                   </div>
                   <div>
-                    <span>{t("setup.offlineLibrary")}</span>
-                    <strong>
-                      {pluralize(
-                        readiness?.groups ?? 0,
-                        "setup.classroomSingular",
-                        "setup.classroomPlural",
-                      )}{" "}
-                      ·{" "}
-                      {pluralize(
-                        readiness?.lessons ?? 0,
-                        "setup.lessonSingular",
-                        "setup.lessonPlural",
-                      )}{" "}
-                      ·{" "}
-                      {pluralize(
-                        readiness?.expectedFiles ?? 0,
-                        "setup.fileSingular",
-                        "setup.filePlural",
-                      )}
-                    </strong>
-                  </div>
-                  <div>
-                    <span>{t("setup.offlineFiles")}</span>
-                    <strong>
-                      {offlineReady
-                        ? t("setup.ready")
-                        : t("setup.needsAttention")}
-                    </strong>
-                  </div>
-                  <div>
-                    <span>{t("setup.filesUpdated")}</span>
-                    <strong>
-                      {formatTimestamp(
-                        readiness?.lastSuccessfulSync,
-                        language,
-                      ) ?? t("setup.notAvailable")}
-                    </strong>
-                  </div>
-                  <div>
                     <span>{t("setup.studentAddress")}</span>
-                    <strong>http://rosehub.local/join</strong>
+                    <strong className={styles.addressStack}>
+                      <span>{primaryJoinUrl}</span>
+                      <small>
+                        {tr("setup.alternativeAddress", {
+                          url: fallbackJoinUrl,
+                        })}
+                      </small>
+                    </strong>
                   </div>
                   {status?.hotspotName && (
                     <div>
@@ -1238,75 +1411,6 @@ export default function SetupPage() {
                     </div>
                   )}
                 </div>
-
-                {!offlineReady && (
-                  <div className={styles.error}>{t("setup.notComplete")}</div>
-                )}
-
-                <section className={styles.downloadPanel}>
-                  <div>
-                    <h2>{t("setup.downloadPanelTitle")}</h2>
-                    <p>{t("setup.downloadPanelIntro")}</p>
-                  </div>
-
-                  {isReadinessLoading && !readiness ? (
-                    <div className={styles.notice}>
-                      {t("setup.checkingFiles")}
-                    </div>
-                  ) : hasPendingDownloads ? (
-                    <div className={styles.notice}>
-                      <strong>{t("setup.newFilesReady")}</strong>{" "}
-                      {readiness?.pendingLessons === 1
-                        ? t("setup.lessonWaitingSingular")
-                        : tr("setup.lessonWaitingPlural", {
-                            count: readiness?.pendingLessons ?? 0,
-                          })}{" "}
-                      {t("setup.tapDownload")}
-                    </div>
-                  ) : offlineReady ? (
-                    <div className={styles.success}>
-                      <strong>{t("setup.everythingReady")}</strong>{" "}
-                      {t("setup.readyExplanation")}
-                    </div>
-                  ) : (
-                    <div className={styles.readinessIssues}>
-                      <strong>{t("setup.filesNeedAttention")}</strong>
-                      {(readiness?.issues ?? []).map((issue, index) => (
-                        <p key={`${issue.type}-${issue.fileName ?? index}`}>
-                          {issue.message}
-                        </p>
-                      ))}
-                    </div>
-                  )}
-
-                  {syncMessage && (
-                    <div className={styles.success}>{syncMessage}</div>
-                  )}
-                  {syncError && <div className={styles.error}>{syncError}</div>}
-
-                  <div className={styles.statusActions}>
-                    <button
-                      type="button"
-                      className={styles.utilityButton}
-                      onClick={() => void loadReadiness()}
-                      disabled={isReadinessLoading || isSyncing}
-                    >
-                      {isReadinessLoading
-                        ? t("setup.refreshing")
-                        : t("setup.refresh")}
-                    </button>
-                    <button
-                      type="button"
-                      className={styles.downloadButton}
-                      onClick={() => void syncContent()}
-                      disabled={isSyncing || isReadinessLoading}
-                    >
-                      {isSyncing
-                        ? t("setup.downloading")
-                        : t("setup.downloadLatest")}
-                    </button>
-                  </div>
-                </section>
 
                 <div className={styles.statusActions}>
                   <Link href="/join" className={styles.finishButton}>

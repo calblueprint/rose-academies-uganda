@@ -99,7 +99,15 @@ export const Title = styled.h1`
   font-size: clamp(14px, 2vw, 20px);
   font-weight: var(--font-weight-action);
   line-height: 1.15;
-  overflow-wrap: anywhere;
+  white-space: nowrap;
+
+  @media (max-width: 760px) {
+    white-space: normal;
+  }
+
+  @media (max-width: 520px) {
+    font-size: 14px;
+  }
 `;
 
 export const Subtitle = styled.p`
@@ -109,8 +117,4 @@ export const Subtitle = styled.p`
   font-size: 0.78rem;
   font-weight: var(--font-weight-section-title);
   line-height: 1.25;
-
-  @media (max-width: 520px) {
-    display: none;
-  }
 `;

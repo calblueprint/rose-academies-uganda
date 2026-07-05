@@ -43,18 +43,27 @@ import {
 type LessonsClientLesson = {
   id: number;
   name: string;
+  description?: string | null;
   image_path: string | null;
   created_at?: string;
   updated_at?: string;
   classroomIds?: number[];
   villages?: string[];
+  fileNames?: string[];
 };
 
 type LessonsClientVariant = "dashboard" | "offline" | "archive";
+type LessonHubStatus =
+  | "available"
+  | "pending"
+  | "pending_removal"
+  | "dashboard";
 
 type LessonsClientProps = {
   initialLessons: LessonsClientLesson[];
-  lessonStatuses: Partial<Record<number, "available" | "pending">>;
+  lessonStatuses: Partial<
+    Record<number, "available" | "pending" | "pending_removal">
+  >;
   title?: string;
   description?: string;
   showCreateButton?: boolean;
@@ -109,6 +118,7 @@ export default function LessonsClient({
     number | null
   >(null);
   const [lessons, setLessons] = useState(initialLessons);
+  const [lessonStatusState, setLessonStatusState] = useState(lessonStatuses);
   const [loadingLessonId, setLoadingLessonId] = useState<number | null>(null);
 
   const defaultSortBy = sortOptions?.[0]?.value ?? "updated_desc";
@@ -120,6 +130,10 @@ export default function LessonsClient({
   useEffect(() => {
     setLessons(initialLessons);
   }, [initialLessons]);
+
+  useEffect(() => {
+    setLessonStatusState(lessonStatuses);
+  }, [lessonStatuses]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -166,10 +180,20 @@ export default function LessonsClient({
   }, [lessons]);
 
   const filteredLessons = useMemo(() => {
+    const normalizedSearchTerm = searchTerm.trim().toLowerCase();
+
     const filtered = lessons.filter(lesson => {
-      const matchesSearch = lesson.name
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase());
+      const searchableText = [
+        lesson.name,
+        lesson.description ?? "",
+        ...(lesson.villages ?? []),
+        ...(lesson.fileNames ?? []),
+      ]
+        .join(" ")
+        .toLowerCase();
+      const matchesSearch =
+        normalizedSearchTerm.length === 0 ||
+        searchableText.includes(normalizedSearchTerm);
 
       const matchesClassroom =
         selectedClassroomIds.length === 0 ||
@@ -269,22 +293,52 @@ export default function LessonsClient({
     variant === "archive"
       ? t("archive.description")
       : description ===
-          "Create lessons, assign classrooms, and choose what to sync for offline use."
+          "Create lessons, assign classrooms, and choose what to save on the Classroom Hub."
         ? t("lessons.description")
         : description;
   const displayEmptyStateTitle =
     variant === "archive"
       ? t("archive.emptyTitle")
-      : emptyStateTitle === "No lessons yet."
-        ? t("lessons.noLessons")
-        : emptyStateTitle;
+      : variant === "offline"
+        ? t("sync.emptyLessonsTitle")
+        : emptyStateTitle === "No lessons yet."
+          ? t("lessons.noLessons")
+          : emptyStateTitle;
   const displayEmptyStateDescription =
     variant === "archive"
       ? t("archive.emptyDescription")
-      : emptyStateDescription ===
-          "Create your first lesson to add files and assign a classroom."
-        ? t("lessons.empty")
-        : emptyStateDescription;
+      : variant === "offline"
+        ? t("sync.emptyLessonsDescription")
+        : emptyStateDescription ===
+            "Create your first lesson to add files and assign a classroom."
+          ? t("lessons.empty")
+          : emptyStateDescription;
+  const removeConfirmStatus =
+    removeConfirmLessonId !== null
+      ? lessonStatusState[removeConfirmLessonId]
+      : undefined;
+  const isNextUpdateRemovalConfirm =
+    removeConfirmStatus === "pending" ||
+    removeConfirmStatus === "pending_removal";
+
+  function getActionLabel(lessonId: number) {
+    if (listAction !== "remove") return undefined;
+    if (variant === "offline") return t("lessons.removeHubAction");
+
+    const status = lessonStatusState[lessonId];
+
+    if (status === "pending") return t("lessons.removeOnNextUpdate");
+    if (status === "pending_removal") return undefined;
+
+    return undefined;
+  }
+
+  function shouldShowListAction(lessonId: number) {
+    if (!listAction) return false;
+    if (listAction !== "remove") return true;
+
+    return lessonStatusState[lessonId] !== "pending_removal";
+  }
 
   async function handleListAction(lessonId: number) {
     if (!listAction) return;
@@ -343,13 +397,16 @@ export default function LessonsClient({
     try {
       const { error } = await supabase
         .from("DeviceLessons")
-        .delete()
+        .update({ status: "pending_removal" })
         .eq("lesson_id", lessonIdToRemove)
         .eq("device_id", deviceId);
 
       if (error) throw error;
 
-      setLessons(prev => prev.filter(l => l.id !== lessonIdToRemove));
+      setLessonStatusState(prev => ({
+        ...prev,
+        [lessonIdToRemove]: "pending_removal",
+      }));
       setRemoveConfirmLessonId(null);
 
       router.refresh();
@@ -358,6 +415,15 @@ export default function LessonsClient({
     } finally {
       setLoadingLessonId(null);
     }
+  }
+
+  function getDisplayStatus(lessonId: number): LessonHubStatus | undefined {
+    const status = lessonStatusState[lessonId];
+
+    if (status) return status;
+    if (variant === "dashboard") return "dashboard";
+
+    return undefined;
   }
 
   return (
@@ -416,9 +482,21 @@ export default function LessonsClient({
 
       <ConfirmationModal
         isOpen={removeConfirmLessonId !== null}
-        title={t("lessons.removeSyncTitle")}
-        description={t("lessons.removeSyncDescription")}
-        confirmText={t("lessons.removeConfirm")}
+        title={
+          isNextUpdateRemovalConfirm
+            ? t("lessons.removePendingTitle")
+            : t("lessons.removeSyncTitle")
+        }
+        description={
+          isNextUpdateRemovalConfirm
+            ? t("lessons.removePendingDescription")
+            : t("lessons.removeSyncDescription")
+        }
+        confirmText={
+          isNextUpdateRemovalConfirm
+            ? t("lessons.removeOnNextUpdate")
+            : t("lessons.removeConfirm")
+        }
         onCancel={() => setRemoveConfirmLessonId(null)}
         onConfirm={handleRemoveConfirm}
         isLoading={
@@ -434,6 +512,7 @@ export default function LessonsClient({
               <SearchBar
                 searchTerm={searchTerm}
                 setSearchTerm={setSearchTerm}
+                placeholder={t("lessons.searchPlaceholder")}
               />
             )}
           </ControlsLeft>
@@ -458,7 +537,7 @@ export default function LessonsClient({
             )}
 
             {showViewToggle && (
-              <ViewToggleButton>
+              <ViewToggleButton $variant={variant}>
                 <GridToggle
                   $active={view === "grid"}
                   onClick={() => setView("grid")}
@@ -514,8 +593,15 @@ export default function LessonsClient({
                   lessonId={lesson.id}
                   lessonName={lesson.name}
                   lessonImage={lesson.image_path}
-                  status={lessonStatuses[lesson.id]}
+                  status={getDisplayStatus(lesson.id)}
                   villages={lesson.villages}
+                  action={
+                    shouldShowListAction(lesson.id) ? listAction : undefined
+                  }
+                  onAction={handleListAction}
+                  isActionLoading={loadingLessonId === lesson.id}
+                  actionLabel={getActionLabel(lesson.id)}
+                  actionPresentation={variant === "offline" ? "icon" : "button"}
                 />
               </CardWrapper>
             </div>
@@ -528,10 +614,12 @@ export default function LessonsClient({
               key={lesson.id}
               lessonId={lesson.id}
               lessonName={lesson.name}
-              status={lessonStatuses[lesson.id]}
-              action={listAction}
+              status={getDisplayStatus(lesson.id)}
+              action={shouldShowListAction(lesson.id) ? listAction : undefined}
               onAction={handleListAction}
               isActionLoading={loadingLessonId === lesson.id}
+              actionLabel={getActionLabel(lesson.id)}
+              actionPresentation={variant === "offline" ? "icon" : "button"}
               showIcon={variant !== "offline"}
             />
           ))}

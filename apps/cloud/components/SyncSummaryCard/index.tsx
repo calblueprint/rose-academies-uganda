@@ -10,6 +10,7 @@ import {
   Label,
   LeftGroup,
   Row,
+  SummaryRows,
   Title,
   TopSection,
   Value,
@@ -38,21 +39,23 @@ export default function SyncSummaryCard({
 
           <PiStorageBar userId={userId} deviceId={deviceId} />
 
-          <Row>
-            <LeftGroup>
-              <Dot $color={COLORS.lightLightGreen} />
-              <Label>{t("status.synced")}</Label>
-            </LeftGroup>
-            <Value>{availableCount}</Value>
-          </Row>
+          <SummaryRows>
+            <Row>
+              <LeftGroup>
+                <Dot $color={COLORS.lightLightGreen} />
+                <Label>{t("status.synced")}</Label>
+              </LeftGroup>
+              <Value>{availableCount}</Value>
+            </Row>
 
-          <Row>
-            <LeftGroup>
-              <Dot $color={COLORS.orange100} />
-              <Label>{t("status.pendingSync")}</Label>
-            </LeftGroup>
-            <Value>{pendingCount}</Value>
-          </Row>
+            <Row>
+              <LeftGroup>
+                <Dot $color={COLORS.orange100} />
+                <Label>{t("status.pendingSync")}</Label>
+              </LeftGroup>
+              <Value>{pendingCount}</Value>
+            </Row>
+          </SummaryRows>
         </TopSection>
       </Content>
     </Card>

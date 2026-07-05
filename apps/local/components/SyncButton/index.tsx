@@ -3,10 +3,12 @@
 import type { ModalVariant } from "@/components/SyncModal/styles";
 import React, { useState } from "react";
 import SyncModal from "@/components/SyncModal";
+import { useLanguage } from "@/lib/i18n";
 import { IconSvgs } from "@/lib/icons";
 import { ButtonWrapper, IconWrapper } from "./style";
 
 export default function SyncButton() {
+  const { t } = useLanguage();
   const [isSyncing, setIsSyncing] = useState(false);
   const [modalVariant, setModalVariant] = useState<ModalVariant | null>(null);
   // null = no modal shown; "success" or "error" = show that modal
@@ -46,10 +48,10 @@ export default function SyncButton() {
       <ButtonWrapper
         onClick={handleSync}
         disabled={isSyncing}
-        title="Click to sync data from cloud"
+        title={t("downloadModal.tooltip")}
       >
         <IconWrapper $isSpinning={isSyncing}>{IconSvgs.refresh}</IconWrapper>
-        {"Sync Lessons"}
+        {t("setup.downloadLatest")}
       </ButtonWrapper>
       {modalVariant && (
         <SyncModal

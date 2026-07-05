@@ -4,6 +4,7 @@ set -euo pipefail
 
 AP_CONNECTION_NAME="${ROSE_AP_CONNECTION_NAME:-pi-ap}"
 WIFI_INTERFACE="${ROSE_WIFI_INTERFACE:-wlan0}"
+AP_INTERFACE="${ROSE_AP_INTERFACE:-roseap0}"
 REQUEST_FILE="${ROSE_WIFI_REQUEST_FILE:-/run/rose-wifi-request}"
 STATE_DIR="${ROSE_WIFI_STATE_DIR:-/var/lib/rose-wifi}"
 RESULT_FILE="$STATE_DIR/last-result"
@@ -21,7 +22,15 @@ write_result() {
 }
 
 activate_hotspot() {
-  nmcli connection up "$AP_CONNECTION_NAME"
+  local ap_if="$WIFI_INTERFACE"
+
+  if ip link show "$AP_INTERFACE" >/dev/null 2>&1; then
+    ap_if="$AP_INTERFACE"
+  fi
+
+  nmcli connection modify "$AP_CONNECTION_NAME" \
+    connection.interface-name "$ap_if" >/dev/null 2>&1 || true
+  nmcli connection up "$AP_CONNECTION_NAME" ifname "$ap_if"
 }
 
 delete_connection_if_present() {
@@ -87,6 +96,7 @@ apply_request() {
   local hidden="no"
   local connection_hash=""
   local connection_name=""
+  local keep_hotspot="no"
 
   if [ ! -f "$REQUEST_FILE" ]; then
     write_result "failure" "No pending Wi-Fi request was found."
@@ -103,7 +113,13 @@ apply_request() {
   connection_hash=$(printf '%s' "$ssid" | sha256sum | cut -c1-8)
   connection_name="rose-wifi-$connection_hash"
 
-  nmcli connection down "$AP_CONNECTION_NAME" >/dev/null 2>&1 || true
+  if ip link show "$AP_INTERFACE" >/dev/null 2>&1; then
+    keep_hotspot="yes"
+    activate_hotspot >/dev/null 2>&1 || true
+  else
+    nmcli connection down "$AP_CONNECTION_NAME" >/dev/null 2>&1 || true
+  fi
+
   delete_connection_if_present "$connection_name"
 
   if [ -n "$password" ]; then
@@ -140,6 +156,9 @@ apply_request() {
   # expected and must not be treated as an offline connection.
   if curl --silent --show-error --max-time 15 \
     --output /dev/null "$SUPABASE_HEALTH_URL"; then
+    if [ "$keep_hotspot" = "yes" ]; then
+      activate_hotspot >/dev/null 2>&1 || true
+    fi
     write_result "success" "$ssid"
     exit 0
   fi

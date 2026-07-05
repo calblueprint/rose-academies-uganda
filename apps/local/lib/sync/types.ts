@@ -13,7 +13,7 @@ export type Lesson = {
   name: string;
   description: string | null;
   image_path: string | null;
-  group_id: number;
+  group_id: number | null;
 };
 
 export type FileRow = {
@@ -41,7 +41,7 @@ export type LessonGroupRow = {
 // offline. The status field comes from the cloud assignment workflow.
 export type DeviceLessonRow = {
   lesson_id: number;
-  status: "pending" | "available" | "failed";
+  status: "pending" | "available" | "pending_removal" | "failed";
 };
 
 // Supabase may return numeric IDs, but route/query serialization can pass the

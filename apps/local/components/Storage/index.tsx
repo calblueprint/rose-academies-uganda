@@ -1,5 +1,6 @@
 "use client";
 
+import { useLanguage } from "@/lib/i18n";
 import { IconSvgs } from "@/lib/icons";
 import {
   Card,
@@ -11,14 +12,16 @@ import {
 } from "./styles";
 
 export default function Storage() {
+  const { t } = useLanguage();
+
   return (
     <Card>
       <IconWrapper>{IconSvgs.storage}</IconWrapper>
       <Content>
-        <Title>Classroom Hub Storage</Title>
+        <Title>{t("status.storageTitle")}</Title>
         <StorageInfo>
-          <StatusText>19 GB of 64 GB Used</StatusText>
-          <StatusText>30% used</StatusText>
+          <StatusText>{t("status.storageExample")}</StatusText>
+          <StatusText>{t("status.storagePercentExample")}</StatusText>
         </StorageInfo>
       </Content>
     </Card>

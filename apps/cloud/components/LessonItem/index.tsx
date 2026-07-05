@@ -24,16 +24,19 @@ import {
   LessonRight,
   LessonWrapper,
   NoFilesMessage,
+  PreviewButton,
 } from "./styles";
 
 type LessonAction = "remove" | "restore";
+type ActionPresentation = "button" | "icon";
+type LessonStatus = "available" | "pending" | "pending_removal" | "dashboard";
 
 function RemoveIcon() {
   return (
     <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
       <path
         d="M3 3L9 9M9 3L3 9"
-        stroke="#4B4A49"
+        stroke="currentColor"
         strokeWidth="1.5"
         strokeLinecap="round"
       />
@@ -46,18 +49,47 @@ function RestoreIcon() {
     <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
       <path
         d="M11.6667 7C11.6667 9.57733 9.57733 11.6667 7 11.6667C4.42267 11.6667 2.33333 9.57733 2.33333 7C2.33333 4.42267 4.42267 2.33333 7 2.33333C8.45567 2.33333 9.75567 3 10.6113 4.04467"
-        stroke="#4B4A49"
+        stroke="currentColor"
         strokeWidth="1.3"
         strokeLinecap="round"
       />
       <path
         d="M10.1113 1.94434V4.27767H12.4447"
-        stroke="#4B4A49"
+        stroke="currentColor"
         strokeWidth="1.3"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
     </svg>
+  );
+}
+
+function inferMimeTypeFromFileName(fileName: string): string {
+  const extension = fileName.split(".").pop()?.toLowerCase();
+
+  if (!extension) return "";
+
+  const mimeByExtension: Record<string, string> = {
+    gif: "image/gif",
+    jpeg: "image/jpeg",
+    jpg: "image/jpeg",
+    mp4: "video/mp4",
+    pdf: "application/pdf",
+    png: "image/png",
+    svg: "image/svg+xml",
+    webp: "image/webp",
+  };
+
+  return mimeByExtension[extension] ?? "";
+}
+
+function canPreviewFile(fileName: string, mimeType?: string | null): boolean {
+  const resolvedMimeType = mimeType || inferMimeTypeFromFileName(fileName);
+
+  return (
+    resolvedMimeType.startsWith("image/") ||
+    resolvedMimeType.startsWith("video/") ||
+    resolvedMimeType === "application/pdf"
   );
 }
 
@@ -68,13 +100,17 @@ export default function LessonItem({
   action,
   onAction,
   isActionLoading = false,
+  actionLabel,
+  actionPresentation = "button",
 }: {
   lessonId: number;
   lessonName: string;
-  status?: "available" | "pending";
+  status?: LessonStatus;
   action?: LessonAction;
   onAction?: (lessonId: number) => void | Promise<void>;
   isActionLoading?: boolean;
+  actionLabel?: string;
+  actionPresentation?: ActionPresentation;
   showIcon?: boolean;
 }) {
   const [opened, setOpened] = useState(false);
@@ -87,7 +123,13 @@ export default function LessonItem({
     return data.files.filter(file => file.lesson_id === lessonId);
   }, [data, lessonId]);
 
-  const actionLabel =
+  const openFilePreview = (fileId: number | string) => {
+    router.push(
+      `/app/lessons/${lessonId}?file=${encodeURIComponent(String(fileId))}`,
+    );
+  };
+
+  const defaultActionLabel =
     action === "remove" ? t("lessons.remove") : t("lessons.restore");
 
   return (
@@ -107,17 +149,24 @@ export default function LessonItem({
           {action && onAction && (
             <ActionButton
               $variant={action}
+              $presentation={actionPresentation}
               type="button"
               disabled={isActionLoading}
+              aria-label={actionLabel ?? defaultActionLabel}
+              title={actionLabel ?? defaultActionLabel}
               onClick={e => {
                 e.stopPropagation(); // prevent expand toggle
                 void onAction(lessonId);
               }}
             >
               {action === "remove" ? <RemoveIcon /> : <RestoreIcon />}
-              <ActionLabel>
-                {isActionLoading ? t("common.working") : actionLabel}
-              </ActionLabel>
+              {actionPresentation === "button" && (
+                <ActionLabel>
+                  {isActionLoading
+                    ? t("common.working")
+                    : (actionLabel ?? defaultActionLabel)}
+                </ActionLabel>
+              )}
             </ActionButton>
           )}
 
@@ -136,14 +185,7 @@ export default function LessonItem({
         <FilesContainer>
           {files.length > 0 ? (
             files.map(file => (
-              <FileRow
-                key={file.id}
-                onClick={() =>
-                  router.push(
-                    `/app/lessons/${lessonId}?file=${encodeURIComponent(String(file.id))}`,
-                  )
-                }
-              >
+              <FileRow key={file.id} onClick={() => openFilePreview(file.id)}>
                 <FileLeft>
                   <FileTypeBadge fileName={file.name} />
                   <FileMeta>
@@ -151,7 +193,19 @@ export default function LessonItem({
                   </FileMeta>
                 </FileLeft>
 
-                {file.storage_path ? (
+                {canPreviewFile(file.name, file.mime_type) ? (
+                  <PreviewButton
+                    type="button"
+                    title={`${t("lessonModal.previewAlt")} ${file.name}`}
+                    aria-label={`${t("lessonModal.previewAlt")} ${file.name}`}
+                    onClick={event => {
+                      event.stopPropagation();
+                      openFilePreview(file.id);
+                    }}
+                  >
+                    {IconSvgs.download}
+                  </PreviewButton>
+                ) : file.storage_path ? (
                   <DownloadLink
                     href={file.storage_path}
                     download={file.name}

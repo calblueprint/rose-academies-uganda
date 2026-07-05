@@ -15,6 +15,16 @@ const DB_PATH =
   process.env.ROSE_DB_PATH ??
   path.join(process.cwd(), "rose-academies-uganda.db");
 
+function localRedirectUrl(request: Request, pathname: string) {
+  const host = request.headers.get("host");
+
+  if (host) {
+    return new URL(pathname, `http://${host}`);
+  }
+
+  return new URL(pathname, request.url);
+}
+
 export async function GET() {
   const session = await getClassroomSession();
 
@@ -25,12 +35,23 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const body = (await request.json().catch(() => null)) as {
-    joinCode?: unknown;
-  } | null;
+  const contentType = request.headers.get("content-type") ?? "";
+  const isFormPost = contentType.includes("application/x-www-form-urlencoded");
+  let joinCodeValue: unknown = null;
+
+  if (isFormPost) {
+    const formData = await request.formData();
+    joinCodeValue = formData.get("joinCode");
+  } else {
+    const body = (await request.json().catch(() => null)) as {
+      joinCode?: unknown;
+    } | null;
+    joinCodeValue = body?.joinCode;
+  }
+
   const joinCode =
-    typeof body?.joinCode === "string"
-      ? body.joinCode
+    typeof joinCodeValue === "string"
+      ? joinCodeValue
           .trim()
           .toUpperCase()
           .replace(/[^A-Z0-9]/g, "")
@@ -42,6 +63,13 @@ export async function POST(request: Request) {
     joinCode.length !== 6 ||
     /[\u0000-\u001f\u007f]/.test(joinCode)
   ) {
+    if (isFormPost) {
+      return NextResponse.redirect(
+        localRedirectUrl(request, "/join?error=invalid"),
+        { status: 303 },
+      );
+    }
+
     return NextResponse.json({ error: "Invalid code" }, { status: 400 });
   }
 
@@ -57,11 +85,23 @@ export async function POST(request: Request) {
 
     if (groups.length !== 1) {
       await new Promise(resolve => setTimeout(resolve, 250));
+      if (isFormPost) {
+        return NextResponse.redirect(
+          localRedirectUrl(request, "/join?error=invalid"),
+          { status: 303 },
+        );
+      }
+
       return NextResponse.json({ error: "Invalid code" }, { status: 401 });
     }
 
     const groupId = groups[0].id;
-    const response = NextResponse.json({ groupId });
+    const response = isFormPost
+      ? NextResponse.redirect(
+          localRedirectUrl(request, `/groups/${groupId}/lessons`),
+          { status: 303 },
+        )
+      : NextResponse.json({ groupId });
 
     response.cookies.set(
       CLASSROOM_COOKIE_NAME,

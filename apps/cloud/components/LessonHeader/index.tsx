@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import UploadLessonImageModal from "@/components/modals/UploadLessonImageModal/UploadLessonImageModal";
+import { useLanguage } from "@/lib/i18n";
 import { IconSvgs } from "@/lib/icons";
 import * as style from "./styles";
 
@@ -16,6 +17,7 @@ export default function LessonHeader({
   imagePath,
   lessonId,
 }: LessonHeaderProps) {
+  const { t } = useLanguage();
   const [isUploadLessonImageModalOpen, setIsUploadLessonImageModalOpen] =
     useState(false);
   const [currentImagePath, setCurrentImagePath] = useState(imagePath);
@@ -31,7 +33,7 @@ export default function LessonHeader({
           <style.HeaderTopRow>
             <style.BackLink href="/app/lessons">
               <style.IconContainer>{IconSvgs.coolicon}</style.IconContainer>
-              <span>Lessons</span>
+              <span>{t("lessons.title")}</span>
               <span>/</span>
               <span>{lessonName}</span>
             </style.BackLink>
@@ -44,7 +46,7 @@ export default function LessonHeader({
               <style.IconContainer>
                 {IconSvgs.pencilEvergreen}
               </style.IconContainer>
-              <span>Customize</span>
+              <span>{t("lessonModal.customize")}</span>
             </style.CustomizeButton>
           </style.HeaderTopRow>
         </style.ImageBanner>

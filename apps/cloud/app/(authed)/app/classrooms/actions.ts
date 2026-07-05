@@ -14,6 +14,10 @@ export type CreateClassroomResult =
     }
   | { success: false; error: string };
 
+export type RemoveLessonFromClassroomResult =
+  | { success: true }
+  | { success: false; error: string };
+
 const JOIN_CODE_PATTERN = /^[A-Z0-9]{6}$/;
 
 function normalizeJoinCode(value: string) {
@@ -170,6 +174,224 @@ export async function deleteOwnedClassroom(
 
   revalidatePath("/app/classrooms");
   revalidatePath("/app/lessons");
+  revalidatePath("/app/offline-library");
+
+  return { success: true };
+}
+
+export async function removeLessonFromClassroom({
+  classroomId,
+  lessonId,
+}: {
+  classroomId: number;
+  lessonId: number;
+}): Promise<RemoveLessonFromClassroomResult> {
+  if (!Number.isInteger(classroomId) || !Number.isInteger(lessonId)) {
+    return { success: false, error: "Invalid classroom or lesson." };
+  }
+
+  const supabase = await getSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return {
+      success: false,
+      error: "Please sign in again before updating this classroom.",
+    };
+  }
+
+  const { data: lesson, error: lessonReadError } = await supabase
+    .from("Lessons")
+    .select("id, group_id")
+    .eq("id", lessonId)
+    .eq("user_id", user.id)
+    .single();
+
+  if (lessonReadError || !lesson) {
+    console.error("[CLASSROOM_LESSON_REMOVE] Unable to read lesson:", {
+      code: lessonReadError?.code,
+      details: lessonReadError?.details,
+      hint: lessonReadError?.hint,
+      message: lessonReadError?.message,
+      classroomId,
+      lessonId,
+      userId: user.id,
+    });
+
+    return {
+      success: false,
+      error: "Unable to find that lesson for this account.",
+    };
+  }
+
+  const { error: deleteAssignmentError } = await supabase
+    .from("LessonGroups")
+    .delete()
+    .eq("lesson_id", lessonId)
+    .eq("group_id", classroomId);
+
+  if (deleteAssignmentError) {
+    console.error("[CLASSROOM_LESSON_REMOVE] Unable to delete assignment:", {
+      code: deleteAssignmentError.code,
+      details: deleteAssignmentError.details,
+      hint: deleteAssignmentError.hint,
+      message: deleteAssignmentError.message,
+      classroomId,
+      lessonId,
+      userId: user.id,
+    });
+
+    return {
+      success: false,
+      error: "Unable to remove lesson from this classroom.",
+    };
+  }
+
+  const { data: remainingRows, error: remainingRowsError } = await supabase
+    .from("LessonGroups")
+    .select("group_id")
+    .eq("lesson_id", lessonId);
+
+  if (remainingRowsError) {
+    console.error(
+      "[CLASSROOM_LESSON_REMOVE] Unable to read remaining groups:",
+      {
+        code: remainingRowsError.code,
+        details: remainingRowsError.details,
+        hint: remainingRowsError.hint,
+        message: remainingRowsError.message,
+        classroomId,
+        lessonId,
+        userId: user.id,
+      },
+    );
+
+    return {
+      success: false,
+      error: "Unable to update this lesson's classroom list.",
+    };
+  }
+
+  const nextGroupId =
+    ((remainingRows ?? []) as { group_id: number | null }[])
+      .map(row => row.group_id)
+      .find(
+        (groupId): groupId is number =>
+          typeof groupId === "number" && Number.isInteger(groupId),
+      ) ?? null;
+
+  if ((lesson as { group_id: number | null }).group_id === classroomId) {
+    const { error: lessonUpdateError } = await supabase
+      .from("Lessons")
+      .update({
+        group_id: nextGroupId,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", lessonId)
+      .eq("user_id", user.id);
+
+    if (lessonUpdateError) {
+      console.error("[CLASSROOM_LESSON_REMOVE] Unable to update lesson:", {
+        code: lessonUpdateError.code,
+        details: lessonUpdateError.details,
+        hint: lessonUpdateError.hint,
+        message: lessonUpdateError.message,
+        classroomId,
+        lessonId,
+        userId: user.id,
+      });
+
+      return {
+        success: false,
+        error: "Unable to update this lesson's classroom list.",
+      };
+    }
+  } else {
+    const { error: lessonTouchedError } = await supabase
+      .from("Lessons")
+      .update({ updated_at: new Date().toISOString() })
+      .eq("id", lessonId)
+      .eq("user_id", user.id);
+
+    if (lessonTouchedError) {
+      console.error(
+        "[CLASSROOM_LESSON_REMOVE] Unable to mark lesson updated:",
+        {
+          code: lessonTouchedError.code,
+          details: lessonTouchedError.details,
+          hint: lessonTouchedError.hint,
+          message: lessonTouchedError.message,
+          classroomId,
+          lessonId,
+          userId: user.id,
+        },
+      );
+
+      return {
+        success: false,
+        error: "Unable to update this lesson's classroom list.",
+      };
+    }
+  }
+
+  const { data: device, error: deviceReadError } = await supabase
+    .from("devices")
+    .select("id")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (deviceReadError) {
+    console.error("[CLASSROOM_LESSON_REMOVE] Unable to read device:", {
+      code: deviceReadError.code,
+      details: deviceReadError.details,
+      hint: deviceReadError.hint,
+      message: deviceReadError.message,
+      classroomId,
+      lessonId,
+      userId: user.id,
+    });
+
+    return {
+      success: false,
+      error: "Unable to update this lesson for the Classroom Hub.",
+    };
+  }
+
+  const deviceId = (device as { id?: string } | null)?.id;
+
+  if (deviceId) {
+    const { error: deviceLessonError } = await supabase
+      .from("DeviceLessons")
+      .update({ status: "pending" })
+      .eq("device_id", deviceId)
+      .eq("lesson_id", lessonId)
+      .neq("status", "pending_removal");
+
+    if (deviceLessonError) {
+      console.error("[CLASSROOM_LESSON_REMOVE] Unable to update hub lesson:", {
+        code: deviceLessonError.code,
+        details: deviceLessonError.details,
+        hint: deviceLessonError.hint,
+        message: deviceLessonError.message,
+        classroomId,
+        lessonId,
+        userId: user.id,
+        deviceId,
+      });
+
+      return {
+        success: false,
+        error: "Unable to update this lesson for the Classroom Hub.",
+      };
+    }
+  }
+
+  revalidatePath("/app");
+  revalidatePath("/app/classrooms");
+  revalidatePath("/app/lessons");
+  revalidatePath(`/app/lessons/${lessonId}`);
   revalidatePath("/app/offline-library");
 
   return { success: true };

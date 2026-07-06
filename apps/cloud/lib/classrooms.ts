@@ -226,6 +226,12 @@ export async function fetchClassroomOverviews(
       .sort((a, b) =>
         a.name.localeCompare(b.name, undefined, { sensitivity: "base" }),
       )
-      .map(({ classroomIds: _classroomIds, ...lesson }) => lesson),
+      .map(lesson => ({
+        id: lesson.id,
+        name: lesson.name,
+        description: lesson.description,
+        fileCount: lesson.fileCount,
+        syncStatus: lesson.syncStatus,
+      })),
   }));
 }

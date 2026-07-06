@@ -211,7 +211,6 @@ export default function DashboardSetupWizard({
   const lastSuccessfulSyncText =
     deviceLastSyncedLabel ?? (deviceLastSyncedAt ? t("common.recorded") : null);
   const currentStepTitle = tr(currentStep.titleKey, currentStep.titleParams);
-  const currentStepShortLabel = t(currentStep.shortLabelKey);
   const currentStepDetail = tr(currentStep.detailKey, currentStep.detailParams);
 
   function goToPreviousStep() {

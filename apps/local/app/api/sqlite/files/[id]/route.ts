@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
 import Database from "better-sqlite3";
+import { contentDispositionInline } from "@/lib/contentDisposition";
 
 type FileRow = {
   id: number;
@@ -42,8 +43,9 @@ export async function GET(
     headers: {
       // Tell browser the type of file (with generic bytes as fallback).
       "Content-Type": row.mime_type ?? "application/octet-stream",
-      // Show as inline.
-      "Content-Disposition": `inline; filename="${row.name}"`,
+      // Show inline; encode the name so a quote or non-ASCII char can neither
+      // corrupt the header nor throw and 500 the response.
+      "Content-Disposition": contentDispositionInline(row.name),
     },
   });
 }
